@@ -2,7 +2,7 @@
 #
 # Original version by Robert Leslie
 # <rob@mars.org>, edited by iwj and cs
-# Modified for openvpn by Alberto Gonzalez Iniesta <agi@agi.as>
+# Modified for openvpn by Alberto Gonzalez Iniesta <agi@inittab.org>
 # Modified for restarting / starting / stopping single tunnels by Richard Mueller <mueller@teamix.net>
 
 test $DEBIAN_SCRIPT_DEBUG && set -v -x
@@ -13,8 +13,16 @@ test -x $DAEMON || exit 0
 test -d $CONFIG_DIR || exit 0
 
 start_vpn () {
+    if grep -q '^[     ]*daemon' $CONFIG_DIR/$NAME.conf ; then
+      # daemon already given in config file
+      DAEMONARG=
+    else
+      # need to daemonize
+      DAEMONARG="--daemon ovpn-$NAME"
+    fi
+
     $DAEMON --writepid /var/run/openvpn.$NAME.pid \
-            --config $CONFIG_DIR/$NAME.conf --daemon ovpn-$NAME \
+            --config $CONFIG_DIR/$NAME.conf $DAEMONARG \
             --cd $CONFIG_DIR || echo -n " FAILED->"
     echo -n " $NAME"
 }
@@ -33,12 +41,15 @@ start)
       start_vpn
     done
   else
-    if test -e $CONFIG_DIR/$2.conf ; then
-      NAME=$2
-      start_vpn
-    else
-      echo -n " No such VPN: $2"
-    fi
+    while shift ; do
+      [ -z "$1" ] && break
+      if test -e $CONFIG_DIR/$1.conf ; then
+        NAME=$1
+        start_vpn
+      else
+        echo -n " No such VPN: $1"
+      fi
+    done
   fi
   echo "."
 
@@ -54,15 +65,18 @@ stop)
       echo -n " $NAME"
     done
   else
-    if test -e /var/run/openvpn.$2.pid ; then
-      PIDFILE=`ls /var/run/openvpn.$2.pid 2> /dev/null`
-      NAME=`echo $PIDFILE | cut -c18-`
-      NAME=${NAME%%.pid}
-      stop_vpn
-      echo -n " $NAME"
-    else
-      echo -n " No such VPN: $2"
-    fi
+    while shift ; do
+      [ -z "$1" ] && break
+      if test -e /var/run/openvpn.$1.pid ; then
+        PIDFILE=`ls /var/run/openvpn.$1.pid 2> /dev/null`
+        NAME=`echo $PIDFILE | cut -c18-`
+        NAME=${NAME%%.pid}
+        stop_vpn
+        echo -n " $NAME"
+      else
+        echo -n " No such running VPN: $1"
+      fi
+    done
   fi
   echo "."
   ;;

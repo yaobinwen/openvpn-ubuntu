@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openvpn_1.5.0-2_templates\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-10 17:08+0200\n"
+"POT-Creation-Date: 2004-11-12 16:17+0100\n"
 "PO-Revision-Date: 2004-04-08 20:24+0200\n"
 "Last-Translator: Aleix Badia i Bosch <abadia@ica.es>\n"
 "Language-Team: Catalan <debian-l10n-catalan@lists.debian.org>\n"
@@ -99,4 +99,27 @@ msgstr ""
 #. Description
 #: ../templates:27
 msgid "This option will take effect in your next upgrade."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid "Default port has changed"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
+"don't specify the port to be used on your VPNs, this upgrade may break them."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"or take a look at your firewall rules to allow the new default port "
+"configuration to work."
 msgstr ""

@@ -15,10 +15,16 @@ if [ ! -e /dev/net/tun ]; then
   db_go
 fi
 
-# Do we want to move the old S20 symlinks to S18 ones?
+# if we're upgrading
 if [ -n "$2" ] ; then
+  # Do we want to move the old S20 symlinks to S18 ones?
   if `dpkg --compare-versions "$2" lt 1.4.3-2`; then
     db_input medium openvpn/change_init || true
+    db_go
+  fi
+  # warn about default port change
+  if `dpkg --compare-versions "$2" lt 1.99+2.beta17`; then
+    db_input high openvpn/default_port || true
     db_go
   fi
 fi
