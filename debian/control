@@ -1,0 +1,14 @@
+Source: openvpn
+Section: net
+Priority: optional
+Maintainer: Alberto Gonzalez Iniesta <agi@agi.as>
+Build-Depends: debhelper (>= 4.1.16), libssl-dev (>> 0.9.6), liblzo-dev
+Standards-Version: 3.6.1.0
+
+Package: openvpn
+Architecture: any
+Depends: debconf, ${shlibs:Depends}
+Description: Virtual Private Network daemon
+ An application to securely tunnel IP networks over a single UDP port,
+ with support for TLS-based session authentication and key exchange,
+ packet encryption, packet authentication, and packet compression.
