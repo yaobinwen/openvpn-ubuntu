@@ -1,3 +1,154 @@
+openvpn (1.99+2.rc6-1) unstable; urgency=low
+
+  * The 'Three Wise Men' release.
+  * New upstream release.
+  * Update README.Debian with comments on changed string remapping.
+    Thanks ron@debian.org for noting this first. (Closes: #288669)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed,  5 Jan 2005 19:03:11 +0100
+
+openvpn (1.99+2.beta19-1) unstable; urgency=low
+
+  * New upstream release.
+  * Updated README.Debian with info on plugins.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  5 Dec 2004 11:57:03 +0100
+
+openvpn (1.99+2.beta18-2) unstable; urgency=low
+
+  * Built and installed plugins. Thanks Michael Renner for noticing.
+    (Closes: #284224)
+  * Added Build-Depends on libpam0g-dev, required by auth-pam plugin.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  5 Dec 2004 10:19:45 +0100
+
+openvpn (1.99+2.beta18-1) unstable; urgency=low
+
+  * New upstream release. Corrects --mssfix behaviour (Closes: #280893)
+  * Included Czech debconf translation. (Closes: #282995)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 29 Nov 2004 10:56:07 +0100
+
+openvpn (1.99+2.beta17-2) unstable; urgency=low
+
+  * Updated (German|Danish|French|Japanese) debconf translations.
+    (Closes: #281235, #282095, #282216, #282881)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 24 Nov 2004 08:15:29 +0100
+
+openvpn (1.99+2.beta17-1) unstable; urgency=low
+
+  * New upstream version. Includes fix for the --key-method 1 bug.
+  * WARNING: This version changes the default port (5000 previously)
+    to 1194 (assigned by INANA). This will affect you if you don't
+    have a 'port' option specified in your configuration files.
+    Added a debconf note about it.
+  * Updated es.po.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 12 Nov 2004 15:32:56 +0100
+
+openvpn (1.99+2.beta16-2) unstable; urgency=low
+
+  * Patched ssl.c to fix bug in --key-method 1, that prevented 
+    OpenVPN 2.x from working with 1.x using that method.
+    Thanks James for the prompt answer & patch.
+    Thanks weasel for finding it out.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon,  8 Nov 2004 11:59:12 +0100
+
+openvpn (1.99+2.beta16-1) unstable; urgency=low
+
+  * New upstream releases. Fixes the "Assertion failed at crypto.c"
+    (Closes: #265632, #270005)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  7 Nov 2004 17:46:09 +0100
+
+openvpn (1.99+2.beta15-5) unstable; urgency=low
+
+  * Updated README.Debian with clearer 2.x vs 1.x interoperability
+    instructions.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  7 Nov 2004 10:26:03 +0100
+
+openvpn (1.99+2.beta15-4) unstable; urgency=low
+
+  * Put if-{up,down}.d scripts back in place, this time they work.
+    Just remember to quote shell vars when checking if they are empty.
+    [ -n "$VAR" ] -> Good     [ -n $VAR ] -> BAD
+    Note to self, don't trust people's patches even if they are DD.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu,  4 Nov 2004 08:33:45 +0100
+
+openvpn (1.99+2.beta15-3) unstable; urgency=low
+
+  * Removed if-{up,down}.d scripts until I get to know how they work.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed,  3 Nov 2004 20:58:41 +0100
+
+openvpn (1.99+2.beta15-2) unstable; urgency=low
+
+  * Corrected names of if-{up,down}.d scripts. Duh!
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed,  3 Nov 2004 10:21:52 +0100
+
+openvpn (1.99+2.beta15-1) unstable; urgency=low
+
+  * New upstream release.
+  * Renamed package to 1.99 to make it clearer that we're using
+    version 2.0 and not 1.6. Some people rather talk about this on IRC
+    and not tell the maintainer directly.
+  * Added Brazilian Portuguese debconf templates. (Closes: #279351)
+  * Modified init.d script so that specifying a daemon option in a
+    VPN configuration won't make it fail. 
+    Thanks Christoph Biedl for the patch. (Closes: #278302)
+  * Added scripts to allow specifying 'openvpn name' in
+    /etc/network/interfaces to have the tunnel created and destroyed with
+    the device it runs over. Thanks Joachim Breitner for the patch.
+    (Closes: #273481)
+  * Modified init.d script so that multiple VPNs can be started or stopped
+    with a single command. (See README.Debian)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue,  2 Nov 2004 12:49:41 +0100
+
+openvpn (1.6.0+2.beta14-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 20 Oct 2004 09:13:09 +0200
+
+openvpn (1.6.0+2.beta12-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added comments about compatibility issues between openvpn 2.x and 1.x
+    to README.Debian (Closes: #276799)
+  * Changed maintainer email address.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 18 Oct 2004 09:01:23 +0200
+
+openvpn (1.6.0+2.beta11-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #269631)
+  * I decided to get OpenVPN 2 into sid, and hopefully into Sarge since
+    the current beta works pretty well and adds important features I don't
+    want missing in Sarge.
+  * Updated README.Debian
+
+ -- Alberto Gonzalez Iniesta <agi@agi.as>  Fri, 15 Oct 2004 11:52:58 +0200
+
+openvpn (1.6.0-5) unstable; urgency=low
+
+  * Added German and Japanese debconf templates.
+    (Closes: #266927, #270477)
+
+ -- Alberto Gonzalez Iniesta <agi@agi.as>  Fri, 10 Sep 2004 08:31:54 +0200
+
+openvpn (1.6.0-4) unstable; urgency=low
+
+  * Updated French and Danish debconf templates
+    (Closes: #254064, #256053)
+
+ -- Alberto Gonzalez Iniesta <agi@agi.as>  Mon, 28 Jun 2004 09:51:44 +0200
+
 openvpn (1.6.0-3) unstable; urgency=low
 
   * Included Catalan debconf templates. (Closes: #248750)

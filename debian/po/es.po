@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-10 17:08+0200\n"
+"POT-Creation-Date: 2004-11-12 16:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgstr ""
 #: ../templates:27
 #, fuzzy
 msgid "Would you like to stop openvpn before it gets upgraded?"
-msgstr "¿Deseas ejecutar fwlogwatch mas pronto?"
+msgstr "¿Deseas parar openvpn antes de actualizarlo?"
 
 #. Type: boolean
 #. Description
@@ -96,6 +96,11 @@ msgid ""
 "new version, in that case you may lose your connection, the upgrade may be "
 "interrupted, and you may not be able to reconnect to the remote host."
 msgstr ""
+"En algunos casos, puedes estar actualizando OpenVPN en una máguina remota "
+"usando la propia VPN para hacerlo. El proceso de actualización para el "
+"proceso OpenVPN antes de instalar la nueva versión y en ese caso podrías "
+"perder la conexión y dejar la actualización interrumpida. "
+"Esto podría impedir que volvieras a conectar con la máquina remota."
 
 #. Type: boolean
 #. Description
@@ -105,9 +110,41 @@ msgid ""
 "before it gets upgraded. The installation process will restart it once it's "
 "done."
 msgstr ""
+"A no ser que hagas las actualizaciones de forma local, se aconseja NO PARAR "
+"openvpn antes de que sea actualizada. El proceso de instalación lo reiniciara "
+"una vez haya finalizado."
 
 #. Type: boolean
 #. Description
 #: ../templates:27
 msgid "This option will take effect in your next upgrade."
+msgstr "Esta opción tomará efecto desde su próxima actualización."
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid "Default port has changed"
+msgstr "El puerto por defecto ha cambiado"
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
+"don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
+"El puerto usado por defecto en OpenVPN ha cambiado del 5000 al 1194 "
+"por asignación de IANA. Si no especificabas el puerto a usar en tus VPNs, "
+"Esta actualización podría inutilizarlas."
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"or take a look at your firewall rules to allow the new default port "
+"configuration to work."
+msgstr ""
+"Usa la opción 'port 5000' si quieres continuar usando el antiguo puerto, "
+"o comprueba las reglas de tu firewall para permitir el funcionamiento con "
+"el nuevo puerto por defecto."

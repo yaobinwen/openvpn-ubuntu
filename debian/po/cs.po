@@ -1,0 +1,142 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: openvpn\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-11-12 16:17+0100\n"
+"PO-Revision-Date: 2004-11-25 20:50+0100\n"
+"Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
+"Language-Team: Czech <provoz@debian.cz>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:4
+msgid "Would you like to start openvpn sooner?"
+msgstr "Chcete spustit openvpn døíve?"
+
+#. Type: boolean
+#. Description
+#: ../templates:4
+msgid ""
+"Previous versions of openvpn started at the same time than most of other "
+"services. This means that most of these services couldn't use openvpn since "
+"it may unavailable when they started. Newer versions of the openvpn package "
+"will start sooner. (i.e. a S18openvpn link in rc[235].d instead of a "
+"S20openvpn)"
+msgstr ""
+"Døívìj¹í verze openvpn se spou¹tìly zhruba ve stejném èase jako ostatní "
+"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, "
+"proto¾e tou dobou je¹tì nemuselo být k dispozici. Novìj¹í verze balíku "
+"openvpn mohou startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn "
+"místo S20openvpn)."
+
+#. Type: boolean
+#. Description
+#: ../templates:4
+msgid ""
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
+msgstr ""
+"Budete-li souhlasit, balík se o zmìnu postará. Pokud mo¾nost odmítnete, "
+"nic se nestane a openvpn bude pracovat jako doposud."
+
+#. Type: boolean
+#. Description
+#: ../templates:18
+msgid "Would you like a TUN/TAP device to be created?"
+msgstr "Chcete vytvoøit TUN/TAP zaøízení?"
+
+#. Type: boolean
+#. Description
+#: ../templates:18
+msgid ""
+"If you accept here, the package will make a special device called /dev/net/"
+"tun for openvpn's use. If you refuse, the device won't be made now. Read "
+"README.Debian for details on how to make it. If you are using devfs refuse "
+"here."
+msgstr ""
+"Odpovíte-li kladnì, balík vytvoøí speciální zaøízení nazvané /dev/net/tun. "
+"Odmítnete-li, zaøízení se nyní nevytvoøí. Pou¾íváte-li devfs, odmítnìte. "
+"Návod na ruèní vytvoøení zaøízení naleznete v souboru README.Debian."
+
+#. Type: boolean
+#. Description
+#: ../templates:27
+msgid "Would you like to stop openvpn before it gets upgraded?"
+msgstr "Chcete openvpn pøi aktualizaci zastavit?"
+
+#. Type: boolean
+#. Description
+#: ../templates:27
+msgid ""
+"In some cases you may be upgrading openvpn in a remote server using a VPN to "
+"do so. The upgrade process stops the running daemon before  installing the "
+"new version, in that case you may lose your connection, the upgrade may be "
+"interrupted, and you may not be able to reconnect to the remote host."
+msgstr ""
+"V nìkterých pøípadech se mù¾e stát, ¾e budete aktualizovat openvpn na "
+"vzdáleném serveru právì pøes VPN tunel. Pøed instalací nové verze bude "
+"bì¾ící daemon zastaven a vy tak ztratíte své pøipojení, aktualizace se "
+"pøeru¹í a u¾ se mo¾ná ke vzdálenému poèítaèi nebudete moci pøihlásit."
+
+#. Type: boolean
+#. Description
+#: ../templates:27
+msgid ""
+"Unless you do your upgrades locally, it is advised NOT to stop openvpn "
+"before it gets upgraded. The installation process will restart it once it's "
+"done."
+msgstr ""
+"Jestli¾e nebudete provádìt aktualizace lokálnì, doporuèujeme NEZASTAVOVAT "
+"openvpn pøed aktualizací. Instalaèní proces jej po instalaci restartuje."
+
+#. Type: boolean
+#. Description
+#: ../templates:27
+msgid "This option will take effect in your next upgrade."
+msgstr "Tato volba nabude úèinnosti pøi pøí¹tí aktualizaci."
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid "Default port has changed"
+msgstr "Implicitní port se zmìnil"
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
+"don't specify the port to be used on your VPNs, this upgrade may break them."
+msgstr ""
+"Implicitní port OpenVPN se zmìnil z 5000 na 1194 (pøidìlen organizací IANA). "
+"Pokud nezadáte port, který se má pou¾ívat na va¹ich VPN, touto aktualizací "
+"je mù¾ete rozbít."
+
+#. Type: note
+#. Description
+#: ../templates:42
+msgid ""
+"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"or take a look at your firewall rules to allow the new default port "
+"configuration to work."
+msgstr ""
+"Pokud chcete zachovat staré nastavení portu, pou¾ijte volbu 'port 5000'. "
+"V opaèném pøípadì nezapomeòte upravit pravidla firewallu, aby umo¾nila "
+"komunikaci na novém portu."

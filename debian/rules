@@ -34,7 +34,9 @@ build-stamp: config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#/usr/bin/docbook-to-man debian/openvpn.sgml > openvpn.1
+	#make plugins
+	$(MAKE) -C plugin/auth-pam/
+	$(MAKE) -C plugin/down-root/
 
 	touch build-stamp
 
@@ -51,6 +53,9 @@ clean: configure
 #	-test -r /usr/share/misc/config.guess && \
 #	  cp -f /usr/share/misc/config.guess config.guess
 
+	#clean plugins
+	$(MAKE) -C plugin/auth-pam/ clean
+	$(MAKE) -C plugin/down-root/ clean
 
 	dh_clean
 
@@ -63,6 +68,13 @@ install: build
 	# Add here commands to install the package into debian/openvpn
 	$(MAKE) install prefix=$(CURDIR)/debian/openvpn/usr
 	install -m 755 sample-scripts/verify-cn $(CURDIR)/debian/openvpn/usr/share/openvpn
+	install -m 755 debian/openvpn.if-up.d $(CURDIR)/debian/openvpn/etc/network/if-up.d/openvpn
+	install -m 755 debian/openvpn.if-down.d $(CURDIR)/debian/openvpn/etc/network/if-down.d/openvpn
+	#instal plugins
+	install -m 644 plugin/auth-pam/openvpn-auth-pam.so $(CURDIR)/debian/openvpn/usr/lib/openvpn
+	install -m 644 plugin/down-root/openvpn-down-root.so $(CURDIR)/debian/openvpn/usr/lib/openvpn
+	install -m 644 plugin/auth-pam/README $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/README.auth-pam
+	install -m 644 plugin/down-root/README $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/README.down-root
 
 
 # Build architecture-independent files here.

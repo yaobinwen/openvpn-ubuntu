@@ -33,11 +33,25 @@
 
 #include "common.h"
 #include "buffer.h"
-#include "mtu.h"
 #include "error.h"
 #include "integer.h"
+#include "mtu.h"
 
 #include "memdbg.h"
+
+/* allocate a buffer for socket or tun layer */
+void
+alloc_buf_sock_tun (struct buffer *buf,
+		    const struct frame *frame,
+		    const bool tuntap_buffer,
+		    const unsigned int align_mask)
+{
+  /* allocate buffer for overlapped I/O */
+  *buf = alloc_buf (BUF_SIZE (frame));
+  ASSERT (buf_init (buf, FRAME_HEADROOM_ADJ (frame, align_mask)));
+  buf->len = tuntap_buffer ? MAX_RW_SIZE_TUN (frame) : MAX_RW_SIZE_LINK (frame);
+  ASSERT (buf_safe (buf, 0));
+}
 
 void
 frame_finalize (struct frame *frame,
@@ -65,6 +79,8 @@ frame_finalize (struct frame *frame,
     }
 
   frame->link_mtu_dynamic = frame->link_mtu;
+
+  frame->extra_buffer += PAYLOAD_ALIGN;
 }
 
 /*
@@ -73,8 +89,11 @@ frame_finalize (struct frame *frame,
 void
 frame_set_mtu_dynamic (struct frame *frame, int mtu, unsigned int flags)
 {
+
+#ifdef ENABLE_DEBUG
   const int orig_mtu = mtu;
   const int orig_link_mtu_dynamic = frame->link_mtu_dynamic;
+#endif
 
   ASSERT (mtu >= 0);
 
@@ -89,7 +108,7 @@ frame_set_mtu_dynamic (struct frame *frame, int mtu, unsigned int flags)
 	EXPANDED_SIZE (frame));
     }
 
-  msg (D_MTU_DEBUG, "MTU DYNAMIC mtu=%d, flags=%u, %d -> %d",
+  dmsg (D_MTU_DEBUG, "MTU DYNAMIC mtu=%d, flags=%u, %d -> %d",
        orig_mtu,
        flags,
        orig_link_mtu_dynamic,
@@ -109,9 +128,12 @@ frame_subtract_extra (struct frame *frame, const struct frame *src)
 }
 
 void
-frame_print (const struct frame *frame, int level, const char *prefix)
+frame_print (const struct frame *frame,
+	     int level,
+	     const char *prefix)
 {
-  struct buffer out = alloc_buf_gc (256);
+  struct gc_arena gc = gc_new ();
+  struct buffer out = alloc_buf_gc (256, &gc);
   if (prefix)
     buf_printf (&out, "%s ", prefix);
   buf_printf (&out, "[");
@@ -121,9 +143,12 @@ frame_print (const struct frame *frame, int level, const char *prefix)
   buf_printf (&out, " EB:%d", frame->extra_buffer);
   buf_printf (&out, " ET:%d", frame->extra_tun);
   buf_printf (&out, " EL:%d", frame->extra_link);
+  if (frame->align_flags && frame->align_adjust)
+    buf_printf (&out, " AF:%u/%d", frame->align_flags, frame->align_adjust);
   buf_printf (&out, " ]");
 
   msg (level, "%s", out.data);
+  gc_free (&gc);
 }
 
 #define MTUDISC_NOT_SUPPORTED_MSG "--mtu-disc is not supported on this OS"
@@ -179,7 +204,7 @@ struct probehdr
 };
 
 const char *
-format_extended_socket_error (int fd, int* mtu)
+format_extended_socket_error (int fd, int *mtu, struct gc_arena *gc)
 {
   int res;
   struct probehdr rcvbuf;
@@ -188,8 +213,8 @@ format_extended_socket_error (int fd, int* mtu)
   struct cmsghdr *cmsg;
   struct sock_extended_err *e;
   struct sockaddr_in addr;
-  struct buffer out = alloc_buf_gc (512);
-  char cbuf[512];
+  struct buffer out = alloc_buf_gc (256, gc);
+  char *cbuf = (char *) gc_malloc (256, false, gc);
 
   *mtu = 0;
 
@@ -204,7 +229,7 @@ format_extended_socket_error (int fd, int* mtu)
       msg.msg_iovlen = 1;
       msg.msg_flags = 0;
       msg.msg_control = cbuf;
-      msg.msg_controllen = sizeof (cbuf);
+      msg.msg_controllen = 256; /* size of cbuf */
 
       res = recvmsg (fd, &msg, MSG_ERRQUEUE);
       if (res < 0)

@@ -11,6 +11,9 @@ test $DEBIAN_SCRIPT_DEBUG && set -v -x
 
 case "$1" in
   configure)
+    # get rid of confiles installed by mistake
+    rm -f /etc/network/if-up.d/openvpn.if-up.d || true
+    rm -f /etc/network/if-down.d/openvpn.if-down.d || true
     db_get openvpn/create_tun || RET="false"
     if [ "$RET" = "true" ]; then
       [ -e /dev/net ] || mkdir -m 755 /dev/net

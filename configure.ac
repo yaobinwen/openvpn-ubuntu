@@ -25,54 +25,113 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.50)
 
-AC_INIT([OpenVPN], [1.6.0], [openvpn-users@lists.sourceforge.net], [openvpn])
+AC_INIT([OpenVPN], [2.0_rc6], [openvpn-users@lists.sourceforge.net], [openvpn])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(syshead.h)
 
 AC_ARG_ENABLE(lzo,
-   [  --disable-lzo           Do not compile LZO compression support],
+   [  --disable-lzo           Disable LZO compression support],
    [LZO="$enableval"],
    [LZO="yes"]
 )
 
 AC_ARG_ENABLE(crypto,
-   [  --disable-crypto        Do not compile OpenSSL crypto support],
+   [  --disable-crypto        Disable OpenSSL crypto support],
    [CRYPTO="$enableval"],
    [CRYPTO="yes"]
 )
 
 AC_ARG_ENABLE(ssl,
-   [  --disable-ssl           Do not compile OpenSSL SSL support for TLS-based key exchange],
+   [  --disable-ssl           Disable OpenSSL SSL support for TLS-based key exchange],
    [SSL="$enableval"],
    [SSL="yes"]
 )
 
+AC_ARG_ENABLE(multi,
+   [  --disable-multi         Disable client/server support (--mode server + client mode)],
+   [MULTI="$enableval"],
+   [MULTI="yes"]
+)
+
+AC_ARG_ENABLE(server,
+   [  --disable-server        Disable server support only (but retain client support)],
+   [MULTI_SERVER="$enableval"],
+   [MULTI_SERVER="yes"]
+)
+
+AC_ARG_ENABLE(plugins,
+   [  --disable-plugins       Disable plug-in support],
+   [PLUGINS="$enableval"],
+   [PLUGINS="yes"]
+)
+
+AC_ARG_ENABLE(management,
+   [  --disable-management    Disable management server support],
+   [MANAGEMENT="$enableval"],
+   [MANAGEMENT="yes"]
+)
+
+AC_ARG_ENABLE(socks,
+   [  --disable-socks         Disable Socks support],
+   [SOCKS="$enableval"],
+   [SOCKS="yes"]
+)
+
+AC_ARG_ENABLE(http,
+   [  --disable-http          Disable HTTP proxy support],
+   [HTTP_PROXY="$enableval"],
+   [HTTP_PROXY="yes"]
+)
+
+AC_ARG_ENABLE(fragment,
+   [  --disable-fragment      Disable internal fragmentation support (--fragment)],
+   [FRAGMENT="$enableval"],
+   [FRAGMENT="yes"]
+)
+
+AC_ARG_ENABLE(debug,
+   [  --disable-debug         Disable debugging support (disable gremlin and verb 7+ messages)],
+   [DEBUG="$enableval"],
+   [DEBUG="yes"]
+)
+
+AC_ARG_ENABLE(small,
+   [  --enable-small          Enable smaller executable size (disable OCC, usage message, and verb 4 parm list)],
+   [SMALL="$enableval"],
+   [SMALL="no"]
+)
+
 AC_ARG_ENABLE(pthread,
-   [  --enable-pthread        Compile pthread support for improved SSL/TLS latency],
+   [  --enable-pthread        Enable pthread support (Experimental for OpenVPN 2.0)],
    [PTHREAD="$enableval"],
    [PTHREAD="no"]
 )
 
+AC_ARG_ENABLE(password-save,
+   [  --enable-password-save  Allow --askpass and --auth-user-pass passwords to be read from a file],
+   [PASSWORD_SAVE="$enableval"],
+   [PASSWORD_SAVE="no"]
+)
+
+AC_ARG_ENABLE(iproute2,
+   [  --enable-iproute2       Enable support for iproute2],
+   AC_DEFINE(CONFIG_FEATURE_IPROUTE, 1, [enable iproute2 support])   
+)
+
 AC_ARG_ENABLE(strict,
-   [  --enable-strict         Enable strict compiler warnings],
+   [  --enable-strict         Enable strict compiler warnings (debugging option)],
    [STRICT="$enableval"],
    [STRICT="no"]
 )
 
 AC_ARG_ENABLE(profiling,
-   [  --enable-profiling      Enable profiling],
+   [  --enable-profiling      Enable profiling (debugging option)],
    [PROFILE="$enableval"],
    [PROFILE="no"]
 )
 
-AC_ARG_ENABLE(mtu-dynamic,
-   [  --disable-mtu-dynamic   Disable dynamic MTU support],
-   [DYNAMIC_MTU="$enableval"],
-   [DYNAMIC_MTU="yes"]
-)
-
 AC_ARG_ENABLE(strict-options,
-   [  --enable-strict-options Enable strict options check between peers],
+   [  --enable-strict-options Enable strict options check between peers (debugging option)],
    [STRICT_OPTIONS="$enableval"],
    [STRICT_OPTIONS="no"]
 )
@@ -121,17 +180,10 @@ AC_ARG_WITH(route-path,
 )
 AC_DEFINE_UNQUOTED(ROUTE_PATH, "$ROUTE", [Path to route tool])
 
-AC_ARG_WITH(leak-check,
-   [  --with-leak-check=TYPE  Build with memory leak checking, TYPE = dmalloc or ssl],
-   [LEAK="$withval"]
+AC_ARG_WITH(mem-check,
+   [  --with-mem-check=TYPE  Build with debug memory checking, TYPE = dmalloc or valgrind],
+   [MEMCHECK="$withval"]
 )
-
-AC_ARG_ENABLE(iproute2,
-   [  --enable-iproute2       Enable support for iproute2],
-   AC_DEFINE(CONFIG_FEATURE_IPROUTE, 1, [enable iproute2 support])
-   
-)
-
 
 dnl Guess host type.
 AC_CANONICAL_HOST
@@ -200,6 +252,7 @@ AC_TYPE_UID_T
 AC_HEADER_TIME
 AX_CPP_VARARG_MACRO_ISO
 AX_CPP_VARARG_MACRO_GCC
+AX_EMPTY_ARRAY
 
 dnl Check for more header files.
 AC_HEADER_SYS_WAIT
@@ -211,7 +264,8 @@ AC_CHECK_HEADERS(sys/time.h sys/socket.h sys/ioctl.h sys/stat.h dnl
 		 netinet/in.h netinet/in_systm.h netinet/ip.h dnl
 		 netinet/if_ether.h netinet/tcp.h resolv.h arpa/inet.h dnl
 		 netdb.h sys/uio.h linux/if_tun.h linux/sockios.h dnl
-		 linux/types.h linux/errqueue.h
+		 linux/types.h linux/errqueue.h dnl
+                 sys/poll.h sys/epoll.h
 )
 AC_CACHE_SAVE
 
@@ -296,8 +350,8 @@ AC_FUNC_FORK
 AC_CHECK_FUNCS(daemon chroot getpwnam setuid nice system getpid dup dup2 dnl
 	       getpass strerror syslog openlog mlockall getgrnam setgid dnl
 	       setgroups stat flock readv writev setsockopt getsockopt dnl
-	       setsid chdir gettimeofday putenv getpeername)
-AC_REPLACE_FUNCS(inet_aton)
+	       setsid chdir gettimeofday putenv getpeername unlink dnl
+               poll chsize ftruncate)
 AC_CACHE_SAVE
 
 dnl Required library functions
@@ -312,14 +366,37 @@ dnl
 dnl check libraries
 dnl
 
+dnl Checking for a working epoll
+AC_CHECKING([for working epoll implementation])
+OLDLDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS -Wl,--fatal-warnings"
+AC_CHECK_FUNCS(epoll_create, AC_DEFINE([HAVE_EPOLL_CREATE], 1, []))
+LDFLAGS="$OLDLDFLAGS"
+
+dnl
+dnl check for valgrind tool
+dnl
+
+if test "$MEMCHECK" = "valgrind"; then
+   AC_CHECKING([for valgrind tool and Header files])
+   AC_CHECK_HEADER(valgrind/memcheck.h, 
+        [
+	    AC_DEFINE(USE_VALGRIND, 1, [Use valgrind memory debugging library])
+	    CFLAGS="-g -fno-inline"
+	],
+        [AC_MSG_ERROR([valgrind headers not found.])]
+   )
+fi
+
 dnl
 dnl check for pthread library
 dnl
 
 if test "$PTHREAD" = "yes"; then
-   AC_CHECKING([for pthread support])
-   ACX_PTHREAD(
-	[
+  AC_CHECKING([for pthread support])
+  AC_MSG_RESULT([********* WARNING: pthread support is experimental for OpenVPN 2.0])
+  ACX_PTHREAD(
+        [
 	    case "$target" in
 	    *openbsd*)
 		AC_MSG_RESULT([WARNING: pthread support on OpenBSD is unstable!])
@@ -341,7 +418,7 @@ dnl
 dnl check for dmalloc library
 dnl
 
-if test "$LEAK" = "dmalloc"; then
+if test "$MEMCHECK" = "dmalloc"; then
    AC_CHECKING([for dmalloc Library and Header files])
    AC_CHECK_HEADER(dmalloc.h, 
         [AC_CHECK_LIB(dmalloc, malloc,
@@ -356,6 +433,23 @@ if test "$LEAK" = "dmalloc"; then
 	    [AC_MSG_ERROR([dmalloc library not found.])]
 	)],
         [AC_MSG_ERROR([dmalloc headers not found.])]
+   )
+fi
+
+dnl
+dnl Check for libdl library
+dnl
+if test "$PLUGINS" = "yes"; then
+   AC_CHECKING([for libdl Library and Header files])
+   AC_CHECK_HEADER(dlfcn.h, 
+        [AC_CHECK_LIB(dl, dlopen,
+	    [
+               OPENVPN_ADD_LIBS(-ldl)
+	       AC_DEFINE(USE_LIBDL, 1, [Use libdl for dynamic library loading])
+	    ],
+	    [AC_MSG_RESULT([libdl library not found.])]
+	)],
+        [AC_MSG_RESULT([libdl headers not found.])]
    )
 fi
 
@@ -390,11 +484,11 @@ if test "$CRYPTO" = "yes"; then
    AC_CHECK_HEADER(openssl/evp.h,
 	[AC_CHECK_LIB(crypto, EVP_CIPHER_CTX_init,
             [
-		   AC_CHECKING([that OpenSSL Library is at least version 0.9.5])
+		   AC_CHECKING([that OpenSSL Library is at least version 0.9.6])
 		   AC_EGREP_CPP(yes,
 		     [
 		       #include "openssl/evp.h"
-		       #if SSLEAY_VERSION_NUMBER >= 0x00905000L
+		       #if SSLEAY_VERSION_NUMBER >= 0x00906000L
 		         yes
 		       #endif
 		     ],
@@ -402,6 +496,12 @@ if test "$CRYPTO" = "yes"; then
                        AC_DEFINE(USE_CRYPTO, 1, [Use OpenSSL crypto library])
                        OPENVPN_ADD_LIBS(-lcrypto)
                        AC_CHECK_FUNCS(EVP_CIPHER_CTX_set_key_length)
+
+		       dnl check for OpenSSL crypto acceleration capability
+		       AC_CHECK_HEADERS(openssl/engine.h)
+                       AC_CHECK_FUNCS(ENGINE_load_builtin_engines)
+                       AC_CHECK_FUNCS(ENGINE_register_all_complete)
+                       AC_CHECK_FUNCS(ENGINE_cleanup)
                      ],
 		     [AC_MSG_ERROR([OpenSSL crypto Library is too old.])]
 		   )
@@ -420,7 +520,7 @@ dnl
       AC_CHECK_HEADER(openssl/ssl.h,
 	   [AC_CHECK_LIB(ssl, SSL_CTX_new,
 	       [
-                  if test "$LEAK" = "ssl"; then
+                  if test "$MEMCHECK" = "ssl"; then
                      AC_CHECKING([for Memory Debugging Capabilities in OpenSSL Library])
                      AC_CHECK_LIB(ssl, CRYPTO_mem_ctrl,
                          [
@@ -440,9 +540,49 @@ dnl
    fi
 fi
 
+dnl enable multi-client mode
+if test "$MULTI" = "yes"; then
+   AC_DEFINE(ENABLE_CLIENT_SERVER, 1, [Enable client/server capability])
+fi
+
+dnl enable client mode only, not server
+if test "$MULTI_SERVER" = "no"; then
+   AC_DEFINE(ENABLE_CLIENT_ONLY, 1, [Enable client capability only])
+fi
+
+dnl enable management server capability
+if test "$MANAGEMENT" = "yes"; then
+   AC_DEFINE(ENABLE_MANAGEMENT, 1, [Enable management server capability])
+fi
+
+dnl enable socks 
+if test "$SOCKS" = "yes"; then
+   AC_DEFINE(ENABLE_SOCKS, 1, [Enable Socks proxy support])
+fi
+
+dnl enable HTTP proxy
+if test "$HTTP_PROXY" = "yes"; then
+   AC_DEFINE(ENABLE_HTTP_PROXY, 1, [Enable HTTP proxy support])
+fi
+
+dnl enable debugging
+if test "$DEBUG" = "yes"; then
+   AC_DEFINE(ENABLE_DEBUG, 1, [Enable debugging support])
+fi
+
+dnl enable small size optimizations
+if test "$SMALL" = "yes"; then
+   AC_DEFINE(ENABLE_SMALL, 1, [Enable smaller executable size])
+fi
+
+dnl enable --fragment
+if test "$FRAGMENT" = "yes"; then
+   AC_DEFINE(ENABLE_FRAGMENT, 1, [Enable internal fragmentation support])
+fi
+
 dnl enable strict compiler warnings
 if test "$STRICT" = "yes"; then
-   CFLAGS="$CFLAGS -Wall -W -Wpointer-arith -Wsign-compare -Winline -Wno-unused-parameter"
+   CFLAGS="$CFLAGS -Wall -Wpointer-arith -Wsign-compare -Wno-unused-parameter -Wno-unused-function"
 fi
 
 dnl enable profiling
@@ -455,9 +595,9 @@ if test "$STRICT_OPTIONS" = "yes"; then
    AC_DEFINE(STRICT_OPTIONS_CHECK, 1, [Enable strict options check between peers])
 fi
 
-dnl enable dynamic MTU capability
-if test "$DYNAMIC_MTU" = "yes"; then
-   AC_DEFINE(FRAGMENT_ENABLE, 1, [Enable dynamic MTU capability])
+dnl enable password save
+if test "$PASSWORD_SAVE" = "yes"; then
+   AC_DEFINE(ENABLE_PASSWORD_SAVE, 1, [Allow --askpass and --auth-user-pass passwords to be read from a file])
 fi
 
 AC_OUTPUT(Makefile openvpn.spec config-win32.h install-win32/openvpn.nsi)
