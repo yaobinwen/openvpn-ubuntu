@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -56,5 +55,13 @@ typedef unsigned long ptr_type;
 
 /* the --client-config-dir default file */
 #define CCD_DEFAULT "DEFAULT"
+
+/*
+ * This parameter controls the TLS channel buffer size.  Among
+ * other things, this buffer must be large enough to contain
+ * the full --push/--pull list.  If you increase it, do so
+ * on both server and client.
+ */
+#define TLS_CHANNEL_BUF_SIZE 1024
 
 #endif

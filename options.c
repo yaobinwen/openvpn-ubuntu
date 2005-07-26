@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -258,7 +257,7 @@ static const char usage_message[] =
   "--mute n        : Log at most n consecutive messages in the same category.\n"
   "--status file n : Write operational status to file every n seconds.\n"
   "--status-version [n] : Choose the status file format version number.\n"
-  "                  Currently, n can be 1 or 2 (default=1)\n."
+  "                  Currently, n can be 1 or 2 (default=1).\n"
 #ifdef ENABLE_OCC
   "--disable-occ   : Disable options consistency check between peers.\n"
 #endif
@@ -306,10 +305,12 @@ static const char usage_message[] =
   "                  If seconds=0, file will be treated as read-only.\n"
   "--ifconfig-push local remote-netmask : Push an ifconfig option to remote,\n"
   "                  overrides --ifconfig-pool dynamic allocation.\n"
-  "                  Must be associated with a specific client instance.\n"
+  "                  Only valid in a client-specific config file.\n"
   "--iroute network [netmask] : Route subnet to client.\n"
-  "                  Sets up internal routes only, and must be\n"
-  "                  associated with a specific client instance.\n"
+  "                  Sets up internal routes only.\n"
+  "                  Only valid in a client-specific config file.\n"
+  "--disable       : Client is disabled.\n"
+  "                  Only valid in a client-specific config file.\n"
   "--client-cert-not-required : Don't require client certificate, client\n"
   "                  will authenticate using username/password.\n"
   "--username-as-common-name  : For auth-user-pass authentication, use\n"
@@ -1326,6 +1327,9 @@ options_postprocess (struct options *options, bool first_time)
   if (options->local_port_defined && !options->bind_local)
     msg (M_USAGE, "--lport and --nobind don't make sense when used together");
 
+  if (!options->remote_list && !options->bind_local)
+    msg (M_USAGE, "--nobind doesn't make sense unless used with --remote");
+
   /*
    * Check for consistency of management options
    */
@@ -1634,6 +1638,9 @@ options_postprocess (struct options *options, bool first_time)
       MUST_BE_UNDEF (crl_file);
       MUST_BE_UNDEF (key_method);
       MUST_BE_UNDEF (ns_cert_type);
+
+      if (pull)
+	msg (M_USAGE, err, "--pull");
     }
 #undef MUST_BE_UNDEF
 #endif /* USE_CRYPTO */
@@ -1653,6 +1660,9 @@ options_postprocess (struct options *options, bool first_time)
       options->ping_rec_timeout = PRE_PULL_INITIAL_PING_RESTART;
       options->ping_rec_timeout_action = PING_RESTART;
     }
+
+  if (options->auth_user_pass_file && !options->pull)
+    msg (M_USAGE, "--auth-user-pass requires --pull");
 
   /*
    * Save certain parms before modifying options via --pull
@@ -1709,6 +1719,7 @@ pre_pull_restore (struct options *o)
 #endif
 
 #ifdef ENABLE_OCC
+
 /*
  * Build an options string to represent data channel encryption options.
  * This string must match exactly between peers.  The keysize is checked
@@ -1760,7 +1771,7 @@ options_string (const struct options *o,
 		bool remote,
 		struct gc_arena *gc)
 {
-  struct buffer out = alloc_buf (256);
+  struct buffer out = alloc_buf (OPTION_LINE_SIZE);
   bool tt_local = false;
 
   buf_printf (&out, "V4");
@@ -1920,6 +1931,116 @@ options_warning (char *actual, const char *expected)
   return options_warning_safe (actual, expected, strlen (actual) + 1);
 }
 
+static const char *
+options_warning_extract_parm1 (const char *option_string,
+			       struct gc_arena *gc_ret)
+{
+  struct gc_arena gc = gc_new ();
+  struct buffer b = string_alloc_buf (option_string, &gc);
+  char *p = gc_malloc (OPTION_PARM_SIZE, false, &gc);
+  const char *ret;
+  
+  buf_parse (&b, ' ', p, OPTION_PARM_SIZE);
+  ret = string_alloc (p, gc_ret);
+  gc_free (&gc);
+  return ret;
+}
+
+static void
+options_warning_safe_scan2 (const int msglevel,
+			    const int delim,
+			    const bool report_inconsistent,
+			    const char *p1,
+			    const struct buffer *b2_src,
+			    const char *b1_name,
+			    const char *b2_name)
+{
+  if (strlen (p1) > 0)
+    {
+      struct gc_arena gc = gc_new ();
+      struct buffer b2 = *b2_src;
+      const char *p1_prefix = options_warning_extract_parm1 (p1, &gc);
+      char *p2 = gc_malloc (OPTION_PARM_SIZE, false, &gc);
+
+      while (buf_parse (&b2, delim, p2, OPTION_PARM_SIZE))
+	{
+	  if (strlen (p2))
+	    {
+	      const char *p2_prefix = options_warning_extract_parm1 (p2, &gc);
+	    
+	      if (!strcmp (p1, p2))
+		goto done;
+	      if (!strcmp (p1_prefix, p2_prefix))
+		{
+		  if (report_inconsistent)
+		    msg (msglevel, "WARNING: '%s' is used inconsistently, %s='%s', %s='%s'",
+			 safe_print (p1_prefix, &gc),
+			 b1_name,
+			 safe_print (p1, &gc),
+			 b2_name,
+			 safe_print (p2, &gc)); 
+		  goto done;
+		}
+	    }
+	}
+      
+      msg (msglevel, "WARNING: '%s' is present in %s config but missing in %s config, %s='%s'",
+	   safe_print (p1_prefix, &gc),
+	   b1_name,
+	   b2_name,
+	   b1_name,	   
+	   safe_print (p1, &gc));
+
+    done:
+      gc_free (&gc);
+    }
+}
+
+static void
+options_warning_safe_scan1 (const int msglevel,
+			    const int delim,
+			    const bool report_inconsistent,
+			    const struct buffer *b1_src,
+			    const struct buffer *b2_src,
+			    const char *b1_name,
+			    const char *b2_name)
+{
+  struct gc_arena gc = gc_new ();
+  struct buffer b = *b1_src;
+  char *p = gc_malloc (OPTION_PARM_SIZE, true, &gc);
+
+  while (buf_parse (&b, delim, p, OPTION_PARM_SIZE))
+      options_warning_safe_scan2 (msglevel, delim, report_inconsistent, p, b2_src, b1_name, b2_name);
+
+  gc_free (&gc);
+}
+
+static void
+options_warning_safe_ml (const int msglevel, char *actual, const char *expected, size_t actual_n)
+{
+  struct gc_arena gc = gc_new ();
+
+  if (actual_n > 0)
+    {
+      struct buffer local = alloc_buf_gc (OPTION_PARM_SIZE + 16, &gc);
+      struct buffer remote = alloc_buf_gc (OPTION_PARM_SIZE + 16, &gc);
+      actual[actual_n - 1] = 0;
+
+      buf_printf (&local, "version %s", expected);
+      buf_printf (&remote, "version %s", actual);
+
+      options_warning_safe_scan1 (msglevel, ',', true,
+				  &local, &remote,
+				  "local", "remote");
+
+      options_warning_safe_scan1 (msglevel, ',', false,
+				  &remote, &local,
+				  "remote", "local");
+    }
+
+  gc_free (&gc);
+}
+
 bool
 options_cmp_equal_safe (char *actual, const char *expected, size_t actual_n)
 {
@@ -1932,21 +2053,13 @@ options_cmp_equal_safe (char *actual, const char *expected, size_t actual_n)
 #ifndef STRICT_OPTIONS_CHECK
       if (strncmp (actual, expected, 2))
 	{
-#ifdef ENABLE_SMALL
-	  msg (D_SHOW_OCC, "NOTE: failed to perform options consistency check, actual: '%s', expected: '%s",
-	       safe_print (actual, &gc),
-	       safe_print (expected, &gc));
-#else
-	  msg (D_SHOW_OCC, "NOTE: failed to perform options consistency check between peers because of " PACKAGE_NAME " version differences -- you can disable the options consistency check with --disable-occ (Required for TLS connections between " PACKAGE_NAME " 1.3.x and later versions).  Actual Remote Options: '%s'.  Expected Remote Options: '%s'",
-	       safe_print (actual, &gc),
-	       safe_print (expected, &gc));
-#endif
+	  msg (D_SHOW_OCC, "NOTE: Options consistency check may be skewed by version differences");
+	  options_warning_safe_ml (D_SHOW_OCC, actual, expected, actual_n);
 	}
       else
 #endif
 	ret = !strcmp (actual, expected);
     }
-
   gc_free (&gc);
   return ret;
 }
@@ -1954,16 +2067,7 @@ options_cmp_equal_safe (char *actual, const char *expected, size_t actual_n)
 void
 options_warning_safe (char *actual, const char *expected, size_t actual_n)
 {
-  struct gc_arena gc = gc_new ();
-  if (actual_n > 0)
-    {
-      actual[actual_n - 1] = 0;
-      msg (M_WARN,
-	   "WARNING: Actual Remote Options ('%s') are inconsistent with Expected Remote Options ('%s')",
-	   safe_print (actual, &gc),
-	   safe_print (expected, &gc));
-    }
-  gc_free (&gc);
+  options_warning_safe_ml (M_WARN, actual, expected, actual_n);
 }
 
 const char *
@@ -1973,6 +2077,7 @@ options_string_version (const char* s, struct gc_arena *gc)
   strncpynt (BPTR (&out), s, 3);
   return BSTR (&out);
 }
+
 #endif /* ENABLE_OCC */
 
 static void
@@ -1981,8 +2086,8 @@ foreign_option (struct options *o, char *argv[], int len, struct env_set *es)
   if (len > 0)
     {
       struct gc_arena gc = gc_new();
-      struct buffer name = alloc_buf_gc (64, &gc);
-      struct buffer value = alloc_buf_gc (256, &gc);
+      struct buffer name = alloc_buf_gc (OPTION_PARM_SIZE, &gc);
+      struct buffer value = alloc_buf_gc (OPTION_PARM_SIZE, &gc);
       int i;
       bool first = true;
 
@@ -2063,7 +2168,8 @@ static void
 usage_version (void)
 {
   msg (M_INFO|M_NOPREFIX, "%s", title_string);
-  msg (M_INFO|M_NOPREFIX, "Copyright (C) 2002-2004 James Yonan <jim@yonan.net>");
+  msg (M_INFO|M_NOPREFIX, "Developed by James Yonan");
+  msg (M_INFO|M_NOPREFIX, "Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>");
   openvpn_exit (OPENVPN_EXIT_STATUS_USAGE); /* exit point */
 }
 
@@ -2126,7 +2232,7 @@ parse_line (const char *line,
   bool backslash = false;
   char in, out;
 
-  char parm[256];
+  char parm[OPTION_PARM_SIZE];
   unsigned int parm_len = 0;
 
   msglevel &= ~M_OPTERR;
@@ -2264,7 +2370,7 @@ read_config_file (struct options *options,
   const int max_recursive_levels = 10;
   FILE *fp;
   int line_num;
-  char line[256];
+  char line[OPTION_LINE_SIZE];
 
   ++level;
   if (level <= max_recursive_levels)
@@ -2360,7 +2466,7 @@ apply_push_options (struct options *options,
 		    unsigned int *option_types_found,
 		    struct env_set *es)
 {
-  char line[256];
+  char line[OPTION_PARM_SIZE];
   int line_num = 0;
   const char *file = "[PUSH-OPTIONS]";
   const int msglevel = D_PUSH_ERRORS|M_OPTERR;
@@ -2517,7 +2623,7 @@ add_option (struct options *options,
     }
   else if (streq (p[0], "echo"))
     {
-      struct buffer string = alloc_buf_gc (256, &gc);
+      struct buffer string = alloc_buf_gc (OPTION_PARM_SIZE, &gc);
       int j;
       VERIFY_PERMISSION (OPT_P_ECHO);
 
@@ -2735,18 +2841,6 @@ add_option (struct options *options,
       options->gremlin = positive_atoi (p[1]);
     }
 #endif
-  else if (streq (p[0], "user") && p[1])
-    {
-      ++i;
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      options->username = p[1];
-    }
-  else if (streq (p[0], "group") && p[1])
-    {
-      ++i;
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      options->groupname = p[1];
-    }
   else if (streq (p[0], "chroot") && p[1])
     {
       ++i;
@@ -3697,8 +3791,8 @@ add_option (struct options *options,
 
       i += 2;
       VERIFY_PERMISSION (OPT_P_INSTANCE);
-      local = getaddr (GETADDR_HOST_ORDER, p[1], 0, NULL, NULL);
-      remote_netmask = getaddr (GETADDR_HOST_ORDER, p[2], 0, NULL, NULL);
+      local = getaddr (GETADDR_HOST_ORDER|GETADDR_RESOLVE, p[1], 0, NULL, NULL);
+      remote_netmask = getaddr (GETADDR_HOST_ORDER|GETADDR_RESOLVE, p[2], 0, NULL, NULL);
       if (local && remote_netmask)
 	{
 	  options->push_ifconfig_defined = true;
@@ -3710,6 +3804,11 @@ add_option (struct options *options,
 	  msg (msglevel, "cannot parse --ifconfig-push addresses");
 	  goto err;
 	}
+    }
+  else if (streq (p[0], "disable"))
+    {
+      VERIFY_PERMISSION (OPT_P_INSTANCE);
+      options->disable = true;
     }
 #endif /* P2MP_SERVER */
 
@@ -3932,7 +4031,31 @@ add_option (struct options *options,
 	  options->exit_event_initial_state = (atoi(p[2]) != 0);
 	}
     }
+  else if (streq (p[0], "user") && p[1])
+    {
+      ++i;
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      msg (M_WARN, "NOTE: --user option is not implemented on Windows");
+    }
+  else if (streq (p[0], "group") && p[1])
+    {
+      ++i;
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      msg (M_WARN, "NOTE: --group option is not implemented on Windows");
+    }
 #else
+  else if (streq (p[0], "user") && p[1])
+    {
+      ++i;
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      options->username = p[1];
+    }
+  else if (streq (p[0], "group") && p[1])
+    {
+      ++i;
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      options->groupname = p[1];
+    }
   else if (streq (p[0], "dhcp-option") && p[1])
     {
       ++i;
@@ -4342,9 +4465,9 @@ add_option (struct options *options,
   else
     {
       if (file)
-	msg (msglevel, "Unrecognized option or missing parameter(s) in %s:%d: %s", file, line, p[0]);
+	msg (msglevel, "Unrecognized option or missing parameter(s) in %s:%d: %s (%s)", file, line, p[0], PACKAGE_VERSION);
       else
-	msg (msglevel, "Unrecognized option or missing parameter(s): --%s", p[0]);
+	msg (msglevel, "Unrecognized option or missing parameter(s): --%s (%s)", p[0], PACKAGE_VERSION);
     }
  err:
   gc_free (&gc);

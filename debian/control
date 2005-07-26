@@ -9,6 +9,14 @@ Package: openvpn
 Architecture: any
 Depends: debconf, ${shlibs:Depends}
 Description: Virtual Private Network daemon
- An application to securely tunnel IP networks over a single UDP port,
- with support for TLS-based session authentication and key exchange,
- packet encryption, packet authentication, and packet compression.
+ An application to securely tunnel IP networks over a single UDP or TCP port.
+ It can be used to access remote sites, make secure point to point connnections,
+ enhance WiFi security, etc.
+ .
+ OpenVPN uses all of the encryption, authentication, and certification features
+ of the OpenSSL library (any cipher, key size, or HMAC digest).
+ .
+ OpenVPN may use static, pre-shared keys or TLS-based dynamic key exchange.  It
+ also supports VPNs with dynamic endpoints (DHCP or dial-up clients), tunnels
+ over NAT or connection-oriented stateful firewalls (like Linux's iptables).
+

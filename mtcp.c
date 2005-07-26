@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -191,6 +190,13 @@ multi_tcp_init (int maxevents, int *maxclients)
   *maxclients = max_int (min_int (mtcp->maxevents - extra_events, *maxclients), 1);
   msg (D_MULTI_LOW, "MULTI: TCP INIT maxclients=%d maxevents=%d", *maxclients, mtcp->maxevents);
   return mtcp;
+}
+
+void
+multi_tcp_delete_event (struct multi_tcp *mtcp, event_t event)
+{
+  if (mtcp && mtcp->es)
+    event_del (mtcp->es, event);
 }
 
 void
@@ -661,7 +667,7 @@ tunnel_server_tcp (struct context *top)
   context_clear_2 (top);
 
   /* initialize top-tunnel instance */
-  init_instance (top, top->es, CC_HARD_USR1_TO_HUP);
+  init_instance_handle_signals (top, top->es, CC_HARD_USR1_TO_HUP);
   if (IS_SIG (top))
     return;
   
@@ -675,7 +681,7 @@ tunnel_server_tcp (struct context *top)
   init_management_callback_multi (&multi);
 
   /* finished with initialization */
-  initialization_sequence_completed (top, false); /* --mode server --proto tcp-server */
+  initialization_sequence_completed (top, ISC_SERVER); /* --mode server --proto tcp-server */
 
   /* per-packet event loop */
   while (true)

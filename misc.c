@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1080,12 +1079,34 @@ adjust_power_of_2 (unsigned int u)
   return ret;
 }
 
+#ifdef HAVE_GETPASS
+
+static FILE *
+open_tty (const bool write)
+{
+  FILE *ret;
+  ret = fopen ("/dev/tty", write ? "w" : "r");
+  if (!ret)
+    ret = write ? stderr : stdin;
+  return ret;
+}
+
+static void
+close_tty (FILE *fp)
+{
+  if (fp != stderr && fp != stdin)
+    fclose (fp);
+}
+
+#endif
+
 /*
  * Get input from console
  */
 bool
 get_console_input (const char *prompt, const bool echo, char *input, const int capacity)
 {
+  bool ret = false;
   ASSERT (prompt);
   ASSERT (input);
   ASSERT (capacity > 0);
@@ -1096,14 +1117,20 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
 #elif defined(HAVE_GETPASS)
   if (echo)
     {
-      fprintf (stderr, "%s", prompt);
-      if (fgets (input, capacity, stdin) != NULL)
+      FILE *fp;
+
+      fp = open_tty (true);
+      fprintf (fp, "%s", prompt);
+      fflush (fp);
+      close_tty (fp);
+
+      fp = open_tty (false);
+      if (fgets (input, capacity, fp) != NULL)
 	{
 	  chomp (input);
-	  return true;
+	  ret = true;
 	}
-      else
-	return false;
+      close_tty (fp);
     }
   else
     {
@@ -1112,15 +1139,13 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
 	{
 	  strncpynt (input, gp, capacity);
 	  memset (gp, 0, strlen (gp));
-	  return true;
+	  ret = true;
 	}
-      else
-	return false;
     }
 #else
   msg (M_FATAL, "Sorry, but I can't get console input on this OS");
 #endif
-  return false; /* NOTREACHED */
+  return ret;
 }
 
 /*

@@ -14,9 +14,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openvpn\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: debian-l10n-portuguese@lists.debian.org\n"
 "POT-Creation-Date: 2004-11-12 16:17+0100\n"
-"PO-Revision-Date: 2004-11-02 11:55-0300\n"
+"PO-Revision-Date: 2005-01-24 22:05-0200\n"
 "Last-Translator: André Luís Lopes <andrelop@debian.org>\n"
 "Language-Team: Debian-BR Project <debian-l10n-portuguese@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
@@ -122,7 +122,7 @@ msgstr "Essa opção terá efeito em sua próxima atualização."
 #. Description
 #: ../templates:42
 msgid "Default port has changed"
-msgstr ""
+msgstr "Porta padrão mudou"
 
 #. Type: note
 #. Description
@@ -131,6 +131,9 @@ msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
+"A porta padrão do OpenVPN mudou de 5000 pra 1194 (atribuída pelo IANA). "
+"Caso você não especifique a porta a ser utilizada em suas VPNs, esta "
+"atualização pode quebrá-las."
 
 #. Type: note
 #. Description
@@ -140,3 +143,6 @@ msgid ""
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
+"Utilize a opção 'port 5000' caso você queira manter a configuração antiga "
+"de porta. Opcionalmente, verifique suas regras de firewall e permita que "
+"a configuração da nova porta padrão funcione."

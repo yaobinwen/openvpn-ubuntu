@@ -24,7 +24,7 @@ endif
 config.status: configure
 	dh_testdir
 	# Add here commands to configure the package.
-	./configure --enable-pthread --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man
+	./configure --enable-pthread --enable-password-save --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man
 
 
 build: build-stamp
@@ -88,6 +88,8 @@ binary-arch: build install
 	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples
+	## remove windoze stuff
+	rm -rf $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/examples/easy-rsa/Windows
 	dh_installmenu
 #	dh_installlogrotate
 #	dh_installemacsen
