@@ -35,9 +35,9 @@ db_stop
 
 if [ -x "/etc/init.d/openvpn" ]; then
 	if [ -x /usr/sbin/invoke-rc.d ]; then
-		invoke-rc.d openvpn restart
+		invoke-rc.d openvpn cond-restart || invoke-rc.d openvpn restart
 	else
-		/etc/init.d/openvpn restart
+		/etc/init.d/openvpn cond-restart || /etc/init.d/openvpn restart
 	fi
 fi
 

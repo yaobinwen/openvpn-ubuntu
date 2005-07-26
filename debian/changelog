@@ -1,3 +1,98 @@
+openvpn (2.0-3~hoary1) hoary-backports; urgency=low
+
+  * Automated backport upload; no source changes.
+
+ -- Ubuntu Archive Auto-Backport <archive@ubuntu.com>  Tue, 26 Jul 2005 14:17:09 +0100
+
+openvpn (2.0-3) unstable; urgency=low
+
+  * postinst: call 'restart' when 'cond-restart' fails due to user
+    not upgrading the init.d script. (Closes: #308926)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 28 May 2005 12:52:16 +0200
+
+openvpn (2.0-2) unstable; urgency=low
+
+  * Added '-f' to rm when deleting the status file. This eliminates
+    the need to test if it exists and saves the init.d script from
+    failing.  (Closes: #306588)
+  * Modified pam plugin to load libpam.so.0 instead of libpam.so.
+    (Closes: #306335)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed,  4 May 2005 15:02:45 +0200
+
+openvpn (2.0-1) unstable; urgency=low
+
+  * The 'This-is-the-real-2.0' release
+  * New upstream version.
+  * openvpn.8: s/--/\\-\\-/g a.k.a escaped dashes to make it possible
+    to search for options with UTF charsets. (Closes: #296133)
+  * Improved init.d script output.  (Closes: #297997)
+    Thanks Thomas Hood for the patch.
+  * debian/control. Rewrote Description: field.
+    Now it's more useful and complete. (Closes: #304895)
+  * init.d script: 
+     - Fixed restarting of multiple VPNs
+     - Fixed TAB converted to spaces.
+     - Remove status file on VPN stop
+     - Respect 'status' option if given in the config file
+     - New /etc/default/openvpn configuration file that allows
+       control on which VPNs are automatically started and also
+       controls status file refresh interval
+     Thanks Philipp A. Hartmann for the nice patch. (Closes: #294332)
+   * init.d script: Added cond-restart to only restart VPNs in use.
+     postint: Call init.d script with cond-restart instead of restart.
+     (Closes: #280464)
+   * init.d script: change order of --config and --cd to permit
+     nested 'configs'. (Closes: #299082)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 18 Apr 2005 09:07:05 +0200
+
+openvpn (1.99+2.rc20-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon,  4 Apr 2005 23:05:23 +0200
+
+openvpn (1.99+2.rc18-1) unstable; urgency=low
+
+  * New upstream release (Closes: #301949)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 29 Mar 2005 12:56:42 +0200
+
+openvpn (1.99+2.rc16-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 20 Feb 2005 20:24:25 +0100
+
+openvpn (1.99+2.rc12-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  6 Feb 2005 11:49:44 +0100
+
+openvpn (1.99+2.rc11-2) unstable; urgency=low
+
+  * Added --enable-password-save to configure call to allow 
+    --askpass and --auth-user-pass passwords to be read from a file.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu,  3 Feb 2005 18:19:28 +0100
+
+openvpn (1.99+2.rc11-1) unstable; urgency=low
+
+  * New upstream release
+  * Added --status line to init.d script (Closes: #293144)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu,  3 Feb 2005 09:28:06 +0100
+
+openvpn (1.99+2.rc10-1) unstable; urgency=low
+
+  * New upstream release
+  * Updated pt_BR debconf translation (Closes: #292079)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 28 Jan 2005 14:44:42 +0100
+
 openvpn (1.99+2.rc6-1) unstable; urgency=low
 
   * The 'Three Wise Men' release.

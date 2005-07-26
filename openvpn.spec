@@ -13,9 +13,9 @@
 
 Summary:	OpenVPN is a robust and highly flexible VPN daemon by James Yonan.
 Name:           openvpn
-Version:        2.0_rc6
+Version:        2.0
 Release:	1
-URL:		http://openvpn.sourceforge.net/
+URL:		http://openvpn.net/
 Source0:	http://prdownloads.sourceforge.net/openvpn/%{name}-%{version}.tar.gz
 
 License:	GPL
@@ -33,8 +33,13 @@ AutoReq: 0
 BuildRequires: openssl-devel >= 0.9.6
 Requires:      openssl       >= 0.9.6
 
+%if "%{_vendor}" == "MandrakeSoft"
+%{!?without_lzo:BuildRequires: liblzo1-devel >= 1.07}
+%{!?without_lzo:Requires:      liblzo1       >= 1.07}
+%else
 %{!?without_lzo:BuildRequires: lzo-devel >= 1.07}
 %{!?without_lzo:Requires:      lzo       >= 1.07}
+%endif
 
 %{!?without_pam:BuildRequires: pam-devel}
 %{!?without_pam:Requires:      pam}
@@ -133,24 +138,19 @@ popd
 #
 
 %__mkdir_p %{buildroot}%{_datadir}/%{name}
-%__cp -pr contrib easy-rsa sample-{config-file,key,script}s management %{buildroot}%{_datadir}/%{name}
 
 #
 # Install the plugins
 #
 
 %__mkdir_p %{buildroot}%{_datadir}/%{name}/plugin/lib
-%__mkdir_p %{buildroot}%{_datadir}/%{name}/plugin/doc
 
-# Install down-root
-%__install -c -m 755 plugin/down-root/openvpn-down-root.so %{buildroot}%{_datadir}/%{name}/plugin/lib
-%__cp -p plugin/down-root/README %{buildroot}%{_datadir}/%{name}/plugin/doc/down-root.txt
+for pi in auth-pam down-root; do
+  %__mv -f plugin/$pi/README plugin/README.$pi
+  %__install -c -m 755 plugin/$pi/openvpn-$pi.so %{buildroot}%{_datadir}/openvpn/plugin/lib/openvpn-$pi.so
+done
 
-# Install auth-pam
-%if %{build_auth_pam}
-%__install -c -m 755 plugin/auth-pam/openvpn-auth-pam.so %{buildroot}%{_datadir}/%{name}/plugin/lib
-%__cp -p plugin/auth-pam/README %{buildroot}%{_datadir}/%{name}/plugin/doc/auth-pam.txt
-%endif
+%__mv -f plugin/README plugin/README.plugins
 
 #
 # Clean section
@@ -198,7 +198,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING COPYRIGHT.GPL INSTALL NEWS PORTS README 
+%doc AUTHORS ChangeLog COPYING COPYRIGHT.GPL INSTALL NEWS PORTS README 
 %{_mandir}/man8/%{name}.8*
 %{_sbindir}/%{name}
 %{_datadir}/%{name}
@@ -209,7 +209,17 @@ fi
 /etc/rc.d/init.d/%{name}
 %endif
 
+# Install extra %doc stuff
+%doc contrib/ easy-rsa/ management/ sample-*/ plugin/README.*
+
 %changelog
+
+* Mon Apr 4 2005 James Yonan
+- Moved some files from /usr/share/openvpn to %doc for compatibility
+  with Dag Wieers' RPM repository
+
+* Sat Mar 12 2005 Tom Walsh
+- Added MandrakeSoft liblzo1 require
 
 * Fri Dec 10 2004 James Yonan
 - Added AutoReq: 0 for manual dependencies

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -257,7 +256,7 @@ check_add_routes_action (struct context *c, const bool errors)
   update_time ();
   event_timeout_clear (&c->c2.route_wakeup);
   event_timeout_clear (&c->c2.route_wakeup_expire);
-  initialization_sequence_completed (c, errors); /* client/p2p --route-delay was defined */
+  initialization_sequence_completed (c, errors ? ISC_ERRORS : 0); /* client/p2p --route-delay was defined */
 }
 
 void

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -219,7 +218,7 @@ plugin_init_item (struct plugin *p, const struct plugin_option *o, const char **
   gc_free (&gc);
 }
 
-static bool
+static int
 plugin_call_item (const struct plugin *p, const int type, const char *args, const char **envp)
 {
   int status = OPENVPN_PLUGIN_FUNC_SUCCESS;
@@ -296,7 +295,7 @@ plugin_list_open (const struct plugin_option_list *list, const struct env_set *e
 int
 plugin_call (const struct plugin_list *pl, const int type, const char *args, struct env_set *es)
 {
-  int ret = false;
+  int ret = 0;
 
   if (plugin_defined (pl, type))
     {
@@ -313,7 +312,7 @@ plugin_call (const struct plugin_list *pl, const int type, const char *args, str
 	{
 	  if (plugin_call_item (&pl->plugins[i], type, args, envp)) /* if any one plugin in the chain fails, return failure */
 	    {
-	      ret = true;
+	      ret = 1;
 	      break;
 	    }
 	}
@@ -342,7 +341,7 @@ plugin_list_close (struct plugin_list *pl)
 bool
 plugin_defined (const struct plugin_list *pl, const int type)
 {
-  int ret = false;
+  bool ret = false;
   if (pl)
     {
       int i;

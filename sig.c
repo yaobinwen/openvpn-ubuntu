@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -198,13 +197,9 @@ void
 pre_init_signal_catch (void)
 {
 #ifdef HAVE_SIGNAL_H
-  /*
-   * Special handling if signal arrives before
-   * we are properly initialized.
-   */
-  signal (SIGINT, signal_handler_exit);
-  signal (SIGTERM, signal_handler_exit);
-  signal (SIGHUP, SIG_IGN);
+  signal (SIGINT, signal_handler);
+  signal (SIGTERM, signal_handler);
+  signal (SIGHUP, signal_handler);
   signal (SIGUSR1, SIG_IGN);
   signal (SIGUSR2, SIG_IGN);
   signal (SIGPIPE, SIG_IGN);
@@ -215,12 +210,12 @@ void
 post_init_signal_catch (void)
 {
 #ifdef HAVE_SIGNAL_H
-  /* catch signals */
   signal (SIGINT, signal_handler);
   signal (SIGTERM, signal_handler);
   signal (SIGHUP, signal_handler);
   signal (SIGUSR1, signal_handler);
   signal (SIGUSR2, signal_handler);
+  signal (SIGPIPE, SIG_IGN);
 #endif /* HAVE_SIGNAL_H */
 }
 
