@@ -8,12 +8,20 @@
 test $DEBIAN_SCRIPT_DEBUG && set -v -x
 
 DAEMON=/usr/sbin/openvpn
+DESC="virtual private network daemon"
 CONFIG_DIR=/etc/openvpn
 test -x $DAEMON || exit 0
 test -d $CONFIG_DIR || exit 0
 
+# Source defaults file; edit that file to configure this script.
+AUTOSTART="all"
+STATUSREFRESH=10
+if test -e /etc/default/openvpn ; then
+  . /etc/default/openvpn
+fi
+
 start_vpn () {
-    if grep -q '^[     ]*daemon' $CONFIG_DIR/$NAME.conf ; then
+    if grep -q '^[	 ]*daemon' $CONFIG_DIR/$NAME.conf ; then
       # daemon already given in config file
       DAEMONARG=
     else
@@ -21,25 +29,59 @@ start_vpn () {
       DAEMONARG="--daemon ovpn-$NAME"
     fi
 
-    $DAEMON --writepid /var/run/openvpn.$NAME.pid \
-            --config $CONFIG_DIR/$NAME.conf $DAEMONARG \
-            --cd $CONFIG_DIR || echo -n " FAILED->"
+    if grep -q '^[	 ]*status ' $CONFIG_DIR/$NAME.conf ; then
+      # status file already given in config file
+      STATUSARG=""
+    elif test $STATUSREFRESH -eq 0 ; then
+      # default status file disabled in /etc/default/openvpn
+      STATUSARG=""
+    else
+      # prepare default status file
+      STATUSARG="--status /var/run/openvpn.$NAME.status $STATUSREFRESH"
+    fi
+
     echo -n " $NAME"
+    STATUS="OK"
+
+    $DAEMON --writepid /var/run/openvpn.$NAME.pid \
+            $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
+            --config $CONFIG_DIR/$NAME.conf < /dev/null || STATUS="FAILED"
+    echo -n "($STATUS)"
 }
 stop_vpn () {
-   kill `cat $PIDFILE` || true
+  kill `cat $PIDFILE` || true
   rm $PIDFILE
+  rm -f /var/run/openvpn.$NAME.status 2> /dev/null
 }
 
 case "$1" in
 start)
-  echo -n "Starting openvpn:"
+  echo -n "Starting $DESC:"
 
-  if test -z $2 ; then
-    for CONFIG in `cd $CONFIG_DIR; ls *.conf 2> /dev/null`; do
-      NAME=${CONFIG%%.conf}
-      start_vpn
-    done
+  # autostart VPNs
+  if test -z "$2" ; then
+    # check if automatic startup is disabled by AUTOSTART=none
+    if test "x$AUTOSTART" = "xnone" -o -z "$AUTOSTART" ; then
+      echo " Autostart disabled."
+      exit 0
+    fi
+    if test -z "$AUTOSTART" -o "x$AUTOSTART" = "xall" ; then
+      # all VPNs shall be started automatically
+      for CONFIG in `cd $CONFIG_DIR; ls *.conf 2> /dev/null`; do
+        NAME=${CONFIG%%.conf}
+        start_vpn
+      done
+    else
+      # start only specified VPNs
+      for NAME in $AUTOSTART ; do
+        if test -e $CONFIG_DIR/$NAME.conf ; then
+          start_vpn
+        else
+          echo -n " (failure: No such VPN: $NAME)"
+        fi
+      done
+    fi
+  #start VPNs from command line
   else
     while shift ; do
       [ -z "$1" ] && break
@@ -47,7 +89,7 @@ start)
         NAME=$1
         start_vpn
       else
-        echo -n " No such VPN: $1"
+        echo -n " (failure: No such VPN: $1)"
       fi
     done
   fi
@@ -55,9 +97,9 @@ start)
 
   ;;
 stop)
-  echo -n "Stopping openvpn:"
+  echo -n "Stopping $DESC:"
 
-  if test -z $2 ; then
+  if test -z "$2" ; then
     for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
       NAME=`echo $PIDFILE | cut -c18-`
       NAME=${NAME%%.pid}
@@ -74,7 +116,7 @@ stop)
         stop_vpn
         echo -n " $NAME"
       else
-        echo -n " No such running VPN: $1"
+        echo -n " (failure: No such VPN is running: $1)"
       fi
     done
   fi
@@ -82,7 +124,7 @@ stop)
   ;;
 # We only 'reload' for running VPNs. New ones will only start with 'start' or 'restart'.
 reload|force-reload)
-  echo -n "Reloading openvpn:"
+  echo -n "Reloading $DESC:"
   for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
     NAME=`echo $PIDFILE | cut -c18-`
     NAME=${NAME%%.pid}
@@ -94,8 +136,6 @@ reload|force-reload)
       echo -n "(restarted)"
     else
       kill -HUP `cat $PIDFILE` || true
-#    start-stop-daemon --stop --signal HUP --quiet --oknodo \
-#      --exec $DAEMON --pidfile $PIDFILE
     echo -n " $NAME"
     fi
   done
@@ -103,16 +143,28 @@ reload|force-reload)
   ;;
 
 restart)
-  $0 stop $2
+  shift
+  $0 stop ${@}
   sleep 1
-  $0 start $2
+  $0 start ${@}
+  ;;
+cond-restart)
+  echo -n "Restarting $DESC:"
+  for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
+    NAME=`echo $PIDFILE | cut -c18-`
+    NAME=${NAME%%.pid}
+    stop_vpn
+    sleep 1
+    start_vpn
+  done
+  echo "."
   ;;
 *)
-  echo "Usage: $0 {start|stop|reload|restart|force-reload}" >&2
+  echo "Usage: $0 {start|stop|reload|restart|force-reload|cond-restart}" >&2
   exit 1
   ;;
 esac
 
 exit 0
 
-# vim:set ai et sts=2 sw=2 tw=0:
+# vim:set ai sts=2 sw=2 tw=0:

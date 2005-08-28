@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -94,7 +93,7 @@ getaddr (unsigned int flags,
   if (status != OIA_IP) /* parse as IP address failed? */
     {
       const int fail_wait_interval = 5; /* seconds */
-      int resolve_retries = resolve_retry_seconds / fail_wait_interval;
+      int resolve_retries = (flags & GETADDR_TRY_ONCE) ? 1 : (resolve_retry_seconds / fail_wait_interval);
       struct hostent *h;
       const char *fmt;
       int level = 0;
@@ -342,18 +341,25 @@ remote_list_next (struct remote_list *l)
 {
   if (l)
     {
-      int i;
-      if (++l->current >= l->len)
-	l->current = 0;
-
-      dmsg (D_REMOTE_LIST, "REMOTE_LIST len=%d current=%d",
-	   l->len, l->current);
-      for (i = 0; i < l->len; ++i)
+      if (l->no_advance && l->current >= 0)
 	{
-	  dmsg (D_REMOTE_LIST, "[%d] %s:%d",
-	       i,
-	       l->array[i].hostname,
-	       l->array[i].port);
+	  l->no_advance = false;
+	}
+      else
+	{
+	  int i;
+	  if (++l->current >= l->len)
+	    l->current = 0;
+
+	  dmsg (D_REMOTE_LIST, "REMOTE_LIST len=%d current=%d",
+		l->len, l->current);
+	  for (i = 0; i < l->len; ++i)
+	    {
+	      dmsg (D_REMOTE_LIST, "[%d] %s:%d",
+		    i,
+		    l->array[i].hostname,
+		    l->array[i].port);
+	    }
 	}
     }
 }
@@ -565,7 +571,7 @@ socket_listen_accept (socket_descriptor_t sd,
 
       FD_ZERO (&reads);
       FD_SET (sd, &reads);
-      tv.tv_sec = 5;
+      tv.tv_sec = 0;
       tv.tv_usec = 0;
 
       status = select (sd + 1, &reads, NULL, NULL, &tv);
@@ -581,7 +587,10 @@ socket_listen_accept (socket_descriptor_t sd,
 	msg (D_LINK_ERRORS | M_ERRNO_SOCK, "TCP: select() failed");
 
       if (status <= 0)
-	continue;
+	{
+	  openvpn_sleep (1);
+	  continue;
+	}
 
       new_sd = socket_do_accept (sd, remote, nowait);
 
@@ -757,7 +766,14 @@ resolve_remote (struct link_socket *sock,
 	      int retry = 0;
 	      bool status = false;
 
-	      if (phase == 1)
+	      if (remote_list_len (sock->remote_list) > 1 && sock->resolve_retry_seconds == RESOLV_RETRY_INFINITE)
+		{
+		  flags = GETADDR_RESOLVE;
+		  if (phase == 2)
+		    flags |= (GETADDR_TRY_ONCE | GETADDR_FATAL);
+		  retry = 0;
+		}
+	      else if (phase == 1)
 		{
 		  if (sock->resolve_retry_seconds)
 		    {

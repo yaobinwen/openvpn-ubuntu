@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -399,9 +398,12 @@ struct context_2
   in_addr_t push_ifconfig_local;
   in_addr_t push_ifconfig_remote_netmask;
 
+  /* client authentication state */
 # define CAS_SUCCEEDED 0
 # define CAS_PENDING   1
 # define CAS_FAILED    2
+# define CAS_PARTIAL   3 /* at least one client-connect script/plugin
+			    succeeded while a later one in the chain failed */
   int context_auth;
 #endif
 
@@ -425,7 +427,7 @@ struct context
   bool first_time;
 
   /* used by multi-client code to lock the context */
-  //MUTEX_DEFINE (mutex);
+  /*MUTEX_DEFINE (mutex);*/
 
   /* context modes */
 # define CM_P2P            0 /* standalone point-to-point session or client */

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -934,6 +933,8 @@ close_tun_generic (struct tuntap *tt)
 /* #warning IPv6 OFF */
 #endif
 
+#if !PEDANTIC
+
 void
 open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, struct tuntap *tt)
 {
@@ -1058,6 +1059,16 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6
     }
   open_tun_generic (dev, dev_type, dev_node, ipv6, false, true, tt);
 }
+
+#else
+
+void
+open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, struct tuntap *tt)
+{
+  ASSERT (0);
+}
+
+#endif
 
 #else
 
@@ -2917,7 +2928,7 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6
   const char *device_guid = NULL;
   DWORD len;
 
-  //netcmd_semaphore_lock ();
+  /*netcmd_semaphore_lock ();*/
 
   ipv6_support (ipv6, false, tt);
 
@@ -3244,7 +3255,7 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6
 	tt->ipapi_context_defined = true;
       }
   }
-  //netcmd_semaphore_release ();
+  /*netcmd_semaphore_release ();*/
   gc_free (&gc);
 }
 

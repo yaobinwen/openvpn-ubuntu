@@ -4,7 +4,7 @@ dnl             session authentication and key exchange,
 dnl             packet encryption, packet authentication, and
 dnl             packet compression.
 dnl
-dnl  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+dnl  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
 dnl
 dnl  This program is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.50)
 
-AC_INIT([OpenVPN], [2.0_rc6], [openvpn-users@lists.sourceforge.net], [openvpn])
+AC_INIT([OpenVPN], [2.0.2], [openvpn-users@lists.sourceforge.net], [openvpn])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(syshead.h)
 
@@ -122,6 +122,12 @@ AC_ARG_ENABLE(strict,
    [  --enable-strict         Enable strict compiler warnings (debugging option)],
    [STRICT="$enableval"],
    [STRICT="no"]
+)
+
+AC_ARG_ENABLE(pedantic,
+   [  --enable-pedantic       Enable pedantic compiler warnings, will not generate a working executable (debugging option)],
+   [PEDANTIC="$enableval"],
+   [PEDANTIC="no"]
 )
 
 AC_ARG_ENABLE(profiling,
@@ -264,9 +270,13 @@ AC_CHECK_HEADERS(sys/time.h sys/socket.h sys/ioctl.h sys/stat.h dnl
 		 netinet/in.h netinet/in_systm.h netinet/ip.h dnl
 		 netinet/if_ether.h netinet/tcp.h resolv.h arpa/inet.h dnl
 		 netdb.h sys/uio.h linux/if_tun.h linux/sockios.h dnl
-		 linux/types.h linux/errqueue.h dnl
-                 sys/poll.h sys/epoll.h
+		 linux/types.h sys/poll.h sys/epoll.h dnl
 )
+AC_CHECK_HEADERS(linux/errqueue.h,,,
+	[#ifdef HAVE_LINUX_TYPES_H
+	 # include <linux/types.h>
+	 #endif
+	])
 AC_CACHE_SAVE
 
 dnl check that in_addr_t is defined
@@ -437,18 +447,21 @@ if test "$MEMCHECK" = "dmalloc"; then
 fi
 
 dnl
-dnl Check for libdl library
+dnl Check for dlopen -- first try libc then libdl.
 dnl
 if test "$PLUGINS" = "yes"; then
    AC_CHECKING([for libdl Library and Header files])
-   AC_CHECK_HEADER(dlfcn.h, 
-        [AC_CHECK_LIB(dl, dlopen,
-	    [
-               OPENVPN_ADD_LIBS(-ldl)
-	       AC_DEFINE(USE_LIBDL, 1, [Use libdl for dynamic library loading])
-	    ],
-	    [AC_MSG_RESULT([libdl library not found.])]
-	)],
+   AC_CHECK_HEADER(dlfcn.h,
+        [AC_CHECK_FUNC(dlopen,
+            [AC_DEFINE(USE_LIBDL, 1, [Use libdl for dynamic library loading])],
+            [AC_CHECK_LIB(dl, dlopen,
+	        [
+                   OPENVPN_ADD_LIBS(-ldl)
+	           AC_DEFINE(USE_LIBDL, 1, [Use libdl for dynamic library loading])
+	        ],
+	        [AC_MSG_RESULT([libdl library not found.])]
+	    )],
+        )],
         [AC_MSG_RESULT([libdl headers not found.])]
    )
 fi
@@ -458,21 +471,36 @@ dnl check for LZO library
 dnl
 
 if test "$LZO" = "yes"; then
+   LZO_H=""
    AC_CHECKING([for LZO Library and Header files])
-   AC_CHECK_HEADER(lzo1x.h, 
-        [AC_CHECK_LIB(lzo, lzo1x_1_15_compress,
-	    [
-	       OPENVPN_ADD_LIBS(-llzo)
-	       AC_DEFINE(USE_LZO, 1, [Use LZO compression library])
-	    ],
-	    [AC_MSG_ERROR([LZO headers were found but LZO library was not found.])]
-	)],
-	[
-          AC_MSG_RESULT([LZO library and headers not found.])
-	  AC_MSG_RESULT([LZO library available from http://www.oberhumer.com/opensource/lzo/])
-	  AC_MSG_ERROR([Or try ./configure --disable-lzo])
-	]
+   AC_CHECK_HEADER(lzo/lzo1x.h,
+	[ LZO_H="2"
+	  lzolibs="lzo2 lzo"
+	  AC_DEFINE(LZO_HEADER_DIR, 1, [Use lzo/ directory prefix for LZO header files (for LZO 2.0)])
+	],
+	[ AC_CHECK_HEADER(lzo1x.h, [ LZO_H="1" ; lzolibs=lzo ]) ]
    )
+
+   if test -n "$LZO_H"; then
+     havelzolib=0
+     for i in $lzolibs ; do
+	if test $havelzolib = 1 ; then break ; fi
+	AC_CHECK_LIB($i, lzo1x_1_15_compress,
+          [
+	    OPENVPN_ADD_LIBS(-l$i)
+	    AC_DEFINE(USE_LZO, 1, [Use LZO compression library])
+	    havelzolib=1
+	  ]
+        )
+     done
+     if test $havelzolib = 0 ; then
+       AC_MSG_ERROR([LZO headers were found but LZO library was not found])
+     fi
+   else
+     AC_MSG_RESULT([LZO headers were not found])
+     AC_MSG_RESULT([LZO library available from http://www.oberhumer.com/opensource/lzo/])
+     AC_MSG_ERROR([Or try ./configure --disable-lzo])
+   fi
 fi
 
 dnl
@@ -583,6 +611,11 @@ fi
 dnl enable strict compiler warnings
 if test "$STRICT" = "yes"; then
    CFLAGS="$CFLAGS -Wall -Wpointer-arith -Wsign-compare -Wno-unused-parameter -Wno-unused-function"
+fi
+
+dnl enable pedantic compiler warnings
+if test "$PEDANTIC" = "yes"; then
+   CFLAGS="$CFLAGS -ansi -pedantic"
 fi
 
 dnl enable profiling

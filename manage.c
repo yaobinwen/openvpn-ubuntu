@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -55,6 +54,7 @@ man_help ()
 {
   msg (M_CLIENT, "Management Interface for %s", title_string);
   msg (M_CLIENT, "Commands:");
+  msg (M_CLIENT, "auth-retry t           : Auth failure retry mode (none,interact,nointeract).");
   msg (M_CLIENT, "echo [on|off] [N|all]  : Like log, but only show messages in echo buffer.");
   msg (M_CLIENT, "exit|quit              : Close management session.");
   msg (M_CLIENT, "help                   : Print this message.");
@@ -170,7 +170,7 @@ man_output_list_push (struct management *man, const char *str)
   if (management_connected (man))
     {
       if (str)
-	output_list_push (man->connection.out, str);
+	output_list_push (man->connection.out, (const unsigned char *) str);
       man_update_io_state (man);
       if (!man->persist.standalone_disabled)
 	man_output_standalone (man, NULL);
@@ -182,10 +182,24 @@ man_prompt (struct management *man)
 {
   if (man_password_needed (man))
     man_output_list_push (man, "ENTER PASSWORD:");
-#if 0 // should we use prompt?
+#if 0 /* should we use prompt? */
   else
     man_output_list_push (man, PACKAGE_NAME ">");
 #endif
+}
+
+static void
+man_close_socket (struct management *man, const socket_descriptor_t sd)
+{
+#ifndef WIN32
+  /*
+   * Windows doesn't need this because the ne32 event is permanently
+   * enabled at struct management scope.
+   */
+  if (man->persist.callback.delete_event)
+    (*man->persist.callback.delete_event) (man->persist.callback.arg, sd);
+#endif
+  openvpn_close_socket (sd);
 }
 
 static void
@@ -281,7 +295,7 @@ man_kill (struct management *man, const char *victim)
       char p2[128];
       int n_killed;
 
-      buf_set_read (&buf, victim, strlen (victim) + 1);
+      buf_set_read (&buf, (uint8_t*) victim, strlen (victim) + 1);
       buf_parse (&buf, ':', p1, sizeof (p1));
       buf_parse (&buf, ':', p2, sizeof (p2));
 
@@ -626,6 +640,22 @@ man_dispatch_command (struct management *man, struct status_output *so, const ch
       else
 	msg (M_CLIENT, "SUCCESS: mute=%d", get_mute_cutoff ());
     }
+  else if (streq (p[0], "auth-retry"))
+    {
+#if P2MP
+      if (p[1])
+	{
+	  if (auth_retry_set (M_CLIENT, p[1]))
+	    msg (M_CLIENT, "SUCCESS: auth-retry parameter changed");
+	  else
+	    msg (M_CLIENT, "ERROR: bad auth-retry parameter");
+	}
+      else
+	msg (M_CLIENT, "SUCCESS: auth-retry=%s", auth_retry_print ());	
+#else
+      msg (M_CLIENT, "ERROR: auth-retry feature is unavailable");
+#endif
+    }
   else if (streq (p[0], "state"))
     {
       if (!p[1])
@@ -744,8 +774,6 @@ man_accept (struct management *man)
 #ifdef WIN32
 	  man_stop_ne32 (man);
 #endif
-	  openvpn_close_socket (man->connection.sd_top);
-	  man->connection.sd_top = SOCKET_UNDEFINED;
 	}
 
       /*
@@ -789,34 +817,37 @@ man_listen (struct management *man)
    * Initialize state
    */
   man->connection.state = MS_LISTEN;
-
-  /*
-   * Initialize socket
-   */
   man->connection.sd_cli = SOCKET_UNDEFINED;
-  man->connection.sd_top = create_socket_tcp ();
 
   /*
-   * Bind socket
+   * Initialize listening socket
    */
-  if (bind (man->connection.sd_top, (struct sockaddr *) &man->settings.local, sizeof (man->settings.local)))
-    msg (M_SOCKERR, "MANAGEMENT: Cannot bind TCP socket on %s",
-	 print_sockaddr (&man->settings.local, &gc));
+  if (man->connection.sd_top == SOCKET_UNDEFINED)
+    {
+      man->connection.sd_top = create_socket_tcp ();
 
-  /*
-   * Listen for connection
-   */
-  if (listen (man->connection.sd_top, 1))
-    msg (M_SOCKERR, "MANAGEMENT: listen() failed");
+      /*
+       * Bind socket
+       */
+      if (bind (man->connection.sd_top, (struct sockaddr *) &man->settings.local, sizeof (man->settings.local)))
+	msg (M_SOCKERR, "MANAGEMENT: Cannot bind TCP socket on %s",
+	     print_sockaddr (&man->settings.local, &gc));
 
-  /*
-   * Set misc socket properties
-   */
-  set_nonblock (man->connection.sd_top);
-  set_cloexec (man->connection.sd_top);
+      /*
+       * Listen for connection
+       */
+      if (listen (man->connection.sd_top, 1))
+	msg (M_SOCKERR, "MANAGEMENT: listen() failed");
 
-  msg (D_MANAGEMENT, "MANAGEMENT: TCP Socket listening on %s",
-       print_sockaddr (&man->settings.local, &gc));
+      /*
+       * Set misc socket properties
+       */
+      set_nonblock (man->connection.sd_top);
+      set_cloexec (man->connection.sd_top);
+
+      msg (D_MANAGEMENT, "MANAGEMENT: TCP Socket listening on %s",
+	   print_sockaddr (&man->settings.local, &gc));
+    }
 
 #ifdef WIN32
   man_start_ne32 (man);
@@ -834,7 +865,7 @@ man_reset_client_socket (struct management *man, const bool listen)
 #ifdef WIN32
       man_stop_ne32 (man);
 #endif
-      openvpn_close_socket (man->connection.sd_cli);
+      man_close_socket (man, man->connection.sd_cli);
       command_line_reset (man->connection.in);
       output_list_reset (man->connection.out);
     }
@@ -861,12 +892,12 @@ man_process_command (struct management *man, const char *line)
     {
       nparms = parse_line (line, parms, MAX_PARMS, "TCP", 0, M_CLIENT, &gc);
       if (parms[0] && streq (parms[0], "password"))
-	msg (D_MANAGEMENT, "MANAGEMENT: CMD 'password [...]'");
+	msg (D_MANAGEMENT_DEBUG, "MANAGEMENT: CMD 'password [...]'");
       else
-	msg (D_MANAGEMENT, "MANAGEMENT: CMD '%s'", line);
+	msg (D_MANAGEMENT_DEBUG, "MANAGEMENT: CMD '%s'", line);
 
 #if 0
-      // DEBUGGING -- print args
+      /* DEBUGGING -- print args */
       {
 	int i;
 	for (i = 0; i < nparms; ++i)
@@ -934,7 +965,7 @@ man_read (struct management *man)
 	const unsigned char *line;
 	while ((line = command_line_get (man->connection.in)))
 	  {
-	    man_process_command (man, line);
+	    man_process_command (man, (char *) line);
 	    if (man->connection.halt)
 	      break;
 	    command_line_next (man->connection.in);
@@ -1179,17 +1210,19 @@ man_connection_init (struct management *man)
 }
 
 static void
-man_connection_close (struct man_connection *mc)
+man_connection_close (struct management *man)
 {
+  struct man_connection *mc = &man->connection;
+
   if (mc->es)
     event_free (mc->es);
 #ifdef WIN32
   net_event_win32_close (&mc->ne32);
 #endif
   if (socket_defined (mc->sd_top))
-    openvpn_close_socket (mc->sd_top);
+    man_close_socket (man, mc->sd_top);
   if (socket_defined (mc->sd_cli))
-    openvpn_close_socket (mc->sd_cli);
+    man_close_socket (man, mc->sd_cli);
   if (mc->in)
     command_line_free (mc->in);
   if (mc->out)
@@ -1269,7 +1302,7 @@ management_open (struct management *man,
 void
 management_close (struct management *man)
 {
-  man_connection_close (&man->connection);
+  man_connection_close (man);
   man_settings_close (&man->settings);
   man_persist_close (&man->persist);
   free (man);
@@ -1289,7 +1322,7 @@ management_clear_callback (struct management *man)
   man->persist.standalone_disabled = false;
   man->persist.hold_release = false;
   CLEAR (man->persist.callback);
-  man_output_list_push (man, NULL); // flush output queue
+  man_output_list_push (man, NULL); /* flush output queue */
 }
 
 void
@@ -1375,7 +1408,7 @@ void
 management_pre_tunnel_close (struct management *man)
 {
   if (man->settings.management_over_tunnel)
-    man_connection_close (&man->connection);
+    man_connection_close (man);
 }
 
 void
@@ -1466,11 +1499,11 @@ management_io (struct management *man)
 	      if (net_events & FD_WRITE)
 		{
 		  int status;
-		  //dmsg (M_INFO, "FD_WRITE set");
+		  /* dmsg (M_INFO, "FD_WRITE set"); */
 		  status = man_write (man);
 		  if (status < 0 && WSAGetLastError() == WSAEWOULDBLOCK)
 		    {
-		      //dmsg (M_INFO, "FD_WRITE cleared");
+		      /* dmsg (M_INFO, "FD_WRITE cleared"); */
 		      net_event_win32_clear_selected_events (&man->connection.ne32, FD_WRITE);
 		    }
 		}
@@ -1531,7 +1564,7 @@ management_io (struct management *man)
 
 #endif
 
-const inline bool
+inline bool
 man_standalone_ok (const struct management *man)
 {
   return !man->settings.management_over_tunnel && man->connection.state != MS_INITIAL;
@@ -1755,13 +1788,22 @@ management_query_user_pass (struct management *man,
 }
 
 /*
+ * Return true if management_hold() would block
+ */
+bool
+management_would_hold (struct management *man)
+{
+  return man->settings.hold && !man->persist.hold_release && man_standalone_ok (man);
+}
+
+/*
  * If the hold flag is enabled, hibernate until a management client releases the hold.
  * Return true if the caller should not sleep for an additional time interval.
  */
 bool
 management_hold (struct management *man)
 {
-  if (man->settings.hold && !man->persist.hold_release && man_standalone_ok (man))
+  if (management_would_hold (man))
     {
       volatile int signal_received = 0;
       const bool standalone_disabled_save = man->persist.standalone_disabled;
@@ -1849,7 +1891,7 @@ command_line_get (struct command_line *cl)
     {
       buf_copy_excess (&cl->residual, &cl->buf, i);
       buf_chomp (&cl->buf);
-      ret = BSTR (&cl->buf);
+      ret = (const unsigned char *) BSTR (&cl->buf);
     }
   return ret;
 }
@@ -1923,7 +1965,7 @@ output_list_push (struct output_list *ol, const unsigned char *str)
 	  ASSERT (!ol->head);
 	  ol->head = e;
 	}
-      e->buf = string_alloc_buf (str, NULL);
+      e->buf = string_alloc_buf ((const char *) str, NULL);
       ol->tail = e;
     }
 }

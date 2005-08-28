@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -900,7 +899,7 @@ setenv_str_ex (struct env_set *es,
     {
 #if defined(WIN32)
       {
-	//msg (M_INFO, "SetEnvironmentVariable '%s' '%s'", name_tmp, val_tmp ? val_tmp : "NULL");
+	/*msg (M_INFO, "SetEnvironmentVariable '%s' '%s'", name_tmp, val_tmp ? val_tmp : "NULL");*/
 	if (!SetEnvironmentVariable (name_tmp, val_tmp))
 	  msg (M_WARN | M_ERRNO, "SetEnvironmentVariable failed, name='%s', value='%s'",
 	       name_tmp,
@@ -913,7 +912,7 @@ setenv_str_ex (struct env_set *es,
 
 	mutex_lock_static (L_PUTENV);
 	status = putenv (str);
-	//msg (M_INFO, "PUTENV '%s'", str);
+	/*msg (M_INFO, "PUTENV '%s'", str);*/
 	if (!status)
 	  manage_env (str);
 	mutex_unlock_static (L_PUTENV);
@@ -1027,7 +1026,7 @@ create_temp_filename (const char *directory, struct gc_arena *gc)
 const char *
 gen_path (const char *directory, const char *filename, struct gc_arena *gc)
 {
-  const char *safe_filename = string_mod_const (filename, CC_ALNUM|CC_UNDERBAR|CC_DASH|CC_DOT, 0, '_', gc);
+  const char *safe_filename = string_mod_const (filename, CC_ALNUM|CC_UNDERBAR|CC_DASH|CC_DOT|CC_AT, 0, '_', gc);
 
   if (safe_filename
       && strcmp (safe_filename, ".")
@@ -1080,12 +1079,34 @@ adjust_power_of_2 (unsigned int u)
   return ret;
 }
 
+#ifdef HAVE_GETPASS
+
+static FILE *
+open_tty (const bool write)
+{
+  FILE *ret;
+  ret = fopen ("/dev/tty", write ? "w" : "r");
+  if (!ret)
+    ret = write ? stderr : stdin;
+  return ret;
+}
+
+static void
+close_tty (FILE *fp)
+{
+  if (fp != stderr && fp != stdin)
+    fclose (fp);
+}
+
+#endif
+
 /*
  * Get input from console
  */
 bool
 get_console_input (const char *prompt, const bool echo, char *input, const int capacity)
 {
+  bool ret = false;
   ASSERT (prompt);
   ASSERT (input);
   ASSERT (capacity > 0);
@@ -1096,14 +1117,20 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
 #elif defined(HAVE_GETPASS)
   if (echo)
     {
-      fprintf (stderr, "%s", prompt);
-      if (fgets (input, capacity, stdin) != NULL)
+      FILE *fp;
+
+      fp = open_tty (true);
+      fprintf (fp, "%s", prompt);
+      fflush (fp);
+      close_tty (fp);
+
+      fp = open_tty (false);
+      if (fgets (input, capacity, fp) != NULL)
 	{
 	  chomp (input);
-	  return true;
+	  ret = true;
 	}
-      else
-	return false;
+      close_tty (fp);
     }
   else
     {
@@ -1112,15 +1139,13 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
 	{
 	  strncpynt (input, gp, capacity);
 	  memset (gp, 0, strlen (gp));
-	  return true;
+	  ret = true;
 	}
-      else
-	return false;
     }
 #else
   msg (M_FATAL, "Sorry, but I can't get console input on this OS");
 #endif
-  return false; /* NOTREACHED */
+  return ret;
 }
 
 /*
@@ -1236,12 +1261,13 @@ get_user_pass (struct user_pass *up,
 }
 
 void
-purge_user_pass (struct user_pass *up)
+purge_user_pass (struct user_pass *up, const bool force)
 {
-  if (up->nocache)
+  const bool nocache = up->nocache;
+  if (nocache || force)
     {
       CLEAR (*up);
-      up->nocache = true;
+      up->nocache = nocache;
     }
 }
 

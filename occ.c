@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -292,7 +291,7 @@ check_send_occ_msg_dowork (struct context *c)
 	dmsg (D_PACKET_CONTENT, "SENT OCC_MTU_LOAD min_int(%d-%d-%d-%d,%d) size=%d",
 	     c->c2.occ_mtu_load_size,
 	     OCC_STRING_SIZE,
-	     sizeof (uint8_t),
+	      (int) sizeof (uint8_t),
 	     EXTRA_FRAME (&c->c2.frame),
 	     MAX_RW_SIZE_TUN (&c->c2.frame),
 	     BLEN (&c->c2.buf));
@@ -347,11 +346,11 @@ process_received_occ_msg (struct context *c)
       dmsg (D_PACKET_CONTENT, "RECEIVED OCC_REPLY");
       if (c->options.occ && !TLS_MODE (c) && c->c2.options_string_remote)
 	{
-	  if (!options_cmp_equal_safe (BPTR (&c->c2.buf),
+	  if (!options_cmp_equal_safe ((char *) BPTR (&c->c2.buf),
 				       c->c2.options_string_remote,
 				       c->c2.buf.len))
 	    {
-	      options_warning_safe (BPTR (&c->c2.buf),
+	      options_warning_safe ((char *) BPTR (&c->c2.buf),
 				    c->c2.options_string_remote,
 				    c->c2.buf.len);
 	    }

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,7 +39,7 @@
 
 #include "openvpn-plugin.h"
 
-#define DEBUG(verb) ((verb) >= 7) // JYFIXME
+#define DEBUG(verb) ((verb) >= 7)
 
 /* Command codes for foreground -> background communication */
 #define COMMAND_RUN_SCRIPT 0
@@ -137,6 +136,33 @@ send_control (int fd, int code)
     return (int) size;
   else
     return -1;
+}
+
+/*
+ * Daemonize if "daemon" env var is true.
+ * Preserve stderr across daemonization if
+ * "daemon_log_redirect" env var is true.
+ */
+static void
+daemonize (const char *envp[])
+{
+  const char *daemon_string = get_env ("daemon", envp);
+  if (daemon_string && daemon_string[0] == '1')
+    {
+      const char *log_redirect = get_env ("daemon_log_redirect", envp);
+      int fd = -1;
+      if (log_redirect && log_redirect[0] == '1')
+	fd = dup (2);
+      if (daemon (0, 0) < 0)
+	{
+	  fprintf (stderr, "DOWN-ROOT: daemonization failed\n");
+	}
+      else if (fd >= 3)
+	{
+	  dup2 (fd, 2);
+	  close (fd);
+	}
+    }
 }
 
 /*
@@ -349,6 +375,9 @@ openvpn_plugin_func_v1 (openvpn_plugin_handle_t handle, const int type, const ch
 	  /* Ignore most signals (the parent will receive them) */
 	  set_signals ();
 
+	  /* Daemonize if --daemon option is set. */
+	  daemonize (envp);
+
 	  /* execute the event loop */
 	  down_root_server (fd[1], context->command, argv, envp, context->verb);
 
@@ -398,6 +427,20 @@ openvpn_plugin_close_v1 (openvpn_plugin_handle_t handle)
     }
 
   free_context (context);
+}
+
+OPENVPN_EXPORT void
+openvpn_plugin_abort_v1 (openvpn_plugin_handle_t handle)
+{
+  struct down_root_context *context = (struct down_root_context *) handle;
+
+  if (context->foreground_fd >= 0)
+    {
+      /* tell background process to exit */
+      send_control (context->foreground_fd, COMMAND_EXIT);
+      close (context->foreground_fd);
+      context->foreground_fd = -1;
+    }
 }
 
 /*

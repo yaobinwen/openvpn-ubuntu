@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -57,7 +56,7 @@ tunnel_point_to_point (struct context *c)
   c->mode = CM_P2P;
 
   /* initialize tunnel instance */
-  init_instance (c, c->es, CC_HARD_USR1_TO_HUP);
+  init_instance_handle_signals (c, c->es, CC_HARD_USR1_TO_HUP);
   if (IS_SIG (c))
     return;
 
@@ -102,6 +101,11 @@ int
 main (int argc, char *argv[])
 {
   struct context c;
+
+#if PEDANTIC
+  fprintf (stderr, "Sorry, I was built with --enable-pedantic and I am incapable of doing any real work!\n");
+  return 1;
+#endif
 
   CLEAR (c);
 

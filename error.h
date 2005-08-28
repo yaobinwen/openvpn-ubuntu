@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +28,7 @@
 #include "basic.h"
 #include "thread.h"
 
-//#define ABORT_ON_ERROR
+/* #define ABORT_ON_ERROR */
 
 #define ERR_BUF_SIZE 1024
 
@@ -151,10 +150,12 @@ bool dont_mute (unsigned int flags); /* check muting filter */
 #  define dmsg(flags, args...)
 # endif
 #else
-# ifdef _MSC_VER
-#  pragma message("this compiler appears to lack vararg macros which will cause a significant degradation in efficiency")
-# else
-#  warning this compiler appears to lack vararg macros which will cause a significant degradation in efficiency (you can ignore this warning if you are using LCLINT)
+# if !PEDANTIC
+#  ifdef _MSC_VER
+#   pragma message("this compiler appears to lack vararg macros which will cause a significant degradation in efficiency")
+#  else
+#   warning this compiler appears to lack vararg macros which will cause a significant degradation in efficiency (you can ignore this warning if you are using LCLINT)
+#  endif
 # endif
 # define msg x_msg
 # define dmsg x_msg
@@ -215,7 +216,7 @@ HANDLE get_orig_stderr (void);
 #endif
 
 /* exit program */
-void openvpn_exit (int status);
+void openvpn_exit (const int status);
 
 /*
  * Check the return status of read/write routines.
@@ -318,7 +319,7 @@ ignore_sys_error (const int err)
 {
   /* I/O operation pending */
 #ifdef WIN32
-  if (err == WSAEWOULDBLOCK)
+  if (err == WSAEWOULDBLOCK || err == WSAEINVAL)
     return true;
 #else
   if (err == EAGAIN)

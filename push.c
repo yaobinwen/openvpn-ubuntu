@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -52,7 +51,19 @@ receive_auth_failed (struct context *c, const struct buffer *buffer)
   msg (M_VERB0, "AUTH: Received AUTH_FAILED control message");
   if (c->options.pull)
     {
-      c->sig->signal_received = SIGTERM; /* SOFT-SIGTERM -- Auth failure error */
+      switch (auth_retry_get ())
+	{
+	case AR_NONE:
+	  c->sig->signal_received = SIGTERM; /* SOFT-SIGTERM -- Auth failure error */
+	  break;
+	case AR_INTERACT:
+	  ssl_purge_auth ();
+	case AR_NOINTERACT:
+	  c->sig->signal_received = SIGUSR1; /* SOFT-SIGUSR1 -- Auth failure error */
+	  break;
+	default:
+	  ASSERT (0);
+	}
       c->sig->signal_text = "auth-failure";
 #ifdef ENABLE_MANAGEMENT
       if (management)
@@ -126,10 +137,10 @@ send_push_reply (struct context *c)
 		print_in_addr_t (c->c2.push_ifconfig_local, 0, &gc),
 		print_in_addr_t (c->c2.push_ifconfig_remote_netmask, 0, &gc));
 
-  if (strlen (BSTR (&buf)) >= MAX_PUSH_LIST_LEN)
-    msg (M_FATAL, "Maximum length of --push buffer (%d) has been exceeded", MAX_PUSH_LIST_LEN);
-
-  ret = send_control_channel_string (c, BSTR (&buf), D_PUSH);
+  if (strlen (BSTR (&buf)) < MAX_PUSH_LIST_LEN)
+    ret = send_control_channel_string (c, BSTR (&buf), D_PUSH);
+  else
+    msg (M_WARN, "Maximum length of --push buffer (%d) has been exceeded", MAX_PUSH_LIST_LEN);
 
   gc_free (&gc);
   return ret;
@@ -179,7 +190,7 @@ process_incoming_push_msg (struct context *c,
 			   const struct buffer *buffer,
 			   bool honor_received_options,
 			   unsigned int permission_mask,
-			   int *option_types_found)
+			   unsigned int *option_types_found)
 {
   int ret = PUSH_MSG_ERROR;
   struct buffer buf = *buffer;
@@ -248,8 +259,8 @@ remove_iroutes_from_push_route_list (struct options *o)
       ALLOC_OBJ_CLEAR_GC (pl, struct push_list, &gc);
       ALLOC_ARRAY_CLEAR_GC (line, char, MAX_PUSH_LIST_LEN, &gc);
 
-      buf_set_read (&in, o->push_list->options, strlen (o->push_list->options));
-      buf_set_write (&out, pl->options, sizeof (pl->options));
+      buf_set_read (&in, (const uint8_t*) o->push_list->options, strlen (o->push_list->options));
+      buf_set_write (&out, (uint8_t*) pl->options, sizeof (pl->options));
 
       /* cycle through the push list */
       while (buf_parse (&in, ',', line, MAX_PUSH_LIST_LEN))

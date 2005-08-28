@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -50,10 +49,10 @@ typedef unsigned long in_addr_t;
 #endif
 
 /* Append a label to program startup title */
-//#define DEBUG_LABEL "DEBUG1"
+/*#define DEBUG_LABEL "DEBUG1"*/
 
 /* Should we print debug info from driver? */
-//#define TAP_WIN32_DEBUG
+/*#define TAP_WIN32_DEBUG*/
 
 /*
  * Minimum TAP-Win32 version number expected by userspace
@@ -222,7 +221,7 @@ typedef unsigned long in_addr_t;
 #define PACKAGE_TARNAME "openvpn"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.0_rc6" /* AUTO_VERSION */
+#define PACKAGE_VERSION "2.0.2" /* AUTO_VERSION */
 
 /* Define to the full name and version of this package. */
 #ifdef DEBUG_LABEL

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -61,6 +60,7 @@ struct multi_instance {
   bool defined;
   bool halt;
   int refcount;
+  int route_count;             /* number of routes (including cached routes) owned by this instance */
   time_t created;
   struct timeval wakeup;       /* absolute time */
   struct mroute_addr real;
@@ -78,28 +78,10 @@ struct multi_instance {
   bool did_real_hash;
   bool did_iter;
   bool connection_established_flag;
+  bool did_iroutes;
 
   struct context context;
 };
-
-#ifdef USE_PTHREAD
-
-struct multi_context_thread_shared
-{
-  struct sparse_mutex read;
-  struct sparse_mutex write_link;
-  struct sparse_mutex write_tun;
-};
-
-struct multi_context_thread_local
-{
-  bool read_owned;
-  bool write_link_owned;
-  bool write_tun_owned;
-  struct multi_instance *held;
-};
-
-#endif
 
 /*
  * One multi_context object per server daemon thread.
@@ -128,11 +110,6 @@ struct multi_context {
   int max_clients;
   int tcp_queue_limit;
   int status_file_version;
-
-#ifdef USE_PTHREAD
-  struct multi_context_thread_shared *thread_shared;
-  struct multi_context_thread_local thread_local;
-#endif
 
   struct multi_instance *pending;
   struct multi_instance *earliest_wakeup;
@@ -164,7 +141,7 @@ struct multi_route
  */
 void tunnel_server (struct context *top);
 
-const char *multi_instance_string (struct multi_instance *mi, bool null, struct gc_arena *gc);
+const char *multi_instance_string (const struct multi_instance *mi, bool null, struct gc_arena *gc);
 
 void multi_bcast (struct multi_context *m,
 		  const struct buffer *buf,
@@ -244,6 +221,37 @@ multi_process_outgoing_link_pre (struct multi_context *m)
 }
 
 /*
+ * Per-client route quota management
+ */
+
+void route_quota_exceeded (const struct multi_context *m, const struct multi_instance *mi);
+
+static inline void
+route_quota_inc (struct multi_instance *mi)
+{
+  ++mi->route_count;
+}
+
+static inline void
+route_quota_dec (struct multi_instance *mi)
+{
+  --mi->route_count;
+}
+
+/* can we add a new route? */
+static inline bool
+route_quota_test (const struct multi_context *m, const struct multi_instance *mi)
+{
+  if (mi->route_count >= mi->context.options.max_routes_per_client)
+    {
+      route_quota_exceeded (m, mi);
+      return false;
+    }
+  else
+    return true;
+}
+
+/*
  * Instance reference counting
  */
 
@@ -267,7 +275,9 @@ multi_instance_dec_refcount (struct multi_instance *mi)
 static inline void
 multi_route_del (struct multi_route *route)
 {
-  multi_instance_dec_refcount (route->instance);
+  struct multi_instance *mi = route->instance;
+  route_quota_dec (mi);
+  multi_instance_dec_refcount (mi);
   free (route);
 }
 
@@ -362,6 +372,7 @@ multi_get_timeout (struct multi_context *m, struct timeval *dest)
 {
   struct timeval tv, current;
 
+  CLEAR (tv);
   m->earliest_wakeup = (struct multi_instance *) schedule_get_earliest_wakeup (m->schedule, &tv);
   if (m->earliest_wakeup)
     {
@@ -414,31 +425,10 @@ multi_process_outgoing_link_dowork (struct multi_context *m, struct multi_instan
   return ret;
 }
 
-#ifndef USE_PTHREAD
-
-#endif
-
 /*
  * Check for signals.
  */
 #define MULTI_CHECK_SIG(m) EVENT_LOOP_CHECK_SIGNAL (&(m)->top, multi_process_signal, (m))
-
-/*
- * Multithreading support
- */
-#ifdef USE_PTHREAD
-
-void inherit_multi_context (struct multi_context *dest, const struct multi_context *src, const unsigned int thread_mode);
-
-void multi_acquire_io_lock (struct multi_context *m, const unsigned int iow_flags);
-void multi_release_io_lock (struct multi_context *m);
-
-void thread_shared_init (struct multi_context_thread_shared *ts);
-void thread_shared_uninit (struct multi_context_thread_shared *ts);
-
-void multi_set_pending (struct multi_context *m, struct multi_instance *mi);
-
-#else
 
 static inline void
 multi_set_pending (struct multi_context *m, struct multi_instance *mi)
@@ -450,8 +440,6 @@ static inline void
 multi_release_io_lock (struct multi_context *m)
 {
 }
-
-#endif /* USE_PTHREAD */
 
 #endif /* P2MP_SERVER */
 #endif /* MULTI_H */

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,8 +24,14 @@
 
 #ifdef USE_LZO
 
+#ifdef LZO_HEADER_DIR
+#include "lzo/lzoutil.h"
+#include "lzo/lzo1x.h"
+#else
 #include "lzoutil.h"
 #include "lzo1x.h"
+#endif
+
 #include "buffer.h"
 #include "mtu.h"
 #include "common.h"
@@ -45,7 +50,7 @@
 #define LZO_WORKSPACE	LZO1X_1_15_MEM_COMPRESS
 #define LZO_DECOMPRESS  lzo1x_decompress_safe
 
-#define LZO_EXTRA_BUFFER(len) ((len)/64 + 16 + 3)	/* LZO worst case size expansion. */
+#define LZO_EXTRA_BUFFER(len) ((len)/8 + 128 + 3)	/* LZO 2.0 worst case size expansion. */
 
 /*
  * Don't try to compress any packet smaller than this.
