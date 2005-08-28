@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -50,6 +49,8 @@
 #define CF_LOAD_PERSISTED_PACKET_ID (1<<0)
 #define CF_INIT_TLS_MULTI           (1<<1)
 #define CF_INIT_TLS_AUTH_STANDALONE (1<<2)
+
+static void do_init_first_time (struct context *c);
 
 void
 context_clear (struct context *c)
@@ -357,6 +358,8 @@ possibly_become_daemon (const struct options *options, const bool first_time)
       ASSERT (!options->inetd);
       if (daemon (options->cd_dir != NULL, options->log) < 0)
 	msg (M_ERR, "daemon() failed");
+      if (options->log)
+	set_std_files_to_null (true);
       ret = true;
     }
   return ret;
@@ -565,26 +568,36 @@ do_init_route_list (const struct options *options,
  * Called after all initialization has been completed.
  */
 void
-initialization_sequence_completed (struct context *c, const bool errors)
+initialization_sequence_completed (struct context *c, const unsigned int flags)
 {
   static const char message[] = "Initialization Sequence Completed";
 
   /* If we delayed UID/GID downgrade or chroot, do it now */
   do_uid_gid_chroot (c, true);
 
-  if (errors)
+  /* Test if errors */
+  if (flags & ISC_ERRORS)
+#ifdef WIN32
+    msg (M_INFO, "%s With Errors ( see http://openvpn.net/faq.html#dhcpclientserv )", message);
+#else
     msg (M_INFO, "%s With Errors", message);
+#endif
   else
     msg (M_INFO, "%s", message);
 
+  /* Flag remote_list that we initialized */
+  if ((flags & (ISC_ERRORS|ISC_SERVER)) == 0 && c->c1.remote_list && c->c1.remote_list->len > 1)
+    c->c1.remote_list->no_advance = true;
+
 #ifdef ENABLE_MANAGEMENT
+  /* Tell management interface that we initialized */
   if (management)
     {
       in_addr_t tun_local = 0;
       const char *detail = "SUCCESS";
       if (c->c1.tuntap)
 	tun_local = c->c1.tuntap->local;
-      if (errors)
+      if (flags & ISC_ERRORS)
 	detail = "ERROR";
       management_set_state (management,
 			    OPENVPN_STATE_CONNECTED,
@@ -917,12 +930,12 @@ do_up (struct context *c, bool pulled_options, unsigned int option_types_found)
 	    }
 	  else
 	    {
-	      initialization_sequence_completed (c, false); /* client/p2p --route-delay undefined */
+	      initialization_sequence_completed (c, 0); /* client/p2p --route-delay undefined */
 	    }
 	}
       else if (c->options.mode == MODE_POINT_TO_POINT)
 	{
-	  initialization_sequence_completed (c, false); /* client/p2p restart with --persist-tun */
+	  initialization_sequence_completed (c, 0); /* client/p2p restart with --persist-tun */
 	}
 	
       c->c2.do_up_ran = true;
@@ -963,8 +976,19 @@ do_deferred_options (struct context *c, const unsigned int found)
       do_init_timers (c, true);
       msg (D_PUSH, "OPTIONS IMPORT: timers and/or timeouts modified");
     }
+
+#ifdef ENABLE_OCC
   if (found & OPT_P_EXPLICIT_NOTIFY)
-    msg (D_PUSH, "OPTIONS IMPORT: explicit notify parm(s) modified");
+    {
+      if (c->options.proto != PROTO_UDPv4 && c->options.explicit_exit_notification)
+	{
+	  msg (D_PUSH, "OPTIONS IMPORT: --explicit-exit-notify can only be used with --proto udp");
+	  c->options.explicit_exit_notification = 0;
+	}
+      else
+	msg (D_PUSH, "OPTIONS IMPORT: explicit notify parm(s) modified");
+    }
+#endif
 
   if (found & OPT_P_SHAPER)
     {
@@ -988,11 +1012,16 @@ do_deferred_options (struct context *c, const unsigned int found)
  * Possible hold on initialization
  */
 static bool
-do_hold (void)
+do_hold (struct context *c)
 {
 #ifdef ENABLE_MANAGEMENT
   if (management)
     {
+      /* if c is defined, daemonize before hold */
+      if (c && c->options.daemon && management_would_hold (management))
+	do_init_first_time (c);
+
+      /* block until management hold is released */
       if (management_hold (management))
 	return true;
     }
@@ -1004,7 +1033,7 @@ do_hold (void)
  * Sleep before restart.
  */
 static void
-socket_restart_pause (const struct context *c)
+socket_restart_pause (struct context *c)
 {
   bool proxy = false;
   int sec = 2;
@@ -1037,7 +1066,12 @@ socket_restart_pause (const struct context *c)
     sec = 0;
 #endif
 
-  if (do_hold ())
+#if P2MP
+  if (auth_retry_get () == AR_NOINTERACT)
+    sec = 10;
+#endif
+
+  if (do_hold (NULL))
     sec = 0;
 
   if (sec)
@@ -1056,7 +1090,7 @@ do_startup_pause (struct context *c)
   if (!c->first_time)
     socket_restart_pause (c);
   else
-    do_hold ();
+    do_hold (NULL);
 }
 
 /*
@@ -1221,6 +1255,28 @@ do_init_crypto_tls_c1 (struct context *c)
        * SSL context.
        */
       c->c1.ks.ssl_ctx = init_ssl (options);
+      if (!c->c1.ks.ssl_ctx)
+	{
+#if P2MP
+	  switch (auth_retry_get ())
+	    {
+	    case AR_NONE:
+	      msg (M_FATAL, "Error: private key password verification failed");
+	      break;
+	    case AR_INTERACT:
+	      ssl_purge_auth ();
+	    case AR_NOINTERACT:
+	      c->sig->signal_received = SIGUSR1; /* SOFT-SIGUSR1 -- Password failure error */
+	      break;
+	    default:
+	      ASSERT (0);
+	    }
+	  c->sig->signal_text = "private-key-password-failure";
+	  return;
+#else
+	  msg (M_FATAL, "Error: private key password verification failed");
+#endif
+	}
 
       /* Get cipher & hash algorithms */
       init_key_type (&c->c1.ks.key_type, options->ciphername,
@@ -1257,6 +1313,8 @@ do_init_crypto_tls (struct context *c, const unsigned int flags)
 
   /* initialize persistent component */
   do_init_crypto_tls_c1 (c);
+  if (IS_SIG (c))
+    return;
 
   /* Sanity check on IV, sequence number, and cipher mode options */
   check_replay_iv_consistency (&c->c1.ks.key_type, options->replay,
@@ -1487,7 +1545,7 @@ do_option_warnings (struct context *c)
 {
   const struct options *o = &c->options;
 
-#if 1 // JYFIXME -- port warning
+#if 1 /* JYFIXME -- port warning */
   if (!o->port_option_used && (o->local_port == OPENVPN_PORT && o->remote_port == OPENVPN_PORT))
     msg (M_WARN, "IMPORTANT: OpenVPN's default port number is now %d, based on an official port number assignment by IANA.  OpenVPN 2.0-beta16 and earlier used 5000 as the default port.",
 	 OPENVPN_PORT);
@@ -1508,6 +1566,10 @@ do_option_warnings (struct context *c)
     {
       if (o->duplicate_cn && o->client_config_dir)
 	msg (M_WARN, "WARNING: using --duplicate-cn and --client-config-dir together is probably not what you want");
+      if (o->duplicate_cn && o->ifconfig_pool_persist_filename)
+	msg (M_WARN, "WARNING: --ifconfig-pool-persist will not work with --duplicate-cn");
+      if (!o->keepalive_ping || !o->keepalive_timeout)
+	msg (M_WARN, "WARNING: --keepalive option is missing from server config");
     }
 #endif
 #endif
@@ -1523,7 +1585,7 @@ do_option_warnings (struct context *c)
       && !o->tls_verify
       && !o->tls_remote
       && !(o->ns_cert_type & NS_SSL_SERVER))
-    msg (M_WARN, "WARNING: No server certificate verification method has been enabled.  See http://openvpn.sourceforge.net/howto.html#mitm for more info.");
+    msg (M_WARN, "WARNING: No server certificate verification method has been enabled.  See http://openvpn.net/howto.html#mitm for more info.");
 #endif
 
 #endif
@@ -1715,11 +1777,11 @@ do_compute_occ_strings (struct context *c)
 #ifdef USE_CRYPTO
   msg (D_SHOW_OCC_HASH, "Local Options hash (VER=%s): '%s'",
        options_string_version (c->c2.options_string_local, &gc),
-       md5sum (c->c2.options_string_local,
+       md5sum ((uint8_t*)c->c2.options_string_local,
 	       strlen (c->c2.options_string_local), 9, &gc));
   msg (D_SHOW_OCC_HASH, "Expected Remote Options hash (VER=%s): '%s'",
        options_string_version (c->c2.options_string_remote, &gc),
-       md5sum (c->c2.options_string_remote,
+       md5sum ((uint8_t*)c->c2.options_string_remote,
 	       strlen (c->c2.options_string_remote), 9, &gc));
 #endif
 
@@ -1742,7 +1804,7 @@ do_compute_occ_strings (struct context *c)
 static void
 do_init_first_time (struct context *c)
 {
-  if (c->first_time)
+  if (c->first_time && !c->c2.did_we_daemonize)
     {
       /* get user and/or group that we want to setuid/setgid to */
       c->c2.uid_gid_specified =
@@ -1882,13 +1944,6 @@ do_close_fragment (struct context *c)
     }
 }
 #endif
-
-static void
-do_close_syslog (struct context *c)
-{
-  if (!(c->sig->signal_received == SIGUSR1))
-    close_syslog ();
-}
 
 /*
  * Open and close our event objects.
@@ -2139,7 +2194,7 @@ open_management (struct context *c)
 	    }
 
 	  /* possible wait */
-	  do_hold ();
+	  do_hold (c);
 	  if (IS_SIG (c))
 	    {
 	      msg (M_WARN, "Signal received from management interface, exiting");
@@ -2177,10 +2232,22 @@ uninit_management_callback (void)
 }
 
 /*
+ * Initialize a tunnel instance, handle pre and post-init
+ * signal settings.
+ */
+void
+init_instance_handle_signals (struct context *c, const struct env_set *env, const unsigned int flags)
+{
+  pre_init_signal_catch ();
+  init_instance (c, env, flags);
+  post_init_signal_catch ();
+}
+
+/*
  * Initialize a tunnel instance.
  */
 void
-init_instance (struct context *c, const struct env_set *env, unsigned int flags)
+init_instance (struct context *c, const struct env_set *env, const unsigned int flags)
 {
   const struct options *options = &c->options;
   const bool child = (c->mode == CM_CHILD_TCP || c->mode == CM_CHILD_UDP);
@@ -2188,6 +2255,11 @@ init_instance (struct context *c, const struct env_set *env, unsigned int flags)
 
   /* init garbage collection level */
   gc_init (&c->c2.gc);
+
+  /* signals caught here will abort */
+  c->sig->signal_received = 0;
+  c->sig->signal_text = NULL;
+  c->sig->hard = false;
 
   /* link_socket_mode allows CM_CHILD_TCP
      instances to inherit acceptable fds
@@ -2199,15 +2271,6 @@ init_instance (struct context *c, const struct env_set *env, unsigned int flags)
       else if (c->mode == CM_CHILD_TCP)
 	link_socket_mode = LS_MODE_TCP_ACCEPT_FROM;
     }
-
-  /* signals caught here will abort */
-  c->sig->signal_received = 0;
-  c->sig->signal_text = NULL;
-  c->sig->hard = false;
-
-  /* before full initialization, received signals will trigger exit */
-  if (c->first_time)
-    pre_init_signal_catch ();
 
   /* should we disable paging? */
   if (c->first_time && options->mlock)
@@ -2287,6 +2350,8 @@ init_instance (struct context *c, const struct env_set *env, unsigned int flags)
     else if (child)
       crypto_flags = CF_INIT_TLS_MULTI;
     do_init_crypto (c, crypto_flags);
+    if (IS_SIG (c))
+      goto sig;
   }
 
 #ifdef USE_LZO
@@ -2338,10 +2403,6 @@ init_instance (struct context *c, const struct env_set *env, unsigned int flags)
 
   /* do one-time inits, and possibily become a daemon here */
   do_init_first_time (c);
-
-  /* catch signals */
-  if (c->first_time)
-    post_init_signal_catch ();
 
   /*
    * Actually do UID/GID downgrade, and chroot, if requested.
@@ -2422,10 +2483,6 @@ close_instance (struct context *c)
 
 	/* close --ifconfig-pool-persist obj */
 	do_close_ifconfig_pool_persist (c);
-
-	/* close syslog */
-	if (c->mode == CM_P2P || c->mode == CM_TOP)
-	  do_close_syslog (c);
 
 	/* garbage collect */
 	gc_free (&c->c2.gc);

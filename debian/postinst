@@ -21,8 +21,9 @@ case "$1" in
     fi
     # Do we want to move the old S20 symlinks to S18 ones?
     if [ -n "$2" ] ; then
-      if `dpkg --compare-versions "$2" lt 1.4.3-2`; then
+      if dpkg --compare-versions "$2" lt 2.0.2-1 ; then
         db_get openvpn/change_init || RET="false"
+        db_get openvpn/change_init2
         if [ "$RET" = "true" ]; then
           /usr/sbin/update-rc.d -f openvpn remove > /dev/null
         fi
@@ -35,9 +36,9 @@ db_stop
 
 if [ -x "/etc/init.d/openvpn" ]; then
 	if [ -x /usr/sbin/invoke-rc.d ]; then
-		invoke-rc.d openvpn restart
+		invoke-rc.d openvpn cond-restart || invoke-rc.d openvpn restart
 	else
-		/etc/init.d/openvpn restart
+		/etc/init.d/openvpn cond-restart || /etc/init.d/openvpn restart
 	fi
 fi
 

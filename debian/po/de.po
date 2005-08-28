@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openvpn_1.99+2.beta17-1_de\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-11-12 16:17+0100\n"
+"POT-Creation-Date: 2005-08-28 14:07+0200\n"
 "PO-Revision-Date: 2004-11-14 17:48+0100\n"
 "Last-Translator: Erik Schanze <mail@erikschanze.de>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
@@ -33,30 +33,19 @@ msgstr "Wollen Sie OpenVPN eher starten?"
 #. Type: boolean
 #. Description
 #: ../templates:4
+#, fuzzy
 msgid ""
-"Previous versions of openvpn started at the same time than most of other "
+"Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
-"it may unavailable when they started. Newer versions of the openvpn package "
-"will start sooner. (i.e. a S18openvpn link in rc[235].d instead of a "
-"S20openvpn)"
+"it may have been unavailable when they started. Newer versions of the "
+"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"instead of a S20openvpn)"
 msgstr ""
 "Frühere Versionen von OpenVPN starteten zur selben Zeit wie die meisten "
 "anderen Dienste. Das bedeutete, viele dieser Dienste konnten OpenVPN nicht "
 "benutzen, weil es noch nicht verfügbar war, als sie starteten. Neuere "
 "Versionen des Pakets OpenVPN starten eher. (z. B. ein Verweis S18openvpn in "
 "den Verzeichnissen /etc/rc[235].d anstelle von S20openvpn)"
-
-#. Type: boolean
-#. Description
-#: ../templates:4
-msgid ""
-"If you accept here, the package upgrade will make this change for you. If "
-"you refuse, nothing will change, and openvpn will be working just like it "
-"did before."
-msgstr ""
-"Wenn Sie hier zustimmen, richtet es das Installationsprogramm für Sie ein. "
-"Wenn Sie ablehnen, wird nichts geändert und OpenVPN wird funktionieren wie "
-"vorher."
 
 #. Type: boolean
 #. Description
@@ -137,12 +126,48 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../templates:42
+#, fuzzy
 msgid ""
-"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
 "Verwenden Sie die Option 'port 5000', wenn Sie die alte Einstellung behalten "
-"wollen oder kontrollieren Sie Ihre Firewallregeln und lassen das neue Port zu, "
-"damit die Einstellung funktioniert."
+"wollen oder kontrollieren Sie Ihre Firewallregeln und lassen das neue Port "
+"zu, damit die Einstellung funktioniert."
 
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid "Would you like to stop openvpn later?"
+msgstr "Wollen Sie OpenVPN eher starten?"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid ""
+"Previous versions of openvpn stopped at the same time as most of other "
+"services. This meant that some of services stopping later couldn't use  "
+"openvpn since it may have been stopped before them. Newer versions of the "
+"openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
+"[06].d instead of a K20openvpn)"
+msgstr ""
+"Frühere Versionen von OpenVPN starteten zur selben Zeit wie die meisten "
+"anderen Dienste. Das bedeutete, viele dieser Dienste konnten OpenVPN nicht "
+"benutzen, weil es noch nicht verfügbar war, als sie starteten. Neuere "
+"Versionen des Pakets OpenVPN starten eher. (z. B. ein Verweis S18openvpn in "
+"den Verzeichnissen /etc/rc[235].d anstelle von S20openvpn)"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+msgid ""
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
+msgstr ""
+"Wenn Sie hier zustimmen, richtet es das Installationsprogramm für Sie ein. "
+"Wenn Sie ablehnen, wird nichts geändert und OpenVPN wird funktionieren wie "
+"vorher."

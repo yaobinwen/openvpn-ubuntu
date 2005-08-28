@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openvpn 1.99+2.beta17-1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-11-12 16:17+0100\n"
+"POT-Creation-Date: 2005-08-28 14:07+0200\n"
 "PO-Revision-Date: 2004-11-25 14:55+0900\n"
 "Last-Translator: Hideki Yamane <henrich@samba.gr.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
@@ -33,29 +33,19 @@ msgstr "openvpn をすぐに起動しますか?"
 #. Type: boolean
 #. Description
 #: ../templates:4
+#, fuzzy
 msgid ""
-"Previous versions of openvpn started at the same time than most of other "
+"Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
-"it may unavailable when they started. Newer versions of the openvpn package "
-"will start sooner. (i.e. a S18openvpn link in rc[235].d instead of a "
-"S20openvpn)"
+"it may have been unavailable when they started. Newer versions of the "
+"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"instead of a S20openvpn)"
 msgstr ""
 "openvpn の以前のバージョンでは他の大半のサービスと同時に起動していました。こ"
 "れは、これらのサービスの大半は起動時に openvpn が利用できない状態のため、"
 "openvpn を使えないのを意味します。新しいバージョンの openvpn パッケージはすぐ"
 "に起動するようになっています。(つまり、rc[235].d で S20openvpn ではなく "
 "S18openvpn にリンクしています)"
-
-#. Type: boolean
-#. Description
-#: ../templates:4
-msgid ""
-"If you accept here, the package upgrade will make this change for you. If "
-"you refuse, nothing will change, and openvpn will be working just like it "
-"did before."
-msgstr ""
-"ここで「はい」と答えると、パッケージのアップグレードでこの変更を行います。"
-"「いいえ」と答えた場合、何も変更されず、openvpn は以前同様に動作します。"
 
 #. Type: boolean
 #. Description
@@ -135,11 +125,47 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../templates:42
+#, fuzzy
 msgid ""
-"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
 "以前のポート設定をそのまま使い続けたい場合は 'port 5000' オプションを利用する"
 "か、ファイアウォールのルールを見直し、新しい標準ポート設定で動作するように許"
 "可を行ってください。"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid "Would you like to stop openvpn later?"
+msgstr "openvpn をすぐに起動しますか?"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid ""
+"Previous versions of openvpn stopped at the same time as most of other "
+"services. This meant that some of services stopping later couldn't use  "
+"openvpn since it may have been stopped before them. Newer versions of the "
+"openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
+"[06].d instead of a K20openvpn)"
+msgstr ""
+"openvpn の以前のバージョンでは他の大半のサービスと同時に起動していました。こ"
+"れは、これらのサービスの大半は起動時に openvpn が利用できない状態のため、"
+"openvpn を使えないのを意味します。新しいバージョンの openvpn パッケージはすぐ"
+"に起動するようになっています。(つまり、rc[235].d で S20openvpn ではなく "
+"S18openvpn にリンクしています)"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+msgid ""
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
+msgstr ""
+"ここで「はい」と答えると、パッケージのアップグレードでこの変更を行います。"
+"「いいえ」と答えた場合、何も変更されず、openvpn は以前同様に動作します。"

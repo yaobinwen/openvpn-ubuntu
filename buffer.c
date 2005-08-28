@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -255,7 +254,7 @@ convert_to_one_line (struct buffer *buf)
 void
 buf_write_string_file (const struct buffer *buf, const char *filename, int fd)
 {
-  const int len = strlen (BPTR (buf));
+  const int len = strlen ((char *) BPTR (buf));
   const int size = write (fd, BPTR (buf), len);
   if (size != len)
     msg (M_ERR, "Write error on file '%s'", filename);
@@ -283,10 +282,10 @@ gc_malloc (size_t size, bool clear, struct gc_arena *a)
 #endif
       check_malloc_return (e);
       ret = (char *) e + sizeof (struct gc_entry);
-      //mutex_lock_static (L_GC_MALLOC);
+      /*mutex_lock_static (L_GC_MALLOC);*/
       e->next = a->list;
       a->list = e;
-      //mutex_unlock_static (L_GC_MALLOC);
+      /*mutex_unlock_static (L_GC_MALLOC);*/
     }
   else
     {
@@ -308,10 +307,10 @@ void
 x_gc_free (struct gc_arena *a)
 {
   struct gc_entry *e;
-  //mutex_lock_static (L_GC_MALLOC);
+  /*mutex_lock_static (L_GC_MALLOC);*/
   e = a->list;
   a->list = NULL;
-  //mutex_unlock_static (L_GC_MALLOC);
+  /*mutex_unlock_static (L_GC_MALLOC);*/
   
   while (e != NULL)
     {
@@ -366,7 +365,7 @@ buf_rmtail (struct buffer *buf, uint8_t remove)
 void
 buf_null_terminate (struct buffer *buf)
 {
-  char *last = BLAST (buf);
+  char *last = (char *) BLAST (buf);
   if (last && *last == '\0') /* already terminated? */
     return;
 
@@ -385,7 +384,7 @@ buf_chomp (struct buffer *buf)
 {
   while (true)
     {
-      char *last = BLAST (buf);
+      char *last = (char *) BLAST (buf);
       if (!last)
 	break;
       if (char_class (*last, CC_CRLF|CC_NULL))
@@ -476,9 +475,9 @@ string_alloc_buf (const char *str, struct gc_arena *gc)
   ASSERT (str);
 
 #ifdef DMALLOC
-  buf_set_read (&buf, string_alloc_debug (str, NULL, file, line), strlen (str) + 1);
+  buf_set_read (&buf, (uint8_t*) string_alloc_debug (str, gc, file, line), strlen (str) + 1);
 #else
-  buf_set_read (&buf, string_alloc (str, NULL), strlen (str) + 1);
+  buf_set_read (&buf, (uint8_t*) string_alloc (str, gc), strlen (str) + 1);
 #endif
 
   if (buf.len > 0) /* Don't count trailing '\0' as part of length */
@@ -513,11 +512,11 @@ buf_string_compare_advance (struct buffer *src, const char *match)
 }
 
 int
-buf_substring_len (const struct buffer *buf, char delim)
+buf_substring_len (const struct buffer *buf, int delim)
 {
   int i = 0;
   struct buffer tmp = *buf;
-  char c;
+  int c;
 
   while ((c = buf_read_u8 (&tmp)) >= 0)
     {

@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -92,6 +91,7 @@
 #define D_PLUGIN             LOGLEV(3, 40, 0)        /* show plugin calls */
 #define D_MANAGEMENT         LOGLEV(3, 41, 0)        /* show --management info */
 #define D_SCHED_EXIT         LOGLEV(3, 42, 0)        /* show arming of scheduled exit */
+#define D_ROUTE_QUOTA        LOGLEV(3, 43, 0)        /* show route quota exceeded messages */
 
 #define D_SHOW_PARMS         LOGLEV(4, 50, 0)        /* show all parameters on program initiation */
 #define D_SHOW_OCC           LOGLEV(4, 51, 0)        /* show options compatibility string */

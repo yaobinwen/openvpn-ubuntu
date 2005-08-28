@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,6 +47,12 @@
 #endif
 
 #include "memdbg.h"
+
+#if SYSLOG_CAPABILITY
+#ifndef LOG_OPENVPN
+#define LOG_OPENVPN LOG_DAEMON
+#endif
+#endif
 
 /* Globals */
 unsigned int x_debug_level; /* GLOBAL */
@@ -382,7 +387,7 @@ void
 out_of_memory (void)
 {
   fprintf (stderr, PACKAGE_NAME ": Out of Memory\n");
-  openvpn_exit (OPENVPN_EXIT_STATUS_ERROR);
+  exit (1);
 }
 
 void
@@ -394,7 +399,7 @@ open_syslog (const char *pgmname, bool stdio_to_null)
       if (!use_syslog)
 	{
 	  pgmname_syslog = string_alloc (pgmname ? pgmname : PACKAGE, NULL);
-	  openlog (pgmname_syslog, LOG_PID, LOG_DAEMON);
+	  openlog (pgmname_syslog, LOG_PID, LOG_OPENVPN);
 	  use_syslog = true;
 
 	  /* Better idea: somehow pipe stdout/stderr output to msg() */
@@ -650,17 +655,25 @@ msg_thread_uninit (void)
  */
 
 void
-openvpn_exit (int status)
+openvpn_exit (const int status)
 {
+#ifdef ENABLE_PLUGIN
+  void plugin_abort (void);
+#endif
+
 #ifdef WIN32
   uninit_win32 ();
 #endif
 
+  close_syslog ();
+
+#ifdef ENABLE_PLUGIN
+  plugin_abort ();
+#endif
+
 #ifdef ABORT_ON_ERROR
   if (status == OPENVPN_EXIT_STATUS_ERROR)
-    {
-      abort ();
-    }
+    abort ();
 #endif
 
   if (status == OPENVPN_EXIT_STATUS_GOOD)

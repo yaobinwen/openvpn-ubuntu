@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -495,12 +494,13 @@ static void
 ep_del (struct event_set *es, event_t event)
 {
   struct epoll_event ev;
-
   struct ep_set *eps = (struct ep_set *) es;
+
+  dmsg (D_EVENT_WAIT, "EP_DEL ev=%d", (int)event);
+
   ASSERT (!eps->fast);
   CLEAR (ev);
-  if (epoll_ctl (eps->epfd, EPOLL_CTL_DEL, event, &ev) < 0)
-    msg (M_ERR, "EVENT: epoll_ctl EPOLL_CTL_DEL epfd=%d fd=%d failed", (int)eps->epfd, (int)event);
+  epoll_ctl (eps->epfd, EPOLL_CTL_DEL, event, &ev);
 }
 
 static void
@@ -641,6 +641,9 @@ po_del (struct event_set *es, event_t event)
 {
   struct po_set *pos = (struct po_set *) es;
   int i;
+
+  dmsg (D_EVENT_WAIT, "PO_DEL ev=%d", (int)event);
+
   ASSERT (!pos->fast);
   for (i = 0; i < pos->n_events; ++i)
     {
@@ -750,6 +753,10 @@ po_wait (struct event_set *es, const struct timeval *tv, struct event_set_return
 	      ++out;
 	      ++j;
 	    }
+	  else if (pfdp->revents)
+	    {
+	      msg (D_EVENT_ERRORS, "Error: poll: unknown revents=0x%04x", (unsigned int)pfdp->revents);
+	    }
 	  ++pfdp;
 	}
       return j;
@@ -835,7 +842,7 @@ se_del (struct event_set *es, event_t event)
   struct se_set *ses = (struct se_set *) es;
   ASSERT (!ses->fast);
 
-  dmsg (D_EVENT_WAIT, "SE_DEL ev=%d", event);
+  dmsg (D_EVENT_WAIT, "SE_DEL ev=%d", (int)event);
 
   if (event >= 0 && event < ses->capacity)
     {
@@ -1000,7 +1007,7 @@ event_set_init_simple (int *maxevents, unsigned int flags)
 #ifdef WIN32
   ret = we_init (maxevents, flags);
 #elif POLL && SELECT
-#if 0 // Define to 1 if EVENT_METHOD_US_TIMEOUT should cause select to be favored over poll
+#if 0 /* Define to 1 if EVENT_METHOD_US_TIMEOUT should cause select to be favored over poll */
   if (flags & EVENT_METHOD_US_TIMEOUT)
     ret = se_init (maxevents, flags); 
 #endif

@@ -378,6 +378,9 @@
 /* Path to iproute tool */
 #undef IPROUTE_PATH
 
+/* Use lzo/ directory prefix for LZO header files (for LZO 2.0) */
+#undef LZO_HEADER_DIR
+
 /* Name of package */
 #undef PACKAGE
 

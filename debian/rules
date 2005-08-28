@@ -24,7 +24,7 @@ endif
 config.status: configure
 	dh_testdir
 	# Add here commands to configure the package.
-	./configure --enable-pthread --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man
+	./configure --enable-pthread --enable-password-save --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man
 
 
 build: build-stamp
@@ -70,12 +70,13 @@ install: build
 	install -m 755 sample-scripts/verify-cn $(CURDIR)/debian/openvpn/usr/share/openvpn
 	install -m 755 debian/openvpn.if-up.d $(CURDIR)/debian/openvpn/etc/network/if-up.d/openvpn
 	install -m 755 debian/openvpn.if-down.d $(CURDIR)/debian/openvpn/etc/network/if-down.d/openvpn
-	#instal plugins
+	#install plugins
 	install -m 644 plugin/auth-pam/openvpn-auth-pam.so $(CURDIR)/debian/openvpn/usr/lib/openvpn
 	install -m 644 plugin/down-root/openvpn-down-root.so $(CURDIR)/debian/openvpn/usr/lib/openvpn
 	install -m 644 plugin/auth-pam/README $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/README.auth-pam
 	install -m 644 plugin/down-root/README $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/README.down-root
-
+	# intall plugin headers 
+	install -m 644 openvpn-plugin.h $(CURDIR)/debian/openvpn/usr/include/openvpn/openvpn-plugin.h
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -88,12 +89,14 @@ binary-arch: build install
 	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples
+	## remove windoze stuff
+	rm -rf $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/examples/easy-rsa/Windows
 	dh_installmenu
 #	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-	dh_installinit --no-start -- defaults 16 20
+	dh_installinit --no-start -- defaults 16 80
 	dh_installcron
 	dh_installman
 	dh_installinfo
@@ -101,7 +104,7 @@ binary-arch: build install
 	dh_installchangelogs ChangeLog
 	dh_link
 	dh_strip
-	dh_compress
+	dh_compress --exclude=openssl.cnf
 	dh_fixperms
 #	dh_makeshlibs
 	dh_installdeb

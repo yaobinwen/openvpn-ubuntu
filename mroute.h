@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -82,7 +81,7 @@ struct mroute_addr {
  * Used to help maintain CIDR routing table.
  */
 struct mroute_helper {
-  //MUTEX_DEFINE (mutex);
+  /*MUTEX_DEFINE (mutex);*/
   unsigned int cache_generation; /* incremented when route added */
   int ageable_ttl_secs;          /* host route cache entry time-to-live*/
   int n_net_len;                 /* length of net_len array */
@@ -119,13 +118,13 @@ void mroute_helper_del_iroute (struct mroute_helper *mh, const struct iroute *ir
 static inline void
 mroute_helper_lock (struct mroute_helper *mh)
 {
-  //mutex_lock (&mh->mutex);
+  /*mutex_lock (&mh->mutex);*/
 }
 
 static inline void
 mroute_helper_unlock (struct mroute_helper *mh)
 {
-  //mutex_unlock (&mh->mutex);
+  /*mutex_unlock (&mh->mutex);*/
 }
 
 static inline bool

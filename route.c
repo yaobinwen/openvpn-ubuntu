@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -660,6 +659,16 @@ add_route (struct route *r, const struct tuntap *tt, unsigned int flags, const s
   netmask = print_in_addr_t (r->netmask, 0, &gc);
   gateway = print_in_addr_t (r->gateway, 0, &gc);
 
+  /*
+   * Filter out routes which are essentially no-ops
+   */
+  if (r->network == r->gateway && r->netmask == 0xFFFFFFFF)
+    {
+      msg (M_INFO, PACKAGE_NAME " ROUTE: omitted no-op route: %s/%s -> %s",
+	   network, netmask, gateway);
+      goto done;
+    }
+
 #if defined(TARGET_LINUX)
 #ifdef CONFIG_FEATURE_IPROUTE
   buf_printf (&buf, IPROUTE_PATH " route add %s/%d via %s",
@@ -781,6 +790,7 @@ add_route (struct route *r, const struct tuntap *tt, unsigned int flags, const s
   msg (M_FATAL, "Sorry, but I don't know how to do 'route' commands on this operating system.  Try putting your routes in a --route-up script");
 #endif
 
+ done:
   r->defined = status;
   gc_free (&gc);
 }
@@ -819,9 +829,11 @@ delete_route (const struct route *r, const struct tuntap *tt, unsigned int flags
   system_check (BSTR (&buf), es, 0, "ERROR: Linux route delete command failed");
 
 #elif defined (WIN32)
-
-  buf_printf (&buf, ROUTE_PATH " DELETE %s",
-	      network);
+  
+  buf_printf (&buf, ROUTE_PATH " DELETE %s MASK %s %s",
+	      network,
+              netmask,
+              gateway);
 
   msg (D_ROUTE, "%s", BSTR (&buf));
 
@@ -1112,8 +1124,19 @@ add_route_ipapi (const struct route *r, const struct tuntap *tt)
       if (status == NO_ERROR)
 	ret = true;
       else
-	msg (M_WARN, "ROUTE: route addition failed using CreateIpForwardEntry: %s",
-	     strerror_win32 (status, &gc));
+	{
+	  /* failed, try a different forward type (--redirect-gateway over RRAS seems to need this) */
+	  fr.dwForwardType = 3;  /* the next hop is the final dest */
+
+	  status = CreateIpForwardEntry (&fr);
+
+	  if (status == NO_ERROR)
+	    ret = true;
+	  else
+	    msg (M_WARN, "ROUTE: route addition failed using CreateIpForwardEntry: %s [if_index=%u]",
+		 strerror_win32 (status, &gc),
+		 (unsigned int)if_index);
+	}
     }
 
   gc_free (&gc);
@@ -1357,6 +1380,7 @@ get_default_gateway (in_addr_t *ret)
     {
       warn("writing to routing socket");
       gc_free (&gc);
+      close(s);
       return false;
     }
 
@@ -1364,6 +1388,7 @@ get_default_gateway (in_addr_t *ret)
     l = read(s, (char *)&m_rtmsg, sizeof(m_rtmsg));
   } while (l > 0 && (rtm.rtm_seq != seq || rtm.rtm_pid != pid));
                         
+  close(s);
 
   rtm_aux = &rtm;
 
@@ -1512,6 +1537,7 @@ get_default_gateway (in_addr_t *ret)
     {
       msg (M_WARN, "ROUTE: problem writing to routing socket");
       gc_free (&gc);
+      close(s);
       return false;
     }
 
@@ -1519,6 +1545,7 @@ get_default_gateway (in_addr_t *ret)
     l = read(s, (char *)&m_rtmsg, sizeof(m_rtmsg));
   } while (l > 0 && (rtm.rtm_seq != seq || rtm.rtm_pid != pid));
                         
+  close(s);
 
   rtm_aux = &rtm;
 
@@ -1667,6 +1694,7 @@ get_default_gateway (in_addr_t *ret)
     {
       warn("writing to routing socket");
       gc_free (&gc);
+      close(s);
       return false;
     }
 
@@ -1674,6 +1702,7 @@ get_default_gateway (in_addr_t *ret)
     l = read(s, (char *)&m_rtmsg, sizeof(m_rtmsg));
   } while (l > 0 && (rtm.rtm_seq != seq || rtm.rtm_pid != pid));
                         
+  close(s);
 
   rtm_aux = &rtm;
 

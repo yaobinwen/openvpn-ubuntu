@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -310,7 +309,10 @@ fragment_outgoing (struct fragment_master *f, struct buffer *buf,
   const char *errmsg = NULL;
   if (buf->len > 0)
     {
-      ASSERT (!f->outgoing.len);
+      /* The outgoing buffer should be empty so we can put new data in it */
+      if (f->outgoing.len)
+	msg (D_FRAG_ERRORS, "FRAG: outgoing buffer is not empty, len=[%d,%d]",
+	     buf->len, f->outgoing.len);
       if (buf->len > PAYLOAD_SIZE_DYNAMIC(frame)) /* should we fragment? */
 	{
 	  /*

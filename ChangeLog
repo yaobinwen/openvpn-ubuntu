@@ -1,7 +1,380 @@
 OpenVPN
-Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
 
-$Id: ChangeLog,v 1.111 2004/12/16 09:59:49 jimyonan Exp $
+$Id: ChangeLog,v 1.138 2005/08/24 09:08:54 jimyonan Exp $
+
+2005.08.25 -- Version 2.0.2
+
+* No change from 2.0.2-rc1.
+
+2005.08.24 -- Version 2.0.2-rc1
+
+* Fixed regression bug in Win32 installer, introduced in 2.0.1,
+  which incorrectly set OpenVPN service to autostart.
+* Don't package source code zip file in Windows installer
+  in order to reduce the size of the installer.  The source
+  zip file can always be downloaded separately if needed.
+* Fixed bug in route.c in FreeBSD, Darwin, OpenBSD and NetBSD
+  version of get_default_gateway.  Allocated socket for route
+  manipulation is never freed so number of mbufs continuously
+  grow and exhaust system resources after a while (Jaroslav Klaus).
+* Fixed bug where "--proto tcp-server --mode p2p --management
+  host port" would cause the management port to not respond until
+  the OpenVPN peer connects.
+* Modified pkitool script to be /bin/sh compatible (Johnny Lam).
+
+2005.08.16 -- Version 2.0.1
+	
+* Security Fix -- DoS attack against server when run with "verb 0" and
+  without "tls-auth".  If a client connection to the server fails
+  certificate verification, the OpenSSL error queue is not properly
+  flushed, which can result in another unrelated client instance on the
+  server seeing the error and responding to it, resulting in disconnection
+  of the unrelated client (CAN-2005-2531).
+* Security Fix -- DoS attack against server by authenticated client.
+  This bug presents a potential DoS attack vector against the server
+  which can only be initiated by a connected and authenticated client.
+  If the client sends a packet which fails to decrypt on the server,
+  the OpenSSL error queue is not properly flushed, which can result in
+  another unrelated client instance on the server seeing the error and
+  responding to it, resulting in disconnection of the unrelated client
+  (CAN-2005-2532).
+* Security Fix -- DoS attack against server by authenticated client.
+  A malicious client in "dev tap" ethernet bridging mode could
+  theoretically flood the server with packets appearing to come from
+  hundreds of thousands of different MAC addresses, causing the OpenVPN
+  process to deplete system virtual memory as it expands its internal
+  routing table.  A --max-routes-per-client directive has been added
+  (default=256) to limit the maximum number of routes in OpenVPN's
+  internal routing table which can be associated with a given client
+  (CAN-2005-2533).
+* Security Fix -- DoS attack against server by authenticated client.
+  If two or more client machines try to connect to the server at the
+  same time via TCP, using the same client certificate, and when
+  --duplicate-cn is not enabled on the server, a race condition can
+  crash the server with "Assertion failed at mtcp.c:411"
+  (CAN-2005-2534).
+* Fixed server bug where under certain circumstances, the client instance
+  object deletion function would try to delete iroutes which had never been
+  added in the first place, triggering "Assertion failed at mroute.c:349".
+* Added --auth-retry option to prevent auth errors from being fatal
+  on the client side, and to permit username/password requeries in case
+  of error.  Also controllable via new "auth-retry" management interface
+  command.  See man page for more info.
+* Added easy-rsa 2.0 scripts to the tarball in easy-rsa/2.0
+* Fixed bug in openvpn.spec where rpmbuild --define 'without_pam 1'
+  would fail to build.
+* Implement "make check" to perform loopback tests (Matthias Andree).
+
+2005.07.21 -- Version 2.0.1-rc7
+
+* Support LZO 2.01 which renamed its library to lzo2 (Matthias Andree).
+* Include linux/types.h before checking for linux/errqueue.h (Matthias
+  Andree).
+
+2005.07.15 -- Version 2.0.1-rc6
+
+* Commented out "user nobody" and "group nobody" in sample
+  client/server config files.
+* Allow '@' character to be used in --client-config-dir
+  file names.
+
+2005.07.04 -- Version 2.0.1-rc5
+
+* Windows version will log a for-further-info URL when
+  initialization sequence is completed with errors.
+* Added DLOPEN_PAM parameter to plugin/auth-pam/Makefile
+  to control whether auth-pam plugin links to PAM via
+  dlopen or -lpam.  By default, DLOPEN_PAM=1 so pre-existing
+  behavior should be preserved.  DLOPEN_PAM=0 is the preferred
+  setting to link via -lpam, but DLOPEN_PAM=1 works around
+  a bug in SuSE 9.1 (and possibly other distros as well)
+  where the PAM modules are not linked with -lpam.  See
+  thread on openvpn-devel for more discussion about this
+  patch (Simon Perreault).
+
+2005.06.15 -- Version 2.0.1-rc4
+
+* Support LZO 2.00, including changes to configure script to
+  autodetect LZO version.
+
+2005.06.12 -- Version 2.0.1-rc3
+
+* Fixed a bug which caused standard file handles to not be closed
+  after daemonization when --plugin and --daemon are used together,
+  and if the plugin initialization function forks (as does auth-pam
+  and down-root) (Simon Perreault).
+* Added client-side up/down scripts in contrib/pull-resolv-conf
+  for accepting server-pushed "dhcp-option DOMAIN" and "dhcp-option DNS"
+  on Linux/Unix systems (Jesse Adelman).
+* Fixed bug where if client-connect scripts/plugins were cascaded,
+  and one (but not all) of them returned an error status, there might
+  be cases where for an individual script/plugin, client-connect was
+  called but not client-disconnect.  The goal of this fix is to
+  ensure that if client-connect is called on a given client instance,
+  then client-disconnect will definitely be called.  A potential
+  complication of this fix is that when client-connect functions are
+  cascaded, it's possible that the client-disconnect function would
+  be called in cases where the related client-connect function returned
+  an error status.  This fix should not alter OpenVPN behavior when
+  scripts/plugins are not cascaded.
+* Changed the hard-to-reproduce "Assertion failed at fragment.c:312"
+  fatal error to a warning: "FRAG: outgoing buffer is not empty".
+  Need more info on how to reproduce this one.
+* When --duplicate-cn is used, the --ifconfig-pool allocation
+  algorithm will now allocate the first available IP address.
+* When --daemon and --management-hold are used together,
+  OpenVPN will daemonize before it enters the management hold state.
+
+2005.05.16 -- Version 2.0.1-rc2
+
+* Modified vendor test in openvpn.spec file to match against
+  "Mandrakesoft" in addition to "MandrakeSoft".
+* Using --iroute in a --client-config-dir file while in --dev tap
+  mode is not currently supported and will produce a warning
+  message. Fixed bug where in certain cases, in addition to
+  generating a warning message, this combination of options
+  would also produce a fatal assertion in mroute.c.
+* Pass --auth-user-pass username to server-side plugin without
+  performing any string remapping (plugins, unlike scripts,
+  don't get any security benefit from string remapping).
+  This is intended to fix an issue with openvpn-auth-pam/pam_winbind
+  where backslash characters in a username ('\') were being remapped
+  to underscore ('_').
+* Updated OpenSSL DLLs in Windows build to 0.9.7g.
+* Documented --explicit-exit-notify in man page.
+* --explicit-exit-notify seconds parameter defaults to 1 if
+  unspecified.
+
+2005.04.30 -- Version 2.0.1-rc1
+
+* Fixed bug where certain kinds of fatal errors after
+  initialization (such as port in use) would leave plugin
+  processes (such as openvpn-auth-pam) still running.
+* Added optional openvpn_plugin_abort_v1 plugin function for
+  closing initialized plugin objects in the event of a fatal
+  error by main OpenVPN process.
+* When the --remote list is > 1, and --resolv-retry is not
+  specified (meaning that it defaults to "infinite"), apply the
+  infinite timeout to the --remote list as a whole, but try each
+  list item only once before moving on to the next item.
+* Added new --syslog directive which redirects output
+  to syslog without requiring the use of the --daemon or --inetd
+  directives.
+* Added openvpn.spec option to allow RPM to be built with support
+  for passwords read from a file:
+  rpmbuild -tb [openvpn.x.tar.gz] --define 'with_password_save 1'
+
+2005.04.17 -- Version 2.0
+
+* Fixed minor options string typo in options.c.
+
+2005.04.10 -- Version 2.0-rc21
+
+* Change license description from "GPL Version 2 or (at your
+  option) any later version" to just "GPL Version 2".
+
+2005.04.04 -- Version 2.0-rc20
+
+* Dag Wieers has put together an OpenVPN/LZO binary RPM set with
+  excellent distro/version coverage for RH/EL/Fedora, though
+  using his own SPEC.  I modified openvpn.spec to follow some of
+  the same conventions such as putting sample scripts and doc
+  files in %doc rather than /usr/share/openvpn.
+* Minor change to init scripts to run the user-defined script
+  /etc/openvpn/openvpn-startup (if it exists) before any OpenVPN
+  configs are started, and to run /etc/openvpn/openvpn-shutdown
+  after all OpenVPN configs have been stopped.  The
+  openvpn-startup script can be used for stuff like
+  insmod tun.o, setting up firewall rules, or starting
+  ethernet bridges.
+
+2005.03.29 -- Version 2.0-rc19
+
+* Omit additions of routes where the network and
+  gateway are equal and the netmask is 255.255.255.255.
+  This can come up if you are using both
+  server/ifconfig-pool and client-config-dir with
+  ifconfig-push static addresses for some subset of clients
+  which directly reference the server IP address as the
+  remote endpoint.
+	
+2005.03.28 -- Version 2.0-rc18
+
+* Packaged Windows installer with OpenSSL 0.9.7f.
+* Built Windows installer with NSIS 2.06.
+
+2005.03.12 -- Version 2.0-rc17
+
+* "MANAGEMENT: CMD" log file output will now only occur
+  at --verb 7 or greater.
+* Added an optional name/value configuration list to
+  the openvpn-auth-pam plugin module argument list.  See
+  plugin/auth-pam/README for documentation. This is necessary
+  in order for openvpn-auth-pam to work with queries generated
+  by arbitrary PAM modules.
+* In both auth-pam and down-root plugins, in the forked process,
+  a read error on the parent process socket is no longer fatal.
+* MandrakeSoft liblzo1 RPM only Provides for a 'liblzo1'.
+  A conditional test of the vendor has been added to
+  Require the appropriately named 'lzo' (liblzo1 / lzo).
+  (Tom Walsh - http://openhardware.net)
+
+	
+2005.02.20 -- Version 2.0-rc16
+
+* Fixed bug introduced in rc13 where Windows service wrapper
+  would be installed with a startup type of Automatic.
+  This fix restores the previous behavior of installing
+  with a startup type of Manual.
+
+2005.02.19 -- Version 2.0-rc15
+
+* Added warning when --keepalive is not used in a server
+  configuration.
+* Don't include OpenSSL md4.h file if we are not building
+  NTLM proxy support (Waldemar Brodkorb).
+* Added easy-rsa/build-key-pkcs12 and
+  easy-rsa/Windows/build-key-pkcs12.bat scripts
+  (Mathias Sundman).
+
+2005.02.16 -- Version 2.0-rc14
+
+* Fixed small memory leak that occurs when --crl-verify
+  is used.
+* Upgraded Windows installer and .nsi script to NSIS 2.05
+  (Mathias Sundman).
+* Changed #include backslash usage in cryptoapi.c to use
+  forward slashes instead (Gisle Vanem).
+* Created easy-rsa/revoke-full to handle revocations in
+  a single step: (a) revoke crt, (b) regenerate CRL, and
+  (c) verify that revocation succeeded.
+* Renamed easy-rsa/Windows/revoke-key to revoke-full so
+  that both *nix and Windows scripts are equivalent.
+	
+2005.02.11 -- Version 2.0-rc13
+
+* Improve human-readability of local/remote options
+  diff, when inconsistencies are present.
+* For Windows easy-rsa, distribute vars.bat.sample and
+  openssl.cnf.sample, then copy them to their normal
+  filenames (without the .sample) when init-config.bat
+  is run.  This is to prevent OpenVPN upgrades from
+  wiping out vars.bat and openssl.cnf edits.
+* Modified service wrapper (Windows) to use a
+  case-insensitive search when scanning for .ovpn files
+  in \Program Files\OpenVPN\config.  Prior versions
+  required an all-lower-case .ovpn file extension.
+* Miscellaneous service wrapper code cleanup.
+* If --user/--group is used on Windows, treat it
+  as a no-op with a warning (this makes it easier to
+  distribute the same client config file to Windows
+  and *nix users).
+* Warn if --ifconfig-pool-persist is used with
+  --duplicate-cn.
+
+2005.02.05 -- Version 2.0-rc12
+
+* Removed some debugging code inadvertently included
+  in rc11 which would print the --auth-user-pass
+  username/password provided by clients in the server
+  logfile.
+* Client code for cycling through --remote list will
+  retry the last address which successfully authenticated
+  before moving on through the list.
+* Windows installer will now install sample configuration
+  files in \Program Files\OpenVPN\sample-configs as well
+  as generate a start menu shortcut to this directory.
+* Minor type change in buffer.[ch] to work around char-type
+  ambiguity bug.  Caused management interface lock-ups on
+  ARM when building with armv4b-hardhat-linux-gcc 2.95.3.
+
+2005.02.03 -- Version 2.0-rc11
+
+* Windows installer will now install easy-rsa directory
+  in \Program Files\OpenVPN
+* Allow syslog facility to be controlled at compile time,
+  e.g. -DLOG_OPENVPN=LOG_LOCAL6 (P Kern).
+* Changed certain shell scripts in distribution to use
+  #!/bin/sh rather than #!/bin/bash for better portability.
+* If --ifconfig-pool-persist seconds parameter is 0, treat
+  persist file as an allocation of fixed IP addresses
+  (previous versions took IP-to-common-name associations
+  from this list as hints, not mandatory static allocations).
+* Fixed bug on *nix where if --auth-user-pass and --log
+  were used together, the username prompt would be sent to
+  the log file rather than /dev/tty.
+* Spurious text in openvpn.8 detected by doclifter
+  (Eric S. Raymond).
+* Call closelog later on daemon kill so that process
+  exit message is written to syslog.
+
+2005.01.27 -- Version 2.0-rc10
+
+* When ./configure is run with plugins enabled (the default),
+  check whether or not dlopen exists in libc before testing
+  for libdl.  This is to fix an issue on FreeBSD and possibly
+  other OSes which bundle libdl functions in libc.
+* On Windows, filter initial WSAEINVAL warning which occurs
+  on the initial read attempt of an unbound socket.
+* The easy-rsa scripts build-key, build-key-pass, and
+  build-key-server will now chmod the .key file
+  to 0600.  This is in addition to the fact the generated
+  keys directory has always been similarly protected
+  (Pete Harlan).
+
+2005.01.23 -- Version 2.0-rc9
+
+* Fixed error "ROUTE: route addition failed using
+  CreateIpForwardEntry ..." on Windows when --redirect-gateway
+  is used over a RRAS internet link.
+* When using --route-method exe on Windows, include the
+  gateway parameter on route delete commands (Mathias Sundman).
+* Try not to do a hard reset (i.e. SIGHUP) when two
+  SIGUSR1 signals are received in close succession.
+* If the push list tries to grow beyond its buffer capacity,
+  the resulting error will be non-fatal.
+* To increase the push list capacity (must be done on both
+  client and server), increase TLS_CHANNEL_BUF_SIZE in
+  common.h (default=1024).
+	
+2005.01.15 -- Version 2.0-rc8
+
+* Fixed bug introduced in rc7 where options error
+  "--auth-user-pass requires --pull" might occur even
+  if --pull was correctly specified.
+* Changed management interface code to bind once
+  to TCP socket, rather than rebinding after every
+  client disconnect.
+* Added "disable" directive for client-config-dir
+  files.
+* Windows binary install is now distributed with
+  OpenSSL 0.9.7e.
+* Query the management interface for --http-proxy
+  username/password if authfile is set to "stdin".
+* Added current OpenVPN version number to "Unrecognized
+  option or missing parameter" error message.
+* Added "-extensions server" to "openssl req" command
+  in easy-rsa/build-key-server (Nir Yeffet).
+	
+2005.01.10 -- Version 2.0-rc7
+
+* Fixed bug in management interface which could cause
+  100% CPU utilization in --proto tcp-server mode
+  on all *nix OSes except for Linux 2.6.
+* --ifconfig-push now accepts DNS names as well as
+  IP addresses.
+* Added sanity check errors when --pull or
+  --auth-user-pass is used in an incorrect mode.
+* Updated man page entries for --client-connect and
+  --ifconfig-push.
+* Added "String Types and Remapping" section to man
+  page to consisely document the way which OpenVPN
+  may convert certain types of characters in strings
+  to ('_').
+* Modified bridging description in HOWTO to emphasize
+  the fact that bridging allows Windows file and print
+  sharing without a WINS server (Charles Duffy).
 
 2004.12.20 -- Version 2.0-rc6
 
@@ -12,7 +385,7 @@ $Id: ChangeLog,v 1.111 2004/12/16 09:59:49 jimyonan Exp $
   with "MULTI: Outgoing TUN queue full, dropped packet".
   So far the issue only seems to occur on Linux 2.2
   in --mode server --proto tcp mode.  It occurs when
-  the TUN/TAP driver locks up and refuses to except
+  the TUN/TAP driver locks up and refuses to accept
   new packet writes for a second or more.
 * Fixed bug where if a --client-config-dir file tried
   to include another file using "config", and if that
@@ -1393,7 +1766,7 @@ $Id: ChangeLog,v 1.111 2004/12/16 09:59:49 jimyonan Exp $
   style, (b) ISO C 1999 style, and (c) no support.
 * Removed generated files from CVS.  Note INSTALL
   file for new CVS build commands.
-* Changed all internal _* symbols to x_*
+* Changed certain internal symbol names
   for C standards compliance.
 * Added TUN/TAP open code to cycle dynamically
   through unit numbers until it finds a free

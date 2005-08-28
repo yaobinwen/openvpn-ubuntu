@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -45,6 +44,7 @@ struct ifconfig_pool_entry
   bool in_use;
   char *common_name;
   time_t last_release;
+  bool fixed;
 };
 
 struct ifconfig_pool
@@ -52,17 +52,19 @@ struct ifconfig_pool
   in_addr_t base;
   int size;
   int type;
+  bool duplicate_cn;
   struct ifconfig_pool_entry *list;
 };
 
 struct ifconfig_pool_persist
 {
   struct status_output *file;
+  bool fixed;
 };
 
 typedef int ifconfig_pool_handle;
 
-struct ifconfig_pool *ifconfig_pool_init (int type, in_addr_t start, in_addr_t end);
+struct ifconfig_pool *ifconfig_pool_init (int type, in_addr_t start, in_addr_t end, const bool duplicate_cn);
 
 void ifconfig_pool_free (struct ifconfig_pool *pool);
 

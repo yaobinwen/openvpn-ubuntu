@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-11-12 16:17+0100\n"
+"POT-Creation-Date: 2005-08-28 14:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,29 +35,17 @@ msgstr "¿Deseas ejecutar fwlogwatch mas pronto?"
 #: ../templates:4
 #, fuzzy
 msgid ""
-"Previous versions of openvpn started at the same time than most of other "
+"Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
-"it may unavailable when they started. Newer versions of the openvpn package "
-"will start sooner. (i.e. a S18openvpn link in rc[235].d instead of a "
-"S20openvpn)"
+"it may have been unavailable when they started. Newer versions of the "
+"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"instead of a S20openvpn)"
 msgstr ""
 "Las versiones antiguas de openvpn arrancaban al mismo tiempo que otros "
 "servicios. Esto significa que muchos de esos servicios no podian usar "
 "openvpn ya que podia no estar disponible cuando arrancaban. Las versiones "
 "nuevas de openvpn arrancaran antes. (es decir, un enlace S18openvpn en rc"
 "[2345].d en vez de S20openvpn)"
-
-#. Type: boolean
-#. Description
-#: ../templates:4
-#, fuzzy
-msgid ""
-"If you accept here, the package upgrade will make this change for you. If "
-"you refuse, nothing will change, and openvpn will be working just like it "
-"did before."
-msgstr ""
-"Si dices acepas ahora, la actualización del paquete hara este cambio por ti. "
-"Si no aceptas, nada cambiará y openvpn funcionará como lo hacia hasta ahora."
 
 #. Type: boolean
 #. Description
@@ -99,8 +87,8 @@ msgstr ""
 "En algunos casos, puedes estar actualizando OpenVPN en una máguina remota "
 "usando la propia VPN para hacerlo. El proceso de actualización para el "
 "proceso OpenVPN antes de instalar la nueva versión y en ese caso podrías "
-"perder la conexión y dejar la actualización interrumpida. "
-"Esto podría impedir que volvieras a conectar con la máquina remota."
+"perder la conexión y dejar la actualización interrumpida. Esto podría "
+"impedir que volvieras a conectar con la máquina remota."
 
 #. Type: boolean
 #. Description
@@ -111,8 +99,8 @@ msgid ""
 "done."
 msgstr ""
 "A no ser que hagas las actualizaciones de forma local, se aconseja NO PARAR "
-"openvpn antes de que sea actualizada. El proceso de instalación lo reiniciara "
-"una vez haya finalizado."
+"openvpn antes de que sea actualizada. El proceso de instalación lo "
+"reiniciara una vez haya finalizado."
 
 #. Type: boolean
 #. Description
@@ -133,18 +121,55 @@ msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
-"El puerto usado por defecto en OpenVPN ha cambiado del 5000 al 1194 "
-"por asignación de IANA. Si no especificabas el puerto a usar en tus VPNs, "
-"Esta actualización podría inutilizarlas."
+"El puerto usado por defecto en OpenVPN ha cambiado del 5000 al 1194 por "
+"asignación de IANA. Si no especificabas el puerto a usar en tus VPNs, Esta "
+"actualización podría inutilizarlas."
 
 #. Type: note
 #. Description
 #: ../templates:42
+#, fuzzy
 msgid ""
-"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"Usa la opción 'port 5000' si quieres continuar usando el antiguo puerto, "
-"o comprueba las reglas de tu firewall para permitir el funcionamiento con "
-"el nuevo puerto por defecto."
+"Usa la opción 'port 5000' si quieres continuar usando el antiguo puerto, o "
+"comprueba las reglas de tu firewall para permitir el funcionamiento con el "
+"nuevo puerto por defecto."
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid "Would you like to stop openvpn later?"
+msgstr "¿Deseas ejecutar fwlogwatch mas pronto?"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid ""
+"Previous versions of openvpn stopped at the same time as most of other "
+"services. This meant that some of services stopping later couldn't use  "
+"openvpn since it may have been stopped before them. Newer versions of the "
+"openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
+"[06].d instead of a K20openvpn)"
+msgstr ""
+"Las versiones antiguas de openvpn arrancaban al mismo tiempo que otros "
+"servicios. Esto significa que muchos de esos servicios no podian usar "
+"openvpn ya que podia no estar disponible cuando arrancaban. Las versiones "
+"nuevas de openvpn arrancaran antes. (es decir, un enlace S18openvpn en rc"
+"[2345].d en vez de S20openvpn)"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid ""
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
+msgstr ""
+"Si dices acepas ahora, la actualización del paquete hara este cambio por ti. "
+"Si no aceptas, nada cambiará y openvpn funcionará como lo hacia hasta ahora."

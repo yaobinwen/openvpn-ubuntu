@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -60,7 +59,6 @@ static int
 ifconfig_pool_find (struct ifconfig_pool *pool, const char *common_name)
 {
   int i;
-  int n = 0;
   time_t earliest_release = 0;
   int previous_usage = -1;
   int new_usage = -1;
@@ -71,10 +69,19 @@ ifconfig_pool_find (struct ifconfig_pool *pool, const char *common_name)
       if (!ipe->in_use)
 	{
 	  /*
+	   * If duplicate_cn mode, take first available IP address
+	   */
+	  if (pool->duplicate_cn)
+	    {
+	      new_usage = i;
+	      break;
+	    }
+
+	  /*
 	   * Keep track of the unused IP address entry which
 	   * was released earliest.
 	   */
-	  if (!n || ipe->last_release < earliest_release)
+	  if ((new_usage == -1 || ipe->last_release < earliest_release) && !ipe->fixed)
 	    {
 	      earliest_release = ipe->last_release;
 	      new_usage = i;
@@ -90,7 +97,6 @@ ifconfig_pool_find (struct ifconfig_pool *pool, const char *common_name)
 	      && !strcmp (common_name, ipe->common_name))
 	    previous_usage = i;
 
-	  ++n;
 	}
     }
 
@@ -105,15 +111,16 @@ ifconfig_pool_find (struct ifconfig_pool *pool, const char *common_name)
 
 
 struct ifconfig_pool *
-ifconfig_pool_init (int type, in_addr_t start, in_addr_t end)
+ifconfig_pool_init (int type, in_addr_t start, in_addr_t end, const bool duplicate_cn)
 {
   struct gc_arena gc = gc_new ();
   struct ifconfig_pool *pool = NULL;
 
   ASSERT (start <= end && end - start < IFCONFIG_POOL_MAX);
-  ALLOC_OBJ (pool, struct ifconfig_pool);
+  ALLOC_OBJ_CLEAR (pool, struct ifconfig_pool);
 
   pool->type = type;
+  pool->duplicate_cn = duplicate_cn;
 
   switch (type)
     {
@@ -261,7 +268,7 @@ ifconfig_pool_handle_to_ip_base (const struct ifconfig_pool* pool, ifconfig_pool
 }
 
 static void
-ifconfig_pool_set (struct ifconfig_pool* pool, const char *cn, const in_addr_t addr)
+ifconfig_pool_set (struct ifconfig_pool* pool, const char *cn, const in_addr_t addr, const bool fixed)
 {
   ifconfig_pool_handle h = ifconfig_pool_ip_base_to_handle (pool, addr);
   if (h >= 0)
@@ -271,6 +278,7 @@ ifconfig_pool_set (struct ifconfig_pool* pool, const char *cn, const in_addr_t a
       e->in_use = false;
       e->common_name = string_alloc (cn, NULL);
       e->last_release = now;
+      e->fixed = fixed;
     }
 }
 
@@ -320,9 +328,15 @@ ifconfig_pool_persist_init (const char *filename, int refresh_freq)
 
   ALLOC_OBJ_CLEAR (ret, struct ifconfig_pool_persist);
   if (refresh_freq > 0)
-    ret->file = status_open (filename, refresh_freq, -1, NULL, STATUS_OUTPUT_READ|STATUS_OUTPUT_WRITE);
+    {
+      ret->fixed = false;
+      ret->file = status_open (filename, refresh_freq, -1, NULL, STATUS_OUTPUT_READ|STATUS_OUTPUT_WRITE);
+    }
   else
-    ret->file = status_open (filename, 0, -1, NULL, STATUS_OUTPUT_READ);
+    {
+      ret->fixed = true;
+      ret->file = status_open (filename, 0, -1, NULL, STATUS_OUTPUT_READ);
+    }
   return ret;
 }
 
@@ -381,7 +395,7 @@ ifconfig_pool_read (struct ifconfig_pool_persist *persist, struct ifconfig_pool 
 		  const in_addr_t addr = getaddr (GETADDR_HOST_ORDER, ip_buf, 0, &succeeded, NULL);
 		  if (succeeded)
 		    {
-		      ifconfig_pool_set (pool, cn_buf, addr);
+		      ifconfig_pool_set (pool, cn_buf, addr, persist->fixed);
 		    }
 		}
 	    }
@@ -417,7 +431,7 @@ ifconfig_pool_test (in_addr_t start, in_addr_t end)
 {
   struct gc_arena gc = gc_new ();
   struct ifconfig_pool *p = ifconfig_pool_init (IFCONFIG_POOL_30NET, start, end); 
-  //struct ifconfig_pool *p = ifconfig_pool_init (IFCONFIG_POOL_INDIV, start, end);
+  /*struct ifconfig_pool *p = ifconfig_pool_init (IFCONFIG_POOL_INDIV, start, end);*/
   ifconfig_pool_handle array[256];
   int i;
 

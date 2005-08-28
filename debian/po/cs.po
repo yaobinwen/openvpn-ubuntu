@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openvpn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-11-12 16:17+0100\n"
+"POT-Creation-Date: 2005-08-28 14:07+0200\n"
 "PO-Revision-Date: 2004-11-25 20:50+0100\n"
 "Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
 "Language-Team: Czech <provoz@debian.cz>\n"
@@ -32,29 +32,18 @@ msgstr "Chcete spustit openvpn døíve?"
 #. Type: boolean
 #. Description
 #: ../templates:4
+#, fuzzy
 msgid ""
-"Previous versions of openvpn started at the same time than most of other "
+"Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
-"it may unavailable when they started. Newer versions of the openvpn package "
-"will start sooner. (i.e. a S18openvpn link in rc[235].d instead of a "
-"S20openvpn)"
+"it may have been unavailable when they started. Newer versions of the "
+"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"instead of a S20openvpn)"
 msgstr ""
 "Døívìj¹í verze openvpn se spou¹tìly zhruba ve stejném èase jako ostatní "
-"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, "
-"proto¾e tou dobou je¹tì nemuselo být k dispozici. Novìj¹í verze balíku "
-"openvpn mohou startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn "
-"místo S20openvpn)."
-
-#. Type: boolean
-#. Description
-#: ../templates:4
-msgid ""
-"If you accept here, the package upgrade will make this change for you. If "
-"you refuse, nothing will change, and openvpn will be working just like it "
-"did before."
-msgstr ""
-"Budete-li souhlasit, balík se o zmìnu postará. Pokud mo¾nost odmítnete, "
-"nic se nestane a openvpn bude pracovat jako doposud."
+"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, proto¾e "
+"tou dobou je¹tì nemuselo být k dispozici. Novìj¹í verze balíku openvpn mohou "
+"startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn místo S20openvpn)."
 
 #. Type: boolean
 #. Description
@@ -132,11 +121,46 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../templates:42
+#, fuzzy
 msgid ""
-"Use the option 'port 5000' if you want to keep the old port  configuration, "
+"Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"Pokud chcete zachovat staré nastavení portu, pou¾ijte volbu 'port 5000'. "
-"V opaèném pøípadì nezapomeòte upravit pravidla firewallu, aby umo¾nila "
+"Pokud chcete zachovat staré nastavení portu, pou¾ijte volbu 'port 5000'. V "
+"opaèném pøípadì nezapomeòte upravit pravidla firewallu, aby umo¾nila "
 "komunikaci na novém portu."
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid "Would you like to stop openvpn later?"
+msgstr "Chcete spustit openvpn døíve?"
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+#, fuzzy
+msgid ""
+"Previous versions of openvpn stopped at the same time as most of other "
+"services. This meant that some of services stopping later couldn't use  "
+"openvpn since it may have been stopped before them. Newer versions of the "
+"openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
+"[06].d instead of a K20openvpn)"
+msgstr ""
+"Døívìj¹í verze openvpn se spou¹tìly zhruba ve stejném èase jako ostatní "
+"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, proto¾e "
+"tou dobou je¹tì nemuselo být k dispozici. Novìj¹í verze balíku openvpn mohou "
+"startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn místo S20openvpn)."
+
+#. Type: boolean
+#. Description
+#: ../templates:54
+msgid ""
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
+msgstr ""
+"Budete-li souhlasit, balík se o zmìnu postará. Pokud mo¾nost odmítnete, nic "
+"se nestane a openvpn bude pracovat jako doposud."

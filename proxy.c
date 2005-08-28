@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -234,7 +233,7 @@ make_base64_string2 (const uint8_t *str, int src_len, struct gc_arena *gc)
 uint8_t *
 make_base64_string (const uint8_t *str, struct gc_arena *gc)
 {
-  return make_base64_string2 (str, strlen (str), gc);
+  return make_base64_string2 (str, strlen ((const char *)str), gc);
 }
 
 static const char *
@@ -244,7 +243,7 @@ username_password_as_base64 (const struct http_proxy_info *p,
   struct buffer out = alloc_buf_gc (strlen (p->up.username) + strlen (p->up.password) + 2, gc);
   ASSERT (strlen (p->up.username) > 0);
   buf_printf (&out, "%s:%s", p->up.username, p->up.password);
-  return make_base64_string (BSTR (&out), gc);
+  return (const char *)make_base64_string ((const uint8_t*)BSTR (&out), gc);
 }
 
 struct http_proxy_info *
@@ -283,7 +282,7 @@ new_http_proxy (const struct http_proxy_options *o,
 		     o->auth_file,
 		     false,
 		     "HTTP Proxy",
-		     0);
+		     GET_USER_PASS_MANAGEMENT);
       p->up = static_proxy_user_pass;
     }
 
@@ -386,11 +385,11 @@ establish_http_proxy_passthru (struct http_proxy_info *p,
     {
       msg (D_PROXY, "Proxy requires authentication");
 
-      // check for NTLM
+      /* check for NTLM */
       if (p->auth_method == HTTP_AUTH_NTLM)
         {
 #if NTLM
-          // look for the phase 2 response
+          /* look for the phase 2 response */
 
           while (true)
             {
@@ -399,19 +398,19 @@ establish_http_proxy_passthru (struct http_proxy_info *p,
               chomp (buf);
               msg (D_PROXY, "HTTP proxy returned: '%s'", buf);
 
-              openvpn_snprintf (get, sizeof get, "%%*s NTLM %%%ds", sizeof (buf2) - 1);
+              openvpn_snprintf (get, sizeof get, "%%*s NTLM %%%ds", (int) sizeof (buf2) - 1);
               nparms = sscanf (buf, get, buf2);
-              buf2[127] = 0; // we only need the beginning - ensure it's null terminated.
+              buf2[127] = 0; /* we only need the beginning - ensure it's null terminated. */
 
-              // check for "Proxy-Authenticate: NTLM TlRM..."
+              /* check for "Proxy-Authenticate: NTLM TlRM..." */
               if (nparms == 1)
                 {
-                  // parse buf2
+                  /* parse buf2 */
                   msg (D_PROXY, "auth string: '%s'", buf2);
                   break;
                 }
             }
-          // if we are here then auth string was got
+          /* if we are here then auth string was got */
           msg (D_PROXY, "Received NTLM Proxy-Authorization phase 2 response");
 
           /* receive and discard everything else */
@@ -446,7 +445,7 @@ establish_http_proxy_passthru (struct http_proxy_info *p,
           openvpn_sleep (1);
           if (!send_line_crlf (sd, buf))
 	    goto error;
-          // ok so far...
+          /* ok so far... */
           /* send empty CR, LF */
           openvpn_sleep (1);
           if (!send_crlf (sd))
@@ -464,7 +463,7 @@ establish_http_proxy_passthru (struct http_proxy_info *p,
           /* parse return string */
           nparms = sscanf (buf, "%*s %d", &status);
 #else
-	  ASSERT (0); // No NTLM support
+	  ASSERT (0); /* No NTLM support */
 #endif
 	}
       else goto error;

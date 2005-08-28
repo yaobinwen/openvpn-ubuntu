@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -229,7 +228,7 @@ send_control_channel_string (struct context *c, const char *str, int msglevel)
     bool stat;
 
     /* buffered cleartext write onto TLS control channel */
-    stat = tls_send_payload (c->c2.tls_multi, str, strlen (str) + 1);
+    stat = tls_send_payload (c->c2.tls_multi, (uint8_t*) str, strlen (str) + 1);
 
     /* reschedule tls_multi_process */
     interval_action (&c->c2.tmp_int);
@@ -257,7 +256,7 @@ check_add_routes_action (struct context *c, const bool errors)
   update_time ();
   event_timeout_clear (&c->c2.route_wakeup);
   event_timeout_clear (&c->c2.route_wakeup_expire);
-  initialization_sequence_completed (c, errors); /* client/p2p --route-delay was defined */
+  initialization_sequence_completed (c, errors ? ISC_ERRORS : 0); /* client/p2p --route-delay was defined */
 }
 
 void
@@ -398,7 +397,7 @@ encrypt_sign (struct context *c, bool comp_frag)
    */
   if (c->c2.tls_multi)
     {
-      //tls_mutex_lock (c->c2.tls_multi);
+      /*tls_mutex_lock (c->c2.tls_multi);*/
       tls_pre_encrypt (c->c2.tls_multi, &c->c2.buf, &c->c2.crypto_options);
     }
 #endif
@@ -426,7 +425,7 @@ encrypt_sign (struct context *c, bool comp_frag)
   if (c->c2.tls_multi)
     {
       tls_post_encrypt (c->c2.tls_multi, &c->c2.buf);
-      //tls_mutex_unlock (c->c2.tls_multi);
+      /*tls_mutex_unlock (c->c2.tls_multi);*/
     }
 #endif
 #endif
@@ -706,7 +705,7 @@ process_incoming_link (struct context *c)
 	   * will load crypto_options with the correct encryption key
 	   * and return false.
 	   */
-	  //tls_mutex_lock (c->c2.tls_multi);
+	  /*tls_mutex_lock (c->c2.tls_multi);*/
 	  if (tls_pre_decrypt (c->c2.tls_multi, &c->c2.from, &c->c2.buf, &c->c2.crypto_options))
 	    {
 	      interval_action (&c->c2.tmp_int);
@@ -732,7 +731,7 @@ process_incoming_link (struct context *c)
 #ifdef USE_SSL
       if (c->c2.tls_multi)
 	{
-	  //tls_mutex_unlock (c->c2.tls_multi);
+	  /*tls_mutex_unlock (c->c2.tls_multi);*/
 	}
 #endif
       

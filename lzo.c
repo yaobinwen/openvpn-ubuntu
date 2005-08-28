@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -136,7 +135,7 @@ lzo_compress (struct buffer *buf, struct buffer work,
 	      struct lzo_compress_workspace *lzowork,
 	      const struct frame* frame)
 {
-  int zlen = 0;
+  lzo_uint zlen = 0;
   int err;
   bool compressed = false;
 
@@ -192,7 +191,7 @@ lzo_decompress (struct buffer *buf, struct buffer work,
 		struct lzo_compress_workspace *lzowork,
 		const struct frame* frame)
 {
-  int zlen = EXPANDED_SIZE (frame);
+  lzo_uint zlen = EXPANDED_SIZE (frame);
   uint8_t c;		/* flag indicating whether or not our peer compressed */
   int err;
 
