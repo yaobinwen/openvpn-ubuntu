@@ -310,6 +310,7 @@ struct options
   int cf_max;
   int cf_per;
   int max_clients;
+  int max_routes_per_client;
 
   bool client_cert_not_required;
   bool username_as_common_name;
@@ -428,6 +429,7 @@ struct options
 #define OPT_P_CONFIG          (1<<18)
 #define OPT_P_EXPLICIT_NOTIFY (1<<19)
 #define OPT_P_ECHO            (1<<20)
+#define OPT_P_INHERIT         (1<<21)
 
 #define OPT_P_DEFAULT   (~OPT_P_INSTANCE)
 
