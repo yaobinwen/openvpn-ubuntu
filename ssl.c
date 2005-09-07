@@ -625,6 +625,7 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   return 1;			/* Accept connection */
 
  err:
+  ERR_clear_error ();
   return 0;                     /* Reject connection */
 }
 
@@ -732,6 +733,8 @@ init_ssl (const struct options *options)
   DH *dh;
   BIO *bio;
   bool using_cert_file = false;
+
+  ERR_clear_error ();
 
   if (options->tls_server)
     {
@@ -908,6 +911,8 @@ init_ssl (const struct options *options)
       if (!SSL_CTX_set_cipher_list (ctx, options->cipher_list))
 	msg (M_SSLERR, "Problem with cipher list: %s", options->cipher_list);
     }
+
+  ERR_clear_error ();
 
   return ctx;
 }
@@ -1174,6 +1179,7 @@ bio_write (struct tls_multi* multi, BIO *bio, const uint8_t *data, int size, con
 	      msg (D_TLS_ERRORS | M_SSL, "TLS ERROR: BIO write %s error",
 		   desc);
 	      ret = -1;
+	      ERR_clear_error ();
 	    }
 	}
       else if (i != size)
@@ -1233,6 +1239,7 @@ bio_read (struct tls_multi* multi, BIO *bio, struct buffer *buf, int maxlen, con
 		   desc);
 	      buf->len = 0;
 	      ret = -1;
+	      ERR_clear_error ();
 	    }
 	}
       else if (!i)
@@ -3091,6 +3098,7 @@ tls_process (struct tls_multi *multi,
   }
 
 error:
+  ERR_clear_error ();
   ks->state = S_ERROR;
   msg (D_TLS_ERRORS, "TLS Error: TLS handshake failed");
   INCR_ERROR;
@@ -3121,6 +3129,8 @@ tls_multi_process (struct tls_multi *multi,
   bool error = false;
 
   perf_push (PERF_TLS_MULTI_PROCESS);
+
+  ERR_clear_error ();
 
   /*
    * Process each session object having state of S_INITIAL or greater,
@@ -3701,6 +3711,7 @@ tls_pre_decrypt (struct tls_multi *multi,
   return ret;
 
  error:
+  ERR_clear_error ();
   ++multi->n_soft_errors;
   goto done;
 }
@@ -3807,7 +3818,11 @@ tls_pre_decrypt_lite (const struct tls_auth_standalone *tas,
 	ret = true;
       }
     }
+  gc_free (&gc);
+  return ret;
+ 
  error:
+  ERR_clear_error ();
   gc_free (&gc);
   return ret;
 }
@@ -3885,6 +3900,8 @@ tls_send_payload (struct tls_multi *multi,
   struct key_state *ks;
   bool ret = false;
 
+  ERR_clear_error ();
+
   ASSERT (multi);
 
   session = &multi->session[TM_ACTIVE];
@@ -3895,6 +3912,8 @@ tls_send_payload (struct tls_multi *multi,
       if (key_state_write_plaintext_const (multi, ks, data, size) == 1)
 	ret = true;
     }
+
+  ERR_clear_error ();
 
   return ret;
 }
@@ -3918,6 +3937,8 @@ tls_rec_payload (struct tls_multi *multi,
 	ret = true;
       ks->plaintext_read_buf.len = 0;
     }
+
+  ERR_clear_error ();
 
   return ret;
 }

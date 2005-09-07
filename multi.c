@@ -319,7 +319,7 @@ multi_init (struct multi_context *m, struct context *t, bool tcp_mode, int threa
   mroute_extract_in_addr_t (&m->local, t->c1.tuntap->local);
 
   /*
-   * Limit total number of clients
+   * Per-client limits
    */
   m->max_clients = t->options.max_clients;
 
@@ -338,7 +338,7 @@ multi_init (struct multi_context *m, struct context *t, bool tcp_mode, int threa
 }
 
 const char *
-multi_instance_string (struct multi_instance *mi, bool null, struct gc_arena *gc)
+multi_instance_string (const struct multi_instance *mi, bool null, struct gc_arena *gc)
 {
   if (mi)
     {
@@ -807,11 +807,12 @@ multi_learn_addr (struct multi_context *m,
 
       if (oldroute) /* route already exists? */
 	{
-	  if (learn_address_script (m, mi, "update", &newroute->addr))
+	  if (route_quota_test (m, mi) && learn_address_script (m, mi, "update", &newroute->addr))
 	    {
 	      learn_succeeded = true;
 	      owner = mi;
 	      multi_instance_inc_refcount (mi);
+	      route_quota_inc (mi);
 
 	      /* delete old route */
 	      multi_route_del (oldroute);
@@ -823,11 +824,12 @@ multi_learn_addr (struct multi_context *m,
 	}
       else
 	{
-	  if (learn_address_script (m, mi, "add", &newroute->addr))
+	  if (route_quota_test (m, mi) && learn_address_script (m, mi, "add", &newroute->addr))
 	    {
 	      learn_succeeded = true;
 	      owner = mi;
 	      multi_instance_inc_refcount (mi);
+	      route_quota_inc (mi);
 
 	      /* add new route */
 	      hash_add_fast (m->vhash, bucket, &newroute->addr, hv, newroute);
@@ -1173,7 +1175,7 @@ multi_connection_established (struct multi_context *m, struct multi_instance *mi
     {
       struct gc_arena gc = gc_new ();
       unsigned int option_types_found = 0;
-      const unsigned int option_permissions_mask = OPT_P_PUSH|OPT_P_INSTANCE|OPT_P_TIMER|OPT_P_CONFIG|OPT_P_ECHO;
+      const unsigned int option_permissions_mask = OPT_P_INSTANCE|OPT_P_INHERIT|OPT_P_PUSH|OPT_P_TIMER|OPT_P_CONFIG|OPT_P_ECHO;
       int cc_succeeded = true; /* client connect script status */
 
       ASSERT (mi->context.c1.tuntap);
@@ -1836,6 +1838,20 @@ multi_process_drop_outgoing_tun (struct multi_context *m, const unsigned int mpp
 
   multi_process_post (m, mi, mpp_flags);
   clear_prefix ();
+}
+
+/*
+ * Per-client route quota management
+ */
+
+void
+route_quota_exceeded (const struct multi_context *m, const struct multi_instance *mi)
+{
+  struct gc_arena gc = gc_new ();
+  msg (D_ROUTE_QUOTA, "MULTI ROUTE: route quota (%d) exceeded for %s (see --max-routes-per-client option)",
+	mi->context.options.max_routes_per_client,
+	multi_instance_string (mi, false, &gc));
+  gc_free (&gc);
 }
 
 #ifdef ENABLE_DEBUG

@@ -334,6 +334,7 @@ static const char usage_message[] =
   "--learn-address cmd : Run script cmd to validate client virtual addresses.\n"
   "--connect-freq n s : Allow a maximum of n new connections per s seconds.\n"
   "--max-clients n : Allow a maximum of n simultaneously connected clients.\n"
+  "--max-routes-per-client n : Allow a maximum of n internal routes per client.\n"
 #endif
   "\n"
   "Client options (when connecting to a multi-client server):\n"
@@ -568,6 +569,7 @@ init_options (struct options *o)
   o->n_bcast_buf = 256;
   o->tcp_queue_limit = 64;
   o->max_clients = 1024;
+  o->max_routes_per_client = 256;
   o->ifconfig_pool_persist_refresh_freq = 600;
 #endif
 #if P2MP
@@ -802,7 +804,7 @@ show_p2mp_parms (const struct options *o)
   SHOW_INT (cf_max);
   SHOW_INT (cf_per);
   SHOW_INT (max_clients);
-
+  SHOW_INT (max_routes_per_client);
   SHOW_BOOL (client_cert_not_required);
   SHOW_BOOL (username_as_common_name)
   SHOW_STR (auth_user_pass_verify_script);
@@ -3568,6 +3570,12 @@ add_option (struct options *options,
 	  goto err;
 	}
       options->max_clients = max_clients;
+    }
+  else if (streq (p[0], "max-routes-per-client") && p[1])
+    {
+      i += 1;
+      VERIFY_PERMISSION (OPT_P_INHERIT);
+      options->max_routes_per_client = max_int (atoi (p[1]), 1);
     }
   else if (streq (p[0], "client-cert-not-required"))
     {

@@ -1,3 +1,49 @@
+openvpn (1.99+2.rc6-1ubuntu0.2) hoary-security; urgency=low
+
+  * Reupload with a higher version, previous version was uploaded as a native
+    package.
+
+ -- Gerardo Di Giacomo <gerardo@linux.it>  Wed,  7 Sep 2005 23:18:44 +0000
+
+openvpn (1.99+2.rc6-1ubuntu0.1) hoary-security; urgency=low
+
+  * SECURITY UPDATE: multiple denial of service vulnerabilities
+  * crypto.c, ssl.c:
+    - DoS attack against server when run with "verb 0" and without "tls-auth".
+    If a client connection to the server fails certificate verification, the
+    OpenSSL error queue is not properly flushed, which can result in another
+    unrelated client instance on the server seeing the error and responding to
+    it, resulting in disconnection of the unrelated client.
+    - DoS attack against server by authenticated client. This bug presents a
+    potential DoS attack vector against the server which can only be initiated
+    by a connected and authenticated client. If the client sends a packet
+    which fails to decrypt on the server, the OpenSSL error queue is not
+    properly flushed, which can result in another unrelated client instance on
+    the server seeing the error and responding to it, resulting in
+    disconnection of the unrelated client.
+  * errlevel.h, multi.c, multi.h, openvpn.8, options.c, options.h:
+    - DoS attack against server by authenticated client. A malicious client in
+    "dev tap" ethernet bridging mode could theoretically flood the server with
+    packets appearing to come from hundreds of thousands of different MAC
+    addresses, causing the OpenVPN process to deplete system virtual memory as
+    it expands its internal routing table.  A --max-routes-per-client
+    directive has been added (default=256) to limit the maximum number of
+    routes in OpenVPN's internal routing table which can be associated with a
+    given client.
+  * mtcp.c:
+    - DoS attack against server by authenticated client. If two or more client
+    machines try to connect to the server at the same time via TCP, using the
+    same client certificate, and when --duplicate-cn is not enabled on the
+    server, a race condition can crash the server with "Assertion failed at
+    mtcp.c:411".
+  * References:
+    - CAN-2005-2531
+    - CAN-2005-2532
+    - CAN-2005-2533
+    - CAN-2005-2534
+
+ -- Gerardo Di Giacomo <gerardo@linux.it>  Mon,  5 Sep 2005 10:30:04 +0000
+
 openvpn (1.99+2.rc6-1) unstable; urgency=low
 
   * The 'Three Wise Men' release.
