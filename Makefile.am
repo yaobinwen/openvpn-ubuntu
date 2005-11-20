@@ -33,6 +33,8 @@ nodist_openvpn_SOURCES = config.h
 TESTS = t_lpback.sh t_cltsrv.sh
 dist_noinst_SCRIPTS = $(TESTS)
 
+.PHONY: plugin
+
 openvpn_SOURCES = \
         base64.c base64.h \
 	basic.h \
@@ -125,4 +127,4 @@ EXTRA_DIST = \
         management
 
 dist-hook:
-	cd $(distdir) && for i in $(EXTRA_DIST) ; do find $$i -name CVS -type d -prune -exec rm -r '{}' ';' ; rm -f `find $$i -type f | grep -E '(^|\/)\.?\#|\~$$|\.s?o$$'` ; done
+	cd $(distdir) && for i in $(EXTRA_DIST) ; do find $$i -name .svn -type d -prune -exec rm -rf '{}' ';' ; rm -f `find $$i -type f | grep -E '(^|\/)\.?\#|\~$$|\.s?o$$'` ; done

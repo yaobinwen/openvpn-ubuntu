@@ -12,16 +12,15 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: openvpn_1.6.0-3\n"
+"Project-Id-Version: openvpn_2.0.2-1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-08-28 14:07+0200\n"
-"PO-Revision-Date: 2004-11-16 07:16+0100\n"
+"PO-Revision-Date: 2005-09-04 11:59+0200\n"
 "Last-Translator: Michel Grentzinger <mic.grentz@online.fr>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.9.1\n"
 
 #. Type: boolean
 #. Description
@@ -32,7 +31,6 @@ msgstr "Faut-il démarrer openvpn dès que possible ?"
 #. Type: boolean
 #. Description
 #: ../templates:4
-#, fuzzy
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
@@ -127,7 +125,6 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../templates:42
-#, fuzzy
 msgid ""
 "Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
@@ -140,14 +137,12 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid "Would you like to stop openvpn later?"
-msgstr "Faut-il démarrer openvpn dès que possible ?"
+msgstr "Faut-il arrêter openvpn dès que possible ?"
 
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid ""
 "Previous versions of openvpn stopped at the same time as most of other "
 "services. This meant that some of services stopping later couldn't use  "
@@ -155,12 +150,12 @@ msgid ""
 "openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
 "[06].d instead of a K20openvpn)"
 msgstr ""
-"Les précédentes versions d'openvpn démarraient en même temps que la plupart "
-"des autres services. Cela signifie que la majorité de ces services ne "
-"peuvent pas utiliser openvpn puisqu'il n'est pas encore disponible "
-"lorsqu'ils démarrent. Les versions récentes du paquet openvpn démarrent plus "
-"tôt (c.-à-d. que le lien dans rc[235].d est S18openvpn au lieu de "
-"S20openvpn)."
+"Les précédentes versions d'openvpn se terminaient en même temps que la "
+"plupart des autres services. Cela signifie que la majorité de ces services "
+"ne peuvent pas utiliser openvpn puisque ce dernier est déjà arrêté avant "
+"qu'ils ne s'arrêtent à leur tour. Les versions récentes du paquet openvpn "
+"s'arrêtent plus tôt (c.-à-d. que le lien dans rc[16].d est K80openvpn au "
+"lieu de K20openvpn)."
 
 #. Type: boolean
 #. Description
