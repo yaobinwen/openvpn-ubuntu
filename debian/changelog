@@ -1,3 +1,31 @@
+openvpn (2.0.5-1build1) dapper; urgency=low
+
+  * Rebuild for openssl 0.9.8 transition
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Sun, 20 Nov 2005 16:27:20 +0100
+
+openvpn (2.0.5-1) unstable; urgency=high
+
+  * New upstream release. Urgency high due to security issues.
+      - DoS vulnerability on the server in TCP mode.
+        (CVE-2005-3409) (Closes: #337334)
+      - Format string vulnerability in the foreign_option
+        function in options.c could potentially allow a malicious
+        or compromised server to execute arbitrary code on the
+        client.  (CVE-2005-3393) (Closes: #336751)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon,  7 Nov 2005 10:13:55 +0100
+
+openvpn (2.0.2-2) unstable; urgency=low
+
+  * debian/control: fix Depends on debconf. (Closes: #332056)
+  * Bumped Standards-Version to 3.6.2.0, no change.
+  * Updated Danish debconf translation. (Closes: #326907)
+  * Updated French debconf translation. (Closes: #328076)
+  * Added Swedish debconf translation. (Closes: #332785)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun,  9 Oct 2005 18:42:34 +0200
+
 openvpn (2.0.2-1) unstable; urgency=low
 
   * The [VAC] upload. Thanks Vorbis Gdynia for the free internet access :)

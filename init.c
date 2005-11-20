@@ -1804,7 +1804,7 @@ do_compute_occ_strings (struct context *c)
 static void
 do_init_first_time (struct context *c)
 {
-  if (c->first_time && !c->c2.did_we_daemonize)
+  if (c->first_time && !c->did_we_daemonize)
     {
       /* get user and/or group that we want to setuid/setgid to */
       c->c2.uid_gid_specified =
@@ -1815,10 +1815,10 @@ do_init_first_time (struct context *c)
       get_pid_file (c->options.writepid, &c->c2.pid_state);
 
       /* become a daemon if --daemon */
-      c->c2.did_we_daemonize = possibly_become_daemon (&c->options, c->first_time);
+      c->did_we_daemonize = possibly_become_daemon (&c->options, c->first_time);
 
       /* should we disable paging? */
-      if (c->options.mlock && c->c2.did_we_daemonize)
+      if (c->options.mlock && c->did_we_daemonize)
 	do_mlockall (true);	/* call again in case we daemonized */
 
       /* save process ID in a file */
@@ -2350,7 +2350,7 @@ init_instance (struct context *c, const struct env_set *env, const unsigned int 
     else if (child)
       crypto_flags = CF_INIT_TLS_MULTI;
     do_init_crypto (c, crypto_flags);
-    if (IS_SIG (c))
+    if (IS_SIG (c) && !child)
       goto sig;
   }
 
@@ -2542,7 +2542,7 @@ inherit_context_child (struct context *dest,
   dest->c1.plugins = src->c1.plugins;
 
   /* context init */
-  init_instance (dest, src->c2.es, CC_USR1_TO_HUP | CC_GC_FREE);
+  init_instance (dest, src->c2.es, CC_NO_CLOSE | CC_USR1_TO_HUP);
   if (IS_SIG (dest))
     return;
 
@@ -2610,6 +2610,9 @@ inherit_context_top (struct context *dest,
 void
 close_context (struct context *c, int sig, unsigned int flags)
 {
+  ASSERT (c);
+  ASSERT (c->sig);
+
   if (sig >= 0)
     c->sig->signal_received = sig;
 
@@ -2620,7 +2623,8 @@ close_context (struct context *c, int sig, unsigned int flags)
 	c->sig->signal_received = SIGHUP;
     }
 
-  close_instance (c);
+  if (!(flags & CC_NO_CLOSE))
+    close_instance (c);
 
   if (flags & CC_GC_FREE)
     context_gc_free (c);

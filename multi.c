@@ -405,7 +405,8 @@ static void
 multi_client_disconnect_script (struct multi_context *m,
 				struct multi_instance *mi)
 {
-  if (mi->context.c2.context_auth == CAS_SUCCEEDED || mi->context.c2.context_auth == CAS_PARTIAL)
+  if ((mi->context.c2.context_auth == CAS_SUCCEEDED && mi->connection_established_flag)
+      || mi->context.c2.context_auth == CAS_PARTIAL)
     {
       multi_client_disconnect_setenv (m, mi);
 
@@ -569,10 +570,10 @@ multi_create_instance (struct multi_context *m, const struct mroute_addr *real)
       generate_prefix (mi);
     }
 
+  mi->did_open_context = true;
   inherit_context_child (&mi->context, &m->top);
   if (IS_SIG (&mi->context))
     goto err;
-  mi->did_open_context = true;
 
   mi->context.c2.context_auth = CAS_PENDING;
 
@@ -1012,6 +1013,7 @@ multi_delete_dup (struct multi_context *m, struct multi_instance *new_mi)
 	{
 	  struct hash_iterator hi;
 	  struct hash_element *he;
+	  int count = 0;
 
 	  hash_iterator_init (m->iter, &hi, true);
 	  while ((he = hash_iterator_next (&hi)))
@@ -1025,10 +1027,14 @@ multi_delete_dup (struct multi_context *m, struct multi_instance *new_mi)
 		      mi->did_iter = false;
 		      multi_close_instance (m, mi, false);
 		      hash_iterator_delete_element (&hi);
+		      ++count;
 		    }
 		}
 	    }
 	  hash_iterator_free (&hi);
+
+	  if (count)
+	    msg (D_MULTI_LOW, "MULTI: new connection by client '%s' will cause previous active sessions by this client to be dropped.  Remember to use the --duplicate-cn option if you want multiple clients using the same certificate or username to concurrently connect.", new_cn);
 	}
     }
 }
@@ -1578,7 +1584,8 @@ multi_process_incoming_link (struct multi_context *m, struct multi_instance *ins
   struct multi_instance *mi;
   bool ret = true;
 
-  ASSERT (!m->pending);
+  if (m->pending)
+    return true;
 
   if (!instance)
     {
@@ -1732,7 +1739,8 @@ multi_process_incoming_tun (struct multi_context *m, const unsigned int mpp_flag
       printf ("TUN -> TCP/UDP [%d]\n", BLEN (&m->top.c2.buf));
 #endif
 
-      ASSERT (!m->pending);
+      if (m->pending)
+	return true;
 
       /* 
        * Route an incoming tun/tap packet to

@@ -10,11 +10,11 @@
 !include "MUI.nsh"
 !include "setpath.nsi"
 
-!define HOME "c:\src\openvpn"
+!define HOME ".."
 !define BIN "${HOME}\bin"
 
 !define PRODUCT_NAME "OpenVPN"
-!define VERSION "2.0.2" # AUTO_VERSION
+!define VERSION "2.0.5" # AUTO_VERSION
 
 !define TAP "tap0801"
 !define TAPDRV "${TAP}.sys"

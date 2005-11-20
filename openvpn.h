@@ -344,9 +344,6 @@ struct context_2
   struct user_state user_state;
   struct group_state group_state;
 
-  /* temporary variable */
-  bool did_we_daemonize;
-
   /* should we print R|W|r|w to console on packet transfers? */
   bool log_rw;
 
@@ -398,7 +395,7 @@ struct context_2
   in_addr_t push_ifconfig_local;
   in_addr_t push_ifconfig_remote_netmask;
 
-  /* client authentication state */
+  /* client authentication state, CAS_SUCCEEDED must be 0 */
 # define CAS_SUCCEEDED 0
 # define CAS_PENDING   1
 # define CAS_FAILED    2
@@ -446,6 +443,9 @@ struct context
 
   /* signal info */
   struct signal_info *sig;
+
+  /* set to true after we daemonize */
+  bool did_we_daemonize;
 
   /* level 1 context is preserved for
      SIGUSR1 restarts, but initialized

@@ -287,6 +287,7 @@ init_route_list (struct route_list *rl,
 		 in_addr_t remote_host,
 		 struct env_set *es)
 {
+  struct gc_arena gc = gc_new ();
   bool ret = true;
 
   clear_route_list (rl);
@@ -301,6 +302,11 @@ init_route_list (struct route_list *rl,
   if (rl->spec.net_gateway_defined)
     {
       setenv_route_addr (es, "net_gateway", rl->spec.net_gateway, -1);
+      dmsg (D_ROUTE_DEBUG, "ROUTE: default_gateway=%s", print_in_addr_t (rl->spec.net_gateway, 0, &gc));
+    }
+  else
+    {
+      dmsg (D_ROUTE_DEBUG, "ROUTE: default_gateway=UNDEF");
     }
   rl->redirect_default_gateway = opt->redirect_default_gateway;
   rl->redirect_local = opt->redirect_local;
@@ -348,6 +354,7 @@ init_route_list (struct route_list *rl,
     rl->n = j;
   }
 
+  gc_free (&gc);
   return ret;
 }
 
@@ -1005,12 +1012,14 @@ test_routes (const struct route_list *rl, const struct tuntap *tt)
 }
 
 static bool
-get_default_gateway (in_addr_t *ret)
+get_default_gateway (in_addr_t *gateway)
 {
   struct gc_arena gc = gc_new ();
-  bool ret_bool = false;
   int i;
   const MIB_IPFORWARDTABLE *routes = get_windows_routing_table (&gc);
+  DWORD lowest_metric = ~0;
+  in_addr_t ret = 0;
+  int best = -1;
 
   if (!routes)
     goto done;
@@ -1021,25 +1030,34 @@ get_default_gateway (in_addr_t *ret)
       const in_addr_t net = ntohl (row->dwForwardDest);
       const in_addr_t mask = ntohl (row->dwForwardMask);
       const in_addr_t gw = ntohl (row->dwForwardNextHop);
+      const DWORD metric = row->dwForwardMetric1;
 
-#if 0
-      msg (M_INFO, "route[%d] %s %s %s",
+      msg (D_ROUTE_DEBUG, "GDG: route[%d] %s %s %s m=%u",
 	   i,
 	   print_in_addr_t ((in_addr_t) net, 0, &gc),
 	   print_in_addr_t ((in_addr_t) mask, 0, &gc),
-	   print_in_addr_t ((in_addr_t) gw, 0, &gc));
-#endif
-      if (!net && !mask)
+	   print_in_addr_t ((in_addr_t) gw, 0, &gc),
+	   (unsigned int)metric);
+
+      if (!net && !mask && metric < lowest_metric)
 	{
-	  *ret = gw;
-	  ret_bool = true;
-	  break;
+	  ret = gw;
+	  lowest_metric = metric;
+	  best = i;
 	}
     }
   
  done:
   gc_free (&gc);
-  return ret_bool;
+
+  if (ret)
+    {
+      dmsg (D_ROUTE_DEBUG, "GDGR: best=%d lm=%u", best, (unsigned int)lowest_metric);
+      *gateway = ret;
+      return true;
+    }
+  else
+    return false;
 }
 
 static DWORD
@@ -1222,14 +1240,18 @@ show_routes (int msglev)
 #elif defined(TARGET_LINUX)
 
 static bool
-get_default_gateway (in_addr_t *ret)
+get_default_gateway (in_addr_t *gateway)
 {
   struct gc_arena gc = gc_new ();
+  bool ret = false;
   FILE *fp = fopen ("/proc/net/route", "r");
   if (fp)
     {
       char line[256];
       int count = 0;
+      int best_count = 0;
+      unsigned int lowest_metric = ~0;
+      in_addr_t best_gw = 0;
       while (fgets (line, sizeof (line), fp) != NULL)
 	{
 	  if (count)
@@ -1237,37 +1259,51 @@ get_default_gateway (in_addr_t *ret)
 	      unsigned int net_x = 0;
 	      unsigned int mask_x = 0;
 	      unsigned int gw_x = 0;
-	      const int np = sscanf (line, "%*s\t%x\t%x\t%*s\t%*s\t%*s\t%*s\t%x",
+	      unsigned int metric = 0;
+	      const int np = sscanf (line, "%*s\t%x\t%x\t%*s\t%*s\t%*s\t%d\t%x",
 				     &net_x,
 				     &gw_x,
+				     &metric,
 				     &mask_x);
-	      if (np == 3)
+	      if (np == 4)
 		{
 		  const in_addr_t net = ntohl (net_x);
 		  const in_addr_t mask = ntohl (mask_x);
 		  const in_addr_t gw = ntohl (gw_x);
-#if 0
-		  msg (M_INFO, "route %s %s %s",
-		       print_in_addr_t ((in_addr_t) net, 0, &gc),
-		       print_in_addr_t ((in_addr_t) mask, 0, &gc),
-		       print_in_addr_t ((in_addr_t) gw, 0, &gc));
-#endif
-		  if (!net && !mask)
+
+		  dmsg (D_ROUTE_DEBUG, "GDG: route[%d] %s/%s/%s m=%u",
+			count,
+			print_in_addr_t ((in_addr_t) net, 0, &gc),
+			print_in_addr_t ((in_addr_t) mask, 0, &gc),
+			print_in_addr_t ((in_addr_t) gw, 0, &gc),
+			metric);
+
+		  if (!net && !mask && metric < lowest_metric)
 		    {
-		      fclose (fp);
-		      *ret = gw;
-		      gc_free (&gc);
-		      return true;
+		      best_gw = gw;
+		      lowest_metric = metric;
+		      best_count = count;
 		    }
 		}
 	    }
 	  ++count;
 	}
       fclose (fp);
+
+      if (best_gw)
+	{
+	  *gateway = best_gw;
+	  ret = true;
+	}
+
+      dmsg (D_ROUTE_DEBUG, "GDG: best=%s[%d] lm=%u",
+	    print_in_addr_t ((in_addr_t) best_gw, 0, &gc),
+	    best_count,
+	    (unsigned int)lowest_metric);
     }
 
   gc_free (&gc);
-  return false;
+  return ret;
 }
 
 #elif defined(TARGET_FREEBSD)

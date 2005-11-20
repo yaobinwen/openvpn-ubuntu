@@ -438,7 +438,7 @@ If unspecified, OpenVPN will bind to all interfaces.
 .\"*********************************************************
 .TP
 .B \-\-remote host [port]
-Remote host name or IP address.  Multiple
+Remote host name or IP address.  On the client, multiple
 .B \-\-remote
 options may be specified for redundancy, each referring
 to a different OpenVPN server.
@@ -455,12 +455,25 @@ Note that at any given time, the OpenVPN client
 will at most be connected to
 one server.
 
-Also, note that since UDP is connectionless, connection failure
+Note that since UDP is connectionless, connection failure
 is defined by the
 .B \-\-ping
 and
 .B \-\-ping-restart
 options.
+
+Note the following corner case:  If you use multiple
+.B \-\-remote
+options, AND you are dropping root privileges on
+the client with
+.B \-\-user
+and/or
+.B \-\-group,
+AND the client is running a non-Windows OS, if the client needs
+to switch to a different server, and that server pushes
+back different TUN/TAP or route settings, the client may lack
+the necessary privileges to close and reopen the TUN/TAP interface.
+This could cause the client to exit with a fatal error.
 
 If
 .B \-\-remote
@@ -933,8 +946,7 @@ table (not supported on all OSes).
 .B remote_host
 \-\- The
 .B \-\-remote
-address, or the address of a connecting client if OpenVPN
-is being run in server mode.
+address if OpenVPN is being run in client mode, and is undefined in server mode.
 .\"*********************************************************
 .TP
 .B \-\-route-gateway gw
@@ -1041,6 +1053,9 @@ flag to override
 the default gateway by using 0.0.0.0/1 and 128.0.0.0/1
 rather than 0.0.0.0/0.  This has the benefit of overriding
 but not wiping out the original default gateway. 
+
+Using the def1 flag is highly recommended, and is currently
+planned to become the default by OpenVPN 2.1.
 .\"*********************************************************
 .TP
 .B \-\-link-mtu n
@@ -2798,7 +2813,21 @@ of OpenVPN's client mode.  This directive is equivalent to:
 This option must be used on a client which is connecting
 to a multi-client server.  It indicates to OpenVPN that it
 should accept options pushed by the server, provided they
-are part of the legal set of pushable options.
+are part of the legal set of pushable options (note that the
+.B \-\-pull
+option is implied by
+.B \-\-client
+).
+
+In particular,
+.B \-\-pull
+allows the server to push routes to the client, so you should
+not use
+.B \-\-pull
+or
+.B \-\-client
+in situations where you don't trust the server to have control
+over the client's routing table.
 .\"*********************************************************
 .TP
 .B \-\-auth-user-pass [up]
@@ -2840,15 +2869,15 @@ tries to connect.
 .B type
 can be one of:
 
-.B none --
+.B none \-\-
 Client will exit with a fatal error (this is the default).
 .br
-.B nointeract --
+.B nointeract \-\-
 Client will retry the connection without requerying for an
 .B \-\-auth-user-pass
 username/password.  Use this option for unattended clients.
 .br
-.B interact --
+.B interact \-\-
 Client will requery for an
 .B \-\-auth-user-pass
 username/password and/or private key password before attempting a reconnection.

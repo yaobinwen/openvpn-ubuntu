@@ -2108,7 +2108,7 @@ foreign_option (struct options *o, char *argv[], int len, struct env_set *es)
 	    {
 	      if (!first)
 		buf_printf (&value, " ");
-	      buf_printf (&value, argv[i]);
+	      buf_printf (&value, "%s", argv[i]);
 	      first = false;
 	    }
 	}
