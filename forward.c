@@ -297,6 +297,7 @@ check_inactivity_timeout_dowork (struct context *c)
 void
 schedule_exit (struct context *c, const int n_seconds)
 {
+  tls_set_single_session (c->c2.tls_multi);
   update_time ();
   reset_coarse_timers (c);
   event_timeout_init (&c->c2.scheduled_exit, n_seconds, now);
@@ -355,6 +356,23 @@ check_fragment_dowork (struct context *c)
   fragment_housekeeping (c->c2.fragment, &c->c2.frame_fragment, &c->c2.timeval);
 }
 #endif
+
+/*
+ * Buffer reallocation, for use with null encryption.
+ */
+static inline void
+buffer_turnover (const uint8_t *orig_buf, struct buffer *dest_stub, struct buffer *src_stub, struct buffer *storage)
+{
+  if (orig_buf == src_stub->data && src_stub->data != storage->data)
+    {
+      buf_assign (storage, src_stub);
+      *dest_stub = *storage;
+    }
+  else
+    {
+      *dest_stub = *src_stub;
+    }
+}
 
 /*
  * Compress, fragment, encrypt and HMAC-sign an outgoing packet.
@@ -431,15 +449,7 @@ encrypt_sign (struct context *c, bool comp_frag)
 #endif
 
   /* if null encryption, copy result to read_tun_buf */
-  if (orig_buf == c->c2.buf.data && c->c2.buf.data != b->read_tun_buf.data)
-    {
-      buf_assign (&b->read_tun_buf, &c->c2.buf);
-      c->c2.to_link = b->read_tun_buf;
-    }
-  else
-    {
-      c->c2.to_link = c->c2.buf;
-    }
+  buffer_turnover (orig_buf, &c->c2.to_link, &c->c2.buf, &b->read_tun_buf);
 }
 
 /*
@@ -600,9 +610,9 @@ read_incoming_link (struct context *c)
    */
   int status;
 
-  perf_push (PERF_READ_IN_LINK);
+  /*ASSERT (!c->c2.to_tun.len);*/
 
-  ASSERT (!c->c2.to_tun.len);
+  perf_push (PERF_READ_IN_LINK);
 
   c->c2.buf = c->c2.buffers->read_link_buf;
   ASSERT (buf_init (&c->c2.buf, FRAME_HEADROOM_ADJ (&c->c2.frame, FRAME_HEADROOM_MARKER_READ_LINK)));
@@ -648,6 +658,7 @@ process_incoming_link (struct context *c)
   struct gc_arena gc = gc_new ();
   bool decrypt_status;
   struct link_socket_info *lsi = get_link_socket_info (c);
+  const uint8_t *orig_buf = c->c2.buf.data;
 
   perf_push (PERF_PROC_IN_LINK);
 
@@ -792,7 +803,7 @@ process_incoming_link (struct context *c)
 	process_received_occ_msg (c);
 #endif
 
-      c->c2.to_tun = c->c2.buf;
+      buffer_turnover (orig_buf, &c->c2.to_tun, &c->c2.buf, &c->c2.buffers->read_link_buf);
 
       /* to_tun defined + unopened tuntap can cause deadlock */
       if (!tuntap_defined (c->c1.tuntap))
@@ -814,12 +825,12 @@ process_incoming_link (struct context *c)
 void
 read_incoming_tun (struct context *c)
 {
-  perf_push (PERF_READ_IN_TUN);
-
   /*
    * Setup for read() call on TUN/TAP device.
    */
-  ASSERT (!c->c2.to_link.len);
+  /*ASSERT (!c->c2.to_link.len);*/
+
+  perf_push (PERF_READ_IN_TUN);
 
   c->c2.buf = c->c2.buffers->read_tun_buf;
 #ifdef TUN_PASS_BUFFER
@@ -867,10 +878,7 @@ process_incoming_tun (struct context *c)
 #endif
 
   /* Show packet content */
-  dmsg (D_TUN_RW, "TUN READ [%d]: %s md5=%s",
-       BLEN (&c->c2.buf),
-       format_hex (BPTR (&c->c2.buf), BLEN (&c->c2.buf), 80, &gc),
-       MD5SUM (BPTR (&c->c2.buf), BLEN (&c->c2.buf), &gc));
+  dmsg (D_TUN_RW, "TUN READ [%d]", BLEN (&c->c2.buf));
 
   if (c->c2.buf.len > 0)
     {
@@ -1049,13 +1057,14 @@ process_outgoing_tun (struct context *c)
 {
   struct gc_arena gc = gc_new ();
 
-  perf_push (PERF_PROC_OUT_TUN);
-
   /*
    * Set up for write() call to TUN/TAP
    * device.
    */
-  ASSERT (c->c2.to_tun.len > 0);
+  if (c->c2.to_tun.len <= 0)
+    return;
+
+  perf_push (PERF_PROC_OUT_TUN);
 
   /*
    * The --mssfix option requires
@@ -1074,10 +1083,7 @@ process_outgoing_tun (struct context *c)
       if (c->c2.log_rw)
 	fprintf (stderr, "w");
 #endif
-      dmsg (D_TUN_RW, "TUN WRITE [%d]: %s md5=%s",
-	   BLEN (&c->c2.to_tun),
-	   format_hex (BPTR (&c->c2.to_tun), BLEN (&c->c2.to_tun), 80, &gc),
-	   MD5SUM (BPTR (&c->c2.to_tun), BLEN (&c->c2.to_tun), &gc));
+      dmsg (D_TUN_RW, "TUN WRITE [%d]", BLEN (&c->c2.to_tun));
 
 #ifdef TUN_PASS_BUFFER
       size = write_tun_buffered (c->c1.tuntap, &c->c2.to_tun);
