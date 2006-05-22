@@ -13,8 +13,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openvpn_2.0.2-1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-08-28 14:07+0200\n"
+"Report-Msgid-Bugs-To: agi@inittab.org\n"
+"POT-Creation-Date: 2006-05-22 03:32+0200\n"
 "PO-Revision-Date: 2005-09-04 11:59+0200\n"
 "Last-Translator: Michel Grentzinger <mic.grentz@online.fr>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
@@ -31,11 +31,12 @@ msgstr "Faut-il démarrer openvpn dès que possible ?"
 #. Type: boolean
 #. Description
 #: ../templates:4
+#, fuzzy
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
 "it may have been unavailable when they started. Newer versions of the "
-"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
 msgstr ""
 "Les précédentes versions d'openvpn démarraient en même temps que la plupart "

@@ -14,20 +14,20 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openvpn\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-08-28 14:07+0200\n"
-"PO-Revision-Date: 2004-11-25 20:50+0100\n"
+"Report-Msgid-Bugs-To: agi@inittab.org\n"
+"POT-Creation-Date: 2006-05-22 03:32+0200\n"
+"PO-Revision-Date: 2005-10-14 21:57+0200\n"
 "Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
-"Language-Team: Czech <provoz@debian.cz>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:4
 msgid "Would you like to start openvpn sooner?"
-msgstr "Chcete spustit openvpn døíve?"
+msgstr "Chcete spouÅ¡tÄ›t openvpn dÅ™Ã­ve?"
 
 #. Type: boolean
 #. Description
@@ -37,19 +37,20 @@ msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
 "it may have been unavailable when they started. Newer versions of the "
-"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
 msgstr ""
-"Døívìj¹í verze openvpn se spou¹tìly zhruba ve stejném èase jako ostatní "
-"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, proto¾e "
-"tou dobou je¹tì nemuselo bıt k dispozici. Novìj¹í verze balíku openvpn mohou "
-"startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn místo S20openvpn)."
+"DÅ™Ã­vÄ›jÅ¡Ã­ verze openvpn se spouÅ¡tÄ›ly zhruba ve stejnÃ©m Äase jako ostatnÃ­ "
+"sluÅ¾by. To znamenÃ¡, Å¾e vÄ›tÅ¡ina tÄ›chto sluÅ¾eb nemohla openvpn vyuÅ¾Ã­t, protoÅ¾e "
+"tou dobou jeÅ¡tÄ› nemuselo bÃ½t k dispozici. NovÄ›jÅ¡Ã­ verze balÃ­ku openvpn mohou "
+"startovat o nÄ›co dÅ™Ã­ve (v rc[235].d se vytvoÅ™Ã­ mÃ­sto S20openvpn odkaz "
+"S18openvpn)."
 
 #. Type: boolean
 #. Description
 #: ../templates:18
 msgid "Would you like a TUN/TAP device to be created?"
-msgstr "Chcete vytvoøit TUN/TAP zaøízení?"
+msgstr "Chcete vytvoÅ™it TUN/TAP zaÅ™Ã­zenÃ­?"
 
 #. Type: boolean
 #. Description
@@ -60,15 +61,15 @@ msgid ""
 "README.Debian for details on how to make it. If you are using devfs refuse "
 "here."
 msgstr ""
-"Odpovíte-li kladnì, balík vytvoøí speciální zaøízení nazvané /dev/net/tun. "
-"Odmítnete-li, zaøízení se nyní nevytvoøí. Pou¾íváte-li devfs, odmítnìte. "
-"Návod na ruèní vytvoøení zaøízení naleznete v souboru README.Debian."
+"OdpovÃ­te-li kladnÄ›, balÃ­k vytvoÅ™Ã­ speciÃ¡lnÃ­ zaÅ™Ã­zenÃ­ nazvanÃ© /dev/net/tun. "
+"OdmÃ­tnete-li, zaÅ™Ã­zenÃ­ se nynÃ­ nevytvoÅ™Ã­. PouÅ¾Ã­vÃ¡te-li devfs, odmÃ­tnÄ›te. "
+"NÃ¡vod na ruÄnÃ­ vytvoÅ™enÃ­ zaÅ™Ã­zenÃ­ naleznete v souboru README.Debian."
 
 #. Type: boolean
 #. Description
 #: ../templates:27
 msgid "Would you like to stop openvpn before it gets upgraded?"
-msgstr "Chcete openvpn pøi aktualizaci zastavit?"
+msgstr "Chcete openvpn pÅ™i aktualizaci zastavit?"
 
 #. Type: boolean
 #. Description
@@ -79,10 +80,10 @@ msgid ""
 "new version, in that case you may lose your connection, the upgrade may be "
 "interrupted, and you may not be able to reconnect to the remote host."
 msgstr ""
-"V nìkterıch pøípadech se mù¾e stát, ¾e budete aktualizovat openvpn na "
-"vzdáleném serveru právì pøes VPN tunel. Pøed instalací nové verze bude "
-"bì¾ící daemon zastaven a vy tak ztratíte své pøipojení, aktualizace se "
-"pøeru¹í a u¾ se mo¾ná ke vzdálenému poèítaèi nebudete moci pøihlásit."
+"V nÄ›kterÃ½ch pÅ™Ã­padech se mÅ¯Å¾e stÃ¡t, Å¾e budete aktualizovat openvpn na "
+"vzdÃ¡lenÃ©m serveru prÃ¡vÄ› pÅ™es VPN tunel. PÅ™ed instalacÃ­ novÃ© verze bude "
+"bÄ›Å¾Ã­cÃ­ daemon zastaven a vy tak ztratÃ­te svÃ© pÅ™ipojenÃ­, aktualizace se "
+"pÅ™eruÅ¡Ã­ a uÅ¾ se moÅ¾nÃ¡ ke vzdÃ¡lenÃ©mu poÄÃ­taÄi nebudete moci pÅ™ihlÃ¡sit."
 
 #. Type: boolean
 #. Description
@@ -92,20 +93,20 @@ msgid ""
 "before it gets upgraded. The installation process will restart it once it's "
 "done."
 msgstr ""
-"Jestli¾e nebudete provádìt aktualizace lokálnì, doporuèujeme NEZASTAVOVAT "
-"openvpn pøed aktualizací. Instalaèní proces jej po instalaci restartuje."
+"JestliÅ¾e nebudete provÃ¡dÄ›t aktualizace lokÃ¡lnÄ›, doporuÄujeme NEZASTAVOVAT "
+"openvpn pÅ™ed aktualizacÃ­. InstalaÄnÃ­ proces jej po instalaci restartuje."
 
 #. Type: boolean
 #. Description
 #: ../templates:27
 msgid "This option will take effect in your next upgrade."
-msgstr "Tato volba nabude úèinnosti pøi pøí¹tí aktualizaci."
+msgstr "Tato volba nabude ÃºÄinnosti pÅ™i pÅ™Ã­Å¡tÃ­ aktualizaci."
 
 #. Type: note
 #. Description
 #: ../templates:42
 msgid "Default port has changed"
-msgstr "Implicitní port se zmìnil"
+msgstr "ImplicitnÃ­ port se zmÄ›nil"
 
 #. Type: note
 #. Description
@@ -114,34 +115,31 @@ msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
-"Implicitní port OpenVPN se zmìnil z 5000 na 1194 (pøidìlen organizací IANA). "
-"Pokud nezadáte port, kterı se má pou¾ívat na va¹ich VPN, touto aktualizací "
-"je mù¾ete rozbít."
+"ImplicitnÃ­ port OpenVPN se zmÄ›nil z 5000 na 1194 (pÅ™idÄ›len organizacÃ­ IANA). "
+"Pokud nezadÃ¡te port, kterÃ½ se mÃ¡ pouÅ¾Ã­vat na vaÅ¡ich VPN, touto aktualizacÃ­ "
+"je mÅ¯Å¾ete rozbÃ­t."
 
 #. Type: note
 #. Description
 #: ../templates:42
-#, fuzzy
 msgid ""
 "Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"Pokud chcete zachovat staré nastavení portu, pou¾ijte volbu 'port 5000'. V "
-"opaèném pøípadì nezapomeòte upravit pravidla firewallu, aby umo¾nila "
-"komunikaci na novém portu."
+"Pokud chcete zachovat starÃ© nastavenÃ­ portu, pouÅ¾ijte volbu 'port 5000'. V "
+"opaÄnÃ©m pÅ™Ã­padÄ› nezapomeÅˆte upravit pravidla firewallu, aby umoÅ¾nila "
+"komunikaci na novÃ©m portu."
 
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid "Would you like to stop openvpn later?"
-msgstr "Chcete spustit openvpn døíve?"
+msgstr "Chcete ukonÄovat openvpn pozdÄ›ji?"
 
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid ""
 "Previous versions of openvpn stopped at the same time as most of other "
 "services. This meant that some of services stopping later couldn't use  "
@@ -149,10 +147,11 @@ msgid ""
 "openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
 "[06].d instead of a K20openvpn)"
 msgstr ""
-"Døívìj¹í verze openvpn se spou¹tìly zhruba ve stejném èase jako ostatní "
-"slu¾by. To znamená, ¾e vìt¹ina tìchto slu¾eb nemohla openvpn vyu¾ít, proto¾e "
-"tou dobou je¹tì nemuselo bıt k dispozici. Novìj¹í verze balíku openvpn mohou "
-"startovat døíve (v rc[235].d se vytvoøí odkaz S18openvpn místo S20openvpn)."
+"DÅ™Ã­vÄ›jÅ¡Ã­ verze openvpn se ukonÄovaly zhruba ve stejnÃ©m Äase jako ostatnÃ­ "
+"sluÅ¾by. To znamenÃ¡, Å¾e vÄ›tÅ¡ina tÄ›chto sluÅ¾eb nemohla openvpn vyuÅ¾Ã­t, protoÅ¾e "
+"tou dobou jiÅ¾ nemuselo bÃ½t k dispozici. NovÄ›jÅ¡Ã­ verze balÃ­ku openvpn mohou "
+"sluÅ¾bu zastavit pozdÄ›ji (v rc[235].d se mÃ­sto K20openvpn vytvoÅ™Ã­ odkaz "
+"K80openvpn)."
 
 #. Type: boolean
 #. Description
@@ -162,5 +161,5 @@ msgid ""
 "you refuse, nothing will change, and openvpn will be working just like it "
 "did before."
 msgstr ""
-"Budete-li souhlasit, balík se o zmìnu postará. Pokud mo¾nost odmítnete, nic "
+"Budete-li souhlasit, balÃ­k se o zmÄ›nu postarÃ¡. Pokud moÅ¾nost odmÃ­tnete, nic "
 "se nestane a openvpn bude pracovat jako doposud."

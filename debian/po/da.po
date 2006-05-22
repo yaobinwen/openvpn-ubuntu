@@ -15,8 +15,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openvpn_1.5.0-2-da\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-08-28 14:07+0200\n"
+"Report-Msgid-Bugs-To: agi@inittab.org\n"
+"POT-Creation-Date: 2006-05-22 03:32+0200\n"
 "PO-Revision-Date: 2005-09-06 16:15+0200\n"
 "Last-Translator: Claus Hindsgaul <claus_h@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -34,18 +34,19 @@ msgstr "Ønsker du at starte openvpn tidligere?"
 #. Type: boolean
 #. Description
 #: ../templates:4
+#, fuzzy
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
 "it may have been unavailable when they started. Newer versions of the "
-"openvpn package will start earlier. (i.e. a S18openvpn link in rc[235].d "
+"openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
 msgstr ""
 "Tidligere udgaver af openvpn startede samtidig med de fleste andre services. "
 "Det betyder at de fleste af disse services ikke kunne benytte openvpn, da "
 "den kunne være utilgængelig når de startede. Nyere versioner af openvpn-"
-"pakken vil starte tidligere (ved hjælp af en S18openvpn-lænke i rc[235].d "
-"i stedet for S20openvpn)"
+"pakken vil starte tidligere (ved hjælp af en S18openvpn-lænke i rc[235].d i "
+"stedet for S20openvpn)"
 
 #. Type: boolean
 #. Description
@@ -131,8 +132,8 @@ msgid ""
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"Vælg 'port 5000' hvis du vil beholde den gamle port-opsætning, eller sørg for "
-"at din brandmur er sat op så den nye standard-portopsætning kan fungere."
+"Vælg 'port 5000' hvis du vil beholde den gamle port-opsætning, eller sørg "
+"for at din brandmur er sat op så den nye standard-portopsætning kan fungere."
 
 #. Type: boolean
 #. Description
@@ -153,8 +154,8 @@ msgstr ""
 "Tidligere udgaver af openvpn stoppede samtidig med de fleste andre services. "
 "Det betyder at nogle af de services, der stoppede senere, ikke kunne benytte "
 "openvpn, da den kunne være stoppet før dem. Nyere versioner af openvpn-"
-"pakken vil stoppe servicen senere (ved hjælp af en K80openvpn-lænke i rc[06].d "
-"i stedet for K20openvpn)"
+"pakken vil stoppe servicen senere (ved hjælp af en K80openvpn-lænke i rc[06]."
+"d i stedet for K20openvpn)"
 
 #. Type: boolean
 #. Description
@@ -167,4 +168,3 @@ msgstr ""
 "Hvis du accepterer her, vil pakkeopgraderingen udføre denne ændring for dig. "
 "Hvis du afviser, bliver intet ændret, og openvpn vil fungere nøjagtig som "
 "før."
-
