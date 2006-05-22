@@ -3,11 +3,12 @@ Section: net
 Priority: optional
 Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 4.1.16), libssl-dev (>> 0.9.6), liblzo-dev, libpam0g-dev
-Standards-Version: 3.6.2.0
+Standards-Version: 3.7.2.0
 
 Package: openvpn
 Architecture: any
 Depends: debconf | debconf-2.0, ${shlibs:Depends}
+Suggests: openssl
 Description: Virtual Private Network daemon
  An application to securely tunnel IP networks over a single UDP or TCP port.
  It can be used to access remote sites, make secure point to point connnections,
