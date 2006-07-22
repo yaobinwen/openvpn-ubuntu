@@ -1,3 +1,16 @@
+openvpn (2.0.7-1) unstable; urgency=low
+
+  * The 'Translators, translators, translators' release.
+  * New upstream version.
+  * Added Dutch debconf translation. (Closes: #370073)
+    Thanks Kurt De Bree
+  * Updated Danish debconf translation. (Closes: #369772, #376704)
+    Thanks Claus Hindsgaul
+  * Updated French debconf translation. (Closes: #373191)
+    Thanks Michel Grentzinger
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 22 Jul 2006 20:44:52 +0200
+
 openvpn (2.0.6-2) unstable; urgency=low
 
   * The "Mañana" Release.
