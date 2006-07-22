@@ -12,10 +12,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: openvpn_2.0.2-1\n"
+"Project-Id-Version: openvpn_2.0.6-2\n"
 "Report-Msgid-Bugs-To: agi@inittab.org\n"
 "POT-Creation-Date: 2006-05-22 03:32+0200\n"
-"PO-Revision-Date: 2005-09-04 11:59+0200\n"
+"PO-Revision-Date: 2006-06-07 06:56+0200\n"
 "Last-Translator: Michel Grentzinger <mic.grentz@online.fr>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
@@ -31,20 +31,13 @@ msgstr "Faut-il démarrer openvpn dès que possible ?"
 #. Type: boolean
 #. Description
 #: ../templates:4
-#, fuzzy
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
 "it may have been unavailable when they started. Newer versions of the "
 "openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
-msgstr ""
-"Les précédentes versions d'openvpn démarraient en même temps que la plupart "
-"des autres services. Cela signifie que la majorité de ces services ne "
-"peuvent pas utiliser openvpn puisqu'il n'est pas encore disponible "
-"lorsqu'ils démarrent. Les versions récentes du paquet openvpn démarrent plus "
-"tôt (c.-à-d. que le lien dans rc[235].d est S18openvpn au lieu de "
-"S20openvpn)."
+msgstr "Les précédentes versions d'openvpn démarraient en même temps que la plupart des autres services. Cela signifie que la majorité de ces services ne peuvent pas utiliser openvpn puisqu'il n'est pas encore disponible lorsqu'ils démarrent. Les versions récentes du paquet openvpn démarrent plus tôt (c.-à-d. que le lien dans rc[235].d est S16openvpn au lieu de S20openvpn)."
 
 #. Type: boolean
 #. Description
@@ -155,7 +148,7 @@ msgstr ""
 "plupart des autres services. Cela signifie que la majorité de ces services "
 "ne peuvent pas utiliser openvpn puisque ce dernier est déjà arrêté avant "
 "qu'ils ne s'arrêtent à leur tour. Les versions récentes du paquet openvpn "
-"s'arrêtent plus tôt (c.-à-d. que le lien dans rc[16].d est K80openvpn au "
+"s'arrêtent plus tard (c.-à-d. que le lien dans rc[06].d est K80openvpn au "
 "lieu de K20openvpn)."
 
 #. Type: boolean
