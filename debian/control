@@ -11,7 +11,7 @@ Depends: debconf | debconf-2.0, ${shlibs:Depends}
 Suggests: openssl
 Description: Virtual Private Network daemon
  An application to securely tunnel IP networks over a single UDP or TCP port.
- It can be used to access remote sites, make secure point to point connnections,
+ It can be used to access remote sites, make secure point to point connections,
  enhance WiFi security, etc.
  .
  OpenVPN uses all of the encryption, authentication, and certification features

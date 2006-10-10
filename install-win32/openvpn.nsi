@@ -14,7 +14,7 @@
 !define BIN "${HOME}\bin"
 
 !define PRODUCT_NAME "OpenVPN"
-!define VERSION "2.0.7" # AUTO_VERSION
+!define VERSION "2.0.9" # AUTO_VERSION
 
 !define TAP "tap0801"
 !define TAPDRV "${TAP}.sys"
