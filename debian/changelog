@@ -1,3 +1,13 @@
+openvpn (2.0.9-2) unstable; urgency=low
+
+  * Updated Spanish debconf translation. (Closes: #393796)
+  * Updated German debconf translation. (Closes: #397019)
+  * Updated Japanese debconf translation. (Closes: #392627)
+  * Added Italian debconf translation. (Closes: #398050)
+  * Added Portuguese debconf translation. (Closes: #400685)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri,  8 Dec 2006 12:28:34 +0100
+
 openvpn (2.0.9-1) unstable; urgency=low
 
   * New upstream release. No changes in *NIX source code.

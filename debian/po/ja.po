@@ -14,26 +14,25 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: openvpn 1.99+2.beta17-1\n"
-"Report-Msgid-Bugs-To: agi@inittab.org\n"
+"Project-Id-Version: openvpn 2.0.7-1\n"
+"Report-Msgid-Bugs-To: Alberto Gonzalez Iniesta <agi@inittab.org>\n"
 "POT-Creation-Date: 2006-05-22 03:32+0200\n"
-"PO-Revision-Date: 2004-11-25 14:55+0900\n"
-"Last-Translator: Hideki Yamane <henrich@samba.gr.jp>\n"
+"PO-Revision-Date: 2006-10-09 00:52+0900\n"
+"Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=EUC-JP\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:4
 msgid "Would you like to start openvpn sooner?"
-msgstr "openvpn ¤ò¤¹¤°¤Ëµ¯Æ°¤·¤Ş¤¹¤«?"
+msgstr "openvpn ã‚’ã™ãã«èµ·å‹•ã—ã¾ã™ã‹?"
 
 #. Type: boolean
 #. Description
 #: ../templates:4
-#, fuzzy
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
@@ -41,17 +40,17 @@ msgid ""
 "openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
 msgstr ""
-"openvpn ¤Î°ÊÁ°¤Î¥Ğ¡¼¥¸¥ç¥ó¤Ç¤ÏÂ¾¤ÎÂçÈ¾¤Î¥µ¡¼¥Ó¥¹¤ÈÆ±»ş¤Ëµ¯Æ°¤·¤Æ¤¤¤Ş¤·¤¿¡£¤³"
-"¤ì¤Ï¡¢¤³¤ì¤é¤Î¥µ¡¼¥Ó¥¹¤ÎÂçÈ¾¤Ïµ¯Æ°»ş¤Ë openvpn ¤¬ÍøÍÑ¤Ç¤­¤Ê¤¤¾õÂÖ¤Î¤¿¤á¡¢"
-"openvpn ¤ò»È¤¨¤Ê¤¤¤Î¤ò°ÕÌ£¤·¤Ş¤¹¡£¿·¤·¤¤¥Ğ¡¼¥¸¥ç¥ó¤Î openvpn ¥Ñ¥Ã¥±¡¼¥¸¤Ï¤¹¤°"
-"¤Ëµ¯Æ°¤¹¤ë¤è¤¦¤Ë¤Ê¤Ã¤Æ¤¤¤Ş¤¹¡£(¤Ä¤Ş¤ê¡¢rc[235].d ¤Ç S20openvpn ¤Ç¤Ï¤Ê¤¯ "
-"S18openvpn ¤Ë¥ê¥ó¥¯¤·¤Æ¤¤¤Ş¤¹)"
+"openvpn ã®ä»¥å‰ã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã§ã¯ä»–ã®å¤§åŠã®ã‚µãƒ¼ãƒ“ã‚¹ã¨åŒæ™‚ã«èµ·å‹•ã—ã¦ã„ã¾ã—ãŸã€‚ã“"
+"ã‚Œã¯ã€ã“ã‚Œã‚‰ã®ã‚µãƒ¼ãƒ“ã‚¹ã®å¤§åŠãŒèµ·å‹•æ™‚ã« openvpn ãŒåˆ©ç”¨ã§ããªã„çŠ¶æ…‹ã®ãŸã‚ã€openvpn "
+"ã‚’åˆ©ç”¨ã§ããªã„ã®ã‚’æ„å‘³ã—ã¾ã™ã€‚æ–°ã—ã„ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã® openvpn ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã¯ã™ã"
+"ã«èµ·å‹•ã™ã‚‹ã‚ˆã†ã«ãªã£ã¦ã„ã¾ã™ã€‚(ã¤ã¾ã‚Šã€rc[235].d ã§ã¯ S20openvpn ã§ã¯ãªã "
+"S16openvpn ã«ãƒªãƒ³ã‚¯ã—ã¦ã„ã¾ã™)"
 
 #. Type: boolean
 #. Description
 #: ../templates:18
 msgid "Would you like a TUN/TAP device to be created?"
-msgstr "TUN/TAP ¥Ç¥Ğ¥¤¥¹¤òºîÀ®¤·¤Ş¤¹¤«?"
+msgstr "TUN/TAP ãƒ‡ãƒã‚¤ã‚¹ã‚’ä½œæˆã—ã¾ã™ã‹?"
 
 #. Type: boolean
 #. Description
@@ -62,16 +61,16 @@ msgid ""
 "README.Debian for details on how to make it. If you are using devfs refuse "
 "here."
 msgstr ""
-"¤³¤³¤Ç¡Ö¤Ï¤¤¡×¤ÈÅú¤¨¤ë¤È¡¢¥Ñ¥Ã¥±¡¼¥¸¤Ï openvpn ¤¬ÍøÍÑ¤¹¤ë¤¿¤á¤Ë /dev/net/tun "
-"¤È¤¤¤¦ÆÃ¼ì¥Ç¥Ğ¥¤¥¹¤òºîÀ®¤·¤Ş¤¹¡£¡Ö¤¤¤¤¤¨¡×¤ÈÅú¤¨¤¿¾ì¹ç¤Ï¡¢¤³¤³¤Ç¤Ï¥Ç¥Ğ¥¤¥¹¤Ï"
-"ºîÀ®¤µ¤ì¤Ş¤»¤ó¡£ºîÀ®ÊıË¡¤Î¾ÜºÙ¤Ë¤Ä¤¤¤Æ¤Ï README.Debian ¤ò»²¾È¤·¤Æ¤¯¤À¤µ¤¤¡£"
-"devfs ¤ò»È¤Ã¤Æ¤¤¤ë¾ì¹ç¤Ï¡Ö¤¤¤¤¤¨¡×¤ÈÅú¤¨¤Æ¤¯¤À¤µ¤¤¡£"
+"ã“ã“ã§ã€Œã¯ã„ã€ã¨ç­”ãˆã‚‹ã¨ã€ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã¯ openvpn ãŒåˆ©ç”¨ã™ã‚‹ãŸã‚ã« /dev/net/tun "
+"ã¨ã„ã†ç‰¹æ®Šãƒ‡ãƒã‚¤ã‚¹ã‚’ä½œæˆã—ã¾ã™ã€‚ã€Œã„ã„ãˆã€ã¨ç­”ãˆãŸå ´åˆã¯ã€ã“ã“ã§ã¯ãƒ‡ãƒã‚¤ã‚¹ã¯"
+"ä½œæˆã•ã‚Œã¾ã›ã‚“ã€‚ä½œæˆæ–¹æ³•ã®è©³ç´°ã«ã¤ã„ã¦ã¯ README.Debian ã‚’å‚ç…§ã—ã¦ãã ã•ã„ã€‚"
+"devfs ã‚’ä½¿ã£ã¦ã„ã‚‹å ´åˆã¯ã€Œã„ã„ãˆã€ã¨ç­”ãˆã¦ãã ã•ã„ã€‚"
 
 #. Type: boolean
 #. Description
 #: ../templates:27
 msgid "Would you like to stop openvpn before it gets upgraded?"
-msgstr "¥¢¥Ã¥×¥°¥ì¡¼¥É¤Îºİ¤Ë openvpn ¤òÄä»ß¤·¤Ş¤¹¤«?"
+msgstr "ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã®éš›ã« openvpn ã‚’åœæ­¢ã—ã¾ã™ã‹?"
 
 #. Type: boolean
 #. Description
@@ -82,10 +81,10 @@ msgid ""
 "new version, in that case you may lose your connection, the upgrade may be "
 "interrupted, and you may not be able to reconnect to the remote host."
 msgstr ""
-"VPN ¤ò»È¤Ã¤Æ¥ê¥â¡¼¥È¥µ¡¼¥Ğ¾å¤Ç openvpn ¤Î¥¢¥Ã¥×¥°¥ì¡¼¥É¤ò¹Ô¤Ã¤Æ¤¤¤ë¾ì¹ç¤¬¤¢¤ë"
-"¤«¤â¤·¤ì¤Ş¤»¤ó¡£¥¢¥Ã¥×¥°¥ì¡¼¥Éºî¶È¤Ç¤Ï¡¢¿·¥Ğ¡¼¥¸¥ç¥ó¤Î¥¤¥ó¥¹¥È¡¼¥ëºî¶È¤ÎÁ°¤Ë"
-"Æ°ºî¤·¤Æ¤¤¤ë¥Ç¡¼¥â¥ó¤òÄä»ß¤¹¤ë¤Î¤Ç¡¢¤½¤Î¾ì¹ç¤ÏÀÜÂ³¤¬ÅÓÀÚ¤ì¡¢¥¢¥Ã¥×¥°¥ì¡¼¥É¤¬"
-"ÃæÃÇ¤µ¤ì¤Æ¥ê¥â¡¼¥È¥Û¥¹¥È¤ØÀÜÂ³¤¬½ĞÍè¤Ê¤¯¤Ê¤ë¤«¤â¤·¤ì¤Ş¤»¤ó¡£"
+"VPN ã‚’ä½¿ã£ã¦ãƒªãƒ¢ãƒ¼ãƒˆã‚µãƒ¼ãƒä¸Šã§ openvpn ã®ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã‚’è¡Œã£ã¦ã„ã‚‹å ´åˆãŒã‚ã‚‹"
+"ã‹ã‚‚ã—ã‚Œã¾ã›ã‚“ã€‚ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ä½œæ¥­ã§ã¯ã€æ–°ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã®ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä½œæ¥­ã®å‰ã«"
+"å‹•ä½œã—ã¦ã„ã‚‹ãƒ‡ãƒ¼ãƒ¢ãƒ³ã‚’åœæ­¢ã™ã‚‹ã®ã§ã€ãã®å ´åˆã¯æ¥ç¶šãŒé€”åˆ‡ã‚Œã€ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ãŒ"
+"ä¸­æ–­ã•ã‚Œã¦ãƒªãƒ¢ãƒ¼ãƒˆãƒ›ã‚¹ãƒˆã¸æ¥ç¶šãŒå‡ºæ¥ãªããªã‚‹ã‹ã‚‚ã—ã‚Œã¾ã›ã‚“ã€‚"
 
 #. Type: boolean
 #. Description
@@ -95,21 +94,21 @@ msgid ""
 "before it gets upgraded. The installation process will restart it once it's "
 "done."
 msgstr ""
-"¥¢¥Ã¥×¥°¥ì¡¼¥É¤ò¥í¡¼¥«¥ë¤Ç¼Â¹Ô¤·¤Ê¤¤¸Â¤ê¡¢¥¢¥Ã¥×¥°¥ì¡¼¥É¤ÎÁ°¤Ë openvpn ¤òÄä»ß"
-"¡Ö¤·¤Ê¤¤¡×¤è¤¦¤Ë¤·¤Ş¤·¤ç¤¦¡£¥¤¥ó¥¹¥È¡¼¥ëºî¶È¤Ç¤Ï°ìÃ¶´°Î»¤¹¤ë¤ÈºÆµ¯Æ°¤ò¹Ô¤¤¤Ş"
-"¤¹¡£"
+"ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã‚’ãƒ­ãƒ¼ã‚«ãƒ«ã§å®Ÿè¡Œã—ãªã„é™ã‚Šã€ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã®å‰ã« openvpn ã‚’åœæ­¢"
+"ã€Œã—ãªã„ã€ã‚ˆã†ã«ã—ã¾ã—ã‚‡ã†ã€‚ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä½œæ¥­ã§ã¯ä¸€æ—¦å®Œäº†ã™ã‚‹ã¨å†èµ·å‹•ã‚’è¡Œã„ã¾"
+"ã™ã€‚"
 
 #. Type: boolean
 #. Description
 #: ../templates:27
 msgid "This option will take effect in your next upgrade."
-msgstr "¤³¤Î¥ª¥×¥·¥ç¥ó¤Ï¼¡²ó¤Î¥¢¥Ã¥×¥°¥ì¡¼¥É»ş¤Ë»È¤ï¤ì¤Ş¤¹¡£"
+msgstr "ã“ã®ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã¯æ¬¡å›ã®ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰æ™‚ã«ä½¿ã‚ã‚Œã¾ã™ã€‚"
 
 #. Type: note
 #. Description
 #: ../templates:42
 msgid "Default port has changed"
-msgstr "É¸½à¥İ¡¼¥È¤¬ÊÑ¹¹¤µ¤ì¤Ş¤·¤¿"
+msgstr "æ¨™æº–ãƒãƒ¼ãƒˆãŒå¤‰æ›´ã•ã‚Œã¾ã—ãŸ"
 
 #. Type: note
 #. Description
@@ -118,34 +117,31 @@ msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
-"OpenVPN ¤ÎÉ¸½à¥İ¡¼¥È¤¬ 5000 ¤«¤é (IANA ¤Ë¤è¤Ã¤Æ³ä¤êÅö¤Æ¤é¤ì¤¿) 1194 ¤ËÊÑ¹¹¤µ"
-"¤ì¤Ş¤·¤¿¡£VPN ÀÜÂ³¤ÇÍøÍÑ¤¹¤ë¥İ¡¼¥È¤òÌÀ¼¨Åª¤Ë»ØÄê¤·¤Æ¤¤¤Ê¤¤¾ì¹ç¤Ï¡¢¤³¤Î¥¢¥Ã¥×"
-"¥°¥ì¡¼¥É¤Ë¤è¤Ã¤ÆÀÜÂ³¤¬¤Ç¤­¤Ê¤¯¤Ê¤ê¤Ş¤¹¡£"
+"OpenVPN ã®æ¨™æº–ãƒãƒ¼ãƒˆãŒ 5000 ã‹ã‚‰ (IANA ã«ã‚ˆã£ã¦å‰²ã‚Šå½“ã¦ã‚‰ã‚ŒãŸ) 1194 ã«å¤‰æ›´ã•"
+"ã‚Œã¾ã—ãŸã€‚VPN æ¥ç¶šã§åˆ©ç”¨ã™ã‚‹ãƒãƒ¼ãƒˆã‚’æ˜ç¤ºçš„ã«æŒ‡å®šã—ã¦ã„ãªã„å ´åˆã¯ã€ã“ã®ã‚¢ãƒƒãƒ—"
+"ã‚°ãƒ¬ãƒ¼ãƒ‰ã«ã‚ˆã£ã¦æ¥ç¶šãŒã§ããªããªã‚Šã¾ã™ã€‚"
 
 #. Type: note
 #. Description
 #: ../templates:42
-#, fuzzy
 msgid ""
 "Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"°ÊÁ°¤Î¥İ¡¼¥ÈÀßÄê¤ò¤½¤Î¤Ş¤Ş»È¤¤Â³¤±¤¿¤¤¾ì¹ç¤Ï 'port 5000' ¥ª¥×¥·¥ç¥ó¤òÍøÍÑ¤¹¤ë"
-"¤«¡¢¥Õ¥¡¥¤¥¢¥¦¥©¡¼¥ë¤Î¥ë¡¼¥ë¤ò¸«Ä¾¤·¡¢¿·¤·¤¤É¸½à¥İ¡¼¥ÈÀßÄê¤ÇÆ°ºî¤¹¤ë¤è¤¦¤Ëµö"
-"²Ä¤ò¹Ô¤Ã¤Æ¤¯¤À¤µ¤¤¡£"
+"ä»¥å‰ã®ãƒãƒ¼ãƒˆè¨­å®šã‚’ãã®ã¾ã¾ä½¿ã„ç¶šã‘ãŸã„å ´åˆã¯ 'port 5000' ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’åˆ©ç”¨ã—ã¦"
+"ã£ãã ã•ã„ã€‚ãã‚Œä»¥å¤–ã®å ´åˆã¯ãƒ•ã‚¡ã‚¤ã‚¢ã‚¦ã‚©ãƒ¼ãƒ«ã®ãƒ«ãƒ¼ãƒ«ã‚’è¦‹ç›´ã—ã€æ–°ã—ã„æ¨™æº–ãƒãƒ¼ãƒˆ"
+"è¨­å®šã§å‹•ä½œã™ã‚‹ã‚ˆã†ã«ã—ã¦ãã ã•ã„ã€‚"
 
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid "Would you like to stop openvpn later?"
-msgstr "openvpn ¤ò¤¹¤°¤Ëµ¯Æ°¤·¤Ş¤¹¤«?"
+msgstr "openvpn ãŒé…ã‚Œã¦åœæ­¢ã™ã‚‹ã‚ˆã†ã«ã—ã¾ã™ã‹?"
 
 #. Type: boolean
 #. Description
 #: ../templates:54
-#, fuzzy
 msgid ""
 "Previous versions of openvpn stopped at the same time as most of other "
 "services. This meant that some of services stopping later couldn't use  "
@@ -153,11 +149,11 @@ msgid ""
 "openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
 "[06].d instead of a K20openvpn)"
 msgstr ""
-"openvpn ¤Î°ÊÁ°¤Î¥Ğ¡¼¥¸¥ç¥ó¤Ç¤ÏÂ¾¤ÎÂçÈ¾¤Î¥µ¡¼¥Ó¥¹¤ÈÆ±»ş¤Ëµ¯Æ°¤·¤Æ¤¤¤Ş¤·¤¿¡£¤³"
-"¤ì¤Ï¡¢¤³¤ì¤é¤Î¥µ¡¼¥Ó¥¹¤ÎÂçÈ¾¤Ïµ¯Æ°»ş¤Ë openvpn ¤¬ÍøÍÑ¤Ç¤­¤Ê¤¤¾õÂÖ¤Î¤¿¤á¡¢"
-"openvpn ¤ò»È¤¨¤Ê¤¤¤Î¤ò°ÕÌ£¤·¤Ş¤¹¡£¿·¤·¤¤¥Ğ¡¼¥¸¥ç¥ó¤Î openvpn ¥Ñ¥Ã¥±¡¼¥¸¤Ï¤¹¤°"
-"¤Ëµ¯Æ°¤¹¤ë¤è¤¦¤Ë¤Ê¤Ã¤Æ¤¤¤Ş¤¹¡£(¤Ä¤Ş¤ê¡¢rc[235].d ¤Ç S20openvpn ¤Ç¤Ï¤Ê¤¯ "
-"S18openvpn ¤Ë¥ê¥ó¥¯¤·¤Æ¤¤¤Ş¤¹)"
+"openvpn ã®ä»¥å‰ã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã§ã¯ã€ä»–ã®å¤§åŠã®ã‚µãƒ¼ãƒ“ã‚¹ã¨åŒæ™‚ã«çµ‚äº†ã—ã¦ã„ã¾ã—ãŸã€‚"
+"ã“ã‚Œã¯ã€é…ã‚Œã¦çµ‚äº†ã™ã‚‹ã‚µãƒ¼ãƒ“ã‚¹ã®å¹¾ã¤ã‹ã¯ã€openvpn ãŒã‚µãƒ¼ãƒ“ã‚¹ã‚ˆã‚Šå‰ã«åœæ­¢ã•ã‚Œã¦"
+"ã—ã¾ã†ã®ã§ã€openvpn ã‚’åˆ©ç”¨ã§ããªã‹ã£ãŸã¨ã„ã†ã“ã¨ã‚’æ„å‘³ã—ã¦ã„ã¾ã™ã€‚"
+"æ–°ã—ã„ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã® openvpn ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã¯é…ã‚Œã¦åœæ­¢ã™ã‚‹ã‚ˆã†ã«ãªã£ã¦ã„ã¾ã™ã€‚"
+"(ã¤ã¾ã‚Šã€rc[06].d ã§ K20openvpn ã§ã¯ãªã K80openvpn ã«ãƒªãƒ³ã‚¯ã—ã¦ã„ã¾ã™)"
 
 #. Type: boolean
 #. Description
@@ -167,5 +163,5 @@ msgid ""
 "you refuse, nothing will change, and openvpn will be working just like it "
 "did before."
 msgstr ""
-"¤³¤³¤Ç¡Ö¤Ï¤¤¡×¤ÈÅú¤¨¤ë¤È¡¢¥Ñ¥Ã¥±¡¼¥¸¤Î¥¢¥Ã¥×¥°¥ì¡¼¥É¤Ç¤³¤ÎÊÑ¹¹¤ò¹Ô¤¤¤Ş¤¹¡£"
-"¡Ö¤¤¤¤¤¨¡×¤ÈÅú¤¨¤¿¾ì¹ç¡¢²¿¤âÊÑ¹¹¤µ¤ì¤º¡¢openvpn ¤Ï°ÊÁ°Æ±ÍÍ¤ËÆ°ºî¤·¤Ş¤¹¡£"
+"ã“ã“ã§ã€Œã¯ã„ã€ã¨ç­”ãˆã‚‹ã¨ã€ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã®ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã§ã“ã®å¤‰æ›´ã‚’è¡Œã„ã¾ã™ã€‚"
+"ã€Œã„ã„ãˆã€ã¨ç­”ãˆãŸå ´åˆã€ä½•ã‚‚å¤‰æ›´ã•ã‚Œãšã€openvpn ã¯ä»¥å‰åŒæ§˜ã«å‹•ä½œã—ã¾ã™ã€‚"
