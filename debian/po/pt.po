@@ -107,7 +107,7 @@ msgstr "Esta opção terá efeito na próxima actualização."
 #. Description
 #: ../templates:4001
 msgid "Default port has changed"
-msgstr "A porta por omissao foi alterada."
+msgstr "A porta por omissão foi alterada."
 
 #. Type: note
 #. Description
