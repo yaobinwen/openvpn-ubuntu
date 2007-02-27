@@ -1,6 +1,6 @@
 Template: openvpn/change_init
 Type: boolean
-Default: true
+Default: false
 _Description: Would you like to start openvpn sooner?
  Previous versions of openvpn started at the same time as most of other
  services. This means that most of these services couldn't use openvpn
@@ -50,7 +50,7 @@ _Description: Default port has changed
 
 Template: openvpn/change_init2
 Type: boolean
-Default: true
+Default: false
 _Description: Would you like to stop openvpn later?
  Previous versions of openvpn stopped at the same time as most of other
  services. This meant that some of services stopping later couldn't use 
