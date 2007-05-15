@@ -2,7 +2,7 @@ Source: openvpn
 Section: net
 Priority: optional
 Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
-Build-Depends: debhelper (>= 4.1.16), libssl-dev (>> 0.9.6), liblzo-dev, libpam0g-dev
+Build-Depends: debhelper (>= 4.1.16), libssl-dev (>> 0.9.6), liblzo2-dev, libpam0g-dev
 Standards-Version: 3.7.2.0
 
 Package: openvpn

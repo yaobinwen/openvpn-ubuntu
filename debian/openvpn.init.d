@@ -43,9 +43,14 @@ start_vpn () {
     echo -n " $NAME"
     STATUS="OK"
 
-    $DAEMON --writepid /var/run/openvpn.$NAME.pid \
-            $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
-            --config $CONFIG_DIR/$NAME.conf < /dev/null || STATUS="FAILED"
+    # Check to see if it's already started...
+    if test -e /var/run/openvpn.$NAME.pid ; then
+      STATUS="FAILED - Already running (PID file exists)"
+    else
+      $DAEMON --writepid /var/run/openvpn.$NAME.pid \
+	      $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
+	      --config $CONFIG_DIR/$NAME.conf < /dev/null || STATUS="FAILED"
+    fi
     echo -n "($STATUS)"
 }
 stop_vpn () {
@@ -129,7 +134,7 @@ reload|force-reload)
     NAME=`echo $PIDFILE | cut -c18-`
     NAME=${NAME%%.pid}
 # If openvpn if running under a different user than root we'll need to restart
-    if egrep '^( |\t)*user' $CONFIG_DIR/$NAME.conf > /dev/null 2>&1 ; then
+    if egrep '^( |\t)*user ' $CONFIG_DIR/$NAME.conf > /dev/null 2>&1 ; then
       stop_vpn
       sleep 1
       start_vpn
