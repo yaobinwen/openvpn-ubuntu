@@ -51,6 +51,38 @@ Just put the names after the action (start|stop), like this:
 
 /etc/init.d/openvpn start vpn1 vpn4 vpn5
 
+/etc/network/interfaces
+-----------------------
+
+/etc/network/interfaces can be configured to start and stop openvpn when the
+underlying network interface is brought up and down. To do so add a line such
+as "openvpn vpn1" to the stanza for the underlying network interface, where
+"vpn1" is the name of the vpn to start and stop.
+
+It is possible to control vpn interfaces using the standard ifup/ifdown
+commands. This is helpful in case you want tunnels to be started right
+after physical networks, so any network filesystems listed in fstab can be
+mounted during the standard boot sequence. In order to do this several
+steps need to be taken:
+
+-   Select a specific tun/tap device name using the 'dev' option in your
+    config file (e.g. dev tun_work). This will ensure that the name you
+    use in /etc/network/interfaces will always match the one this vpn 
+    will utilize.
+    
+-   Create a 'manual' type interface entry in /etc/network/interfaces. 
+    There should be only one option - openvpn, which takes a config file
+    name as the argument (without the .conf suffix) For example:
+    
+    auto tun_work
+    iface tun_work inet manual
+        openvpn work_vpn
+
+-   You should prevent openvpn from trying to start this tunnel when its
+    own init script runs, since the interface is already up. This is done 
+    in /etc/default/openvpn by changing the AUTOSTART option as described 
+    in the same file
+
 
 #####################################
 # Compatibility notes on 2.x vs 1.x #
