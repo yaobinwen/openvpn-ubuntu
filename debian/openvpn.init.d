@@ -1,5 +1,14 @@
 #!/bin/sh -e
-#
+
+### BEGIN INIT INFO
+# Provides:          vpn
+# Required-Start:    $network $local_fs
+# Required-Stop:     $network $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Openvpn VPN service
+### END INIT INFO
+
 # Original version by Robert Leslie
 # <rob@mars.org>, edited by iwj and cs
 # Modified for openvpn by Alberto Gonzalez Iniesta <agi@inittab.org>
