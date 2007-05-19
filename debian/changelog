@@ -1,3 +1,19 @@
+openvpn (2.0.9-8) unstable; urgency=low
+
+  * Install /etc/openvpn/update-resolv-conf with correct permissions
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 19 May 2007 18:12:12 +0200
+
+openvpn (2.0.9-7) unstable; urgency=low
+
+  * Added script to update resolv.conf with server's settings.
+    The script is located in the /etc/openvpn/ directory.
+    Thanks a lot Christof Lauber for the script.
+    Added resolvconf to Suggests.
+  * Added LSB section to the init.d script.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 19 May 2007 17:48:23 +0200
+
 openvpn (2.0.9-6) unstable; urgency=low
 
   * Fixed init.d script to avoid running multiple instances of the

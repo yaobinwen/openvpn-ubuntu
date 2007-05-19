@@ -8,7 +8,7 @@ Standards-Version: 3.7.2.0
 Package: openvpn
 Architecture: any
 Depends: debconf | debconf-2.0, ${shlibs:Depends}
-Suggests: openssl
+Suggests: openssl, resolvconf
 Description: Virtual Private Network daemon
  An application to securely tunnel IP networks over a single UDP or TCP port.
  It can be used to access remote sites, make secure point to point connections,
