@@ -64,7 +64,7 @@ start_vpn () {
 }
 stop_vpn () {
   kill `cat $PIDFILE` || true
-  rm $PIDFILE
+  rm -f $PIDFILE
   rm -f /var/run/openvpn.$NAME.status 2> /dev/null
 }
 
