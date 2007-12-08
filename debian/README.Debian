@@ -6,6 +6,7 @@ In this file:
 - Compatibility notes on 2.x vs 1.x #
 - Changes in string remapping (affects tls-remote certificate names)
 - plugin support
+- Using resolvconf
 
 
 openvpn for Debian
@@ -140,5 +141,16 @@ Append /usr/lib/openvpn/ to the plugin name in the plugin option.
 i.e. 
 	plugin /usr/lib/openvpn/openvpn-auth-pam.so [service-type]
 
+Using resolvconf
+----------------
 
- -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 18 Oct 2004 09:04:26 +0200
+Have a look at the shell script /etc/openvpn/update-resolv-conf
+It parses DHCP options from openvpn to update /etc/resolv.conf 
+To use set as 'up' and 'down' script in your openvpn *.conf:   
+
+up /etc/openvpn/update-resolv-conf
+down /etc/openvpn/update-resolv-conf
+
+You will need to install resolvconf package.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 09 Dec 2007 01:32:10 +0100

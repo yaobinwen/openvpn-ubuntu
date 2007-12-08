@@ -1,3 +1,30 @@
+openvpn (2.1~rc4-2) unstable; urgency=low
+
+  * Upload to unstable. New upstream fixes:
+     - Bug with: Assertion failed at multi.c. (Closes: #411633)
+     - Hangs with tcp clients goin down with new option:
+       --connect-timeout. (Closes: #296834)
+  * Use rm -f to remove PIDFILE, in case rm wants to ask.
+    (Closes: #429932)
+  * Updated Vietnamese debconf templates. (Closes: #427048)
+    Thanks Clytie Siddall.
+  * Added note on resolvconf use with openvpn. (Closes: #451319)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 08 Dec 2007 21:58:05 +0100
+
+openvpn (2.1~rc4-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 22 Oct 2007 20:59:46 +0200
+
+openvpn (2.1~rc2-1) experimental; urgency=low
+
+  * Just forward-push the Debian patches to the new version,
+    and upload to experimental (with permission of the maintainer).
+
+ -- Andreas Barth <aba@not.so.argh.org>  Thu, 19 Apr 2007 18:23:59 +0200
+
 openvpn (2.0.9-8) unstable; urgency=low
 
   * Install /etc/openvpn/update-resolv-conf with correct permissions

@@ -50,6 +50,7 @@ openvpn_SOURCES = \
 	fragment.c fragment.h \
 	gremlin.c gremlin.h \
 	helper.c helper.h \
+	lladdr.c lladdr.h \
 	init.c init.h \
 	integer.h \
         interval.c interval.h \
@@ -67,6 +68,7 @@ openvpn_SOURCES = \
 	multi.c multi.h \
         ntlm.c ntlm.h \
 	occ.c occ.h occ-inline.h \
+	pkcs11.c pkcs11.h pkcs11-helper.c pkcs11-helper.h pkcs11-helper-config.h cryptoki.h \
 	openvpn.c openvpn.h \
 	openvpn-plugin.h \
 	options.c options.h \
@@ -78,6 +80,7 @@ openvpn_SOURCES = \
 	pool.c pool.h \
 	proto.c proto.h \
 	proxy.c proxy.h \
+        ps.c ps.h \
 	push.c push.h \
 	reliable.c reliable.h \
 	route.c route.h \
@@ -124,7 +127,9 @@ EXTRA_DIST = \
 	contrib \
 	debug \
 	plugin \
-        management
+        management \
+        pkcs11-headers \
+	cryptoki-win32.h
 
 dist-hook:
 	cd $(distdir) && for i in $(EXTRA_DIST) ; do find $$i -name .svn -type d -prune -exec rm -rf '{}' ';' ; rm -f `find $$i -type f | grep -E '(^|\/)\.?\#|\~$$|\.s?o$$'` ; done
