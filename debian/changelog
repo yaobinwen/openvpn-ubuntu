@@ -1,3 +1,10 @@
+openvpn (2.1~rc7-1ubuntu1) hardy; urgency=low
+
+  * New upstream version (LP: #157144).
+  * Disable creation of tun, let udev handle it.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Tue, 12 Feb 2008 07:48:51 -0500
+
 openvpn (2.1~rc4-2) unstable; urgency=low
 
   * Upload to unstable. New upstream fixes:
