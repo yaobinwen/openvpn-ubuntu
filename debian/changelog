@@ -1,3 +1,9 @@
+openvpn (2.1~rc7-1ubuntu2) hardy; urgency=low
+
+  * Made init script more lsb compliant.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Fri, 15 Feb 2008 09:33:14 -0500
+
 openvpn (2.1~rc7-1ubuntu1) hardy; urgency=low
 
   * New upstream version (LP: #157144).
