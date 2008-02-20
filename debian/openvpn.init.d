@@ -51,7 +51,6 @@ start_vpn () {
       STATUSARG="--status /var/run/openvpn.$NAME.status $STATUSREFRESH"
     fi
 
-    echo -n " $NAME"
     STATUS="OK"
 
     # Check to see if it's already started...
@@ -62,7 +61,7 @@ start_vpn () {
 	      $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
 	      --config $CONFIG_DIR/$NAME.conf < /dev/null || STATUS="FAILED"
     fi
-    echo -n "($STATUS)"
+    log_action_msg  "$NAME ($STATUS)"
 }
 stop_vpn () {
   kill `cat $PIDFILE` || true
@@ -120,7 +119,7 @@ stop)
       NAME=`echo $PIDFILE | cut -c18-`
       NAME=${NAME%%.pid}
       stop_vpn
-      echo -n " $NAME"
+      log_progress_msg " $NAME"
     done
   else
     while shift ; do
@@ -130,7 +129,7 @@ stop)
         NAME=`echo $PIDFILE | cut -c18-`
         NAME=${NAME%%.pid}
         stop_vpn
-        echo -n " $NAME"
+        log_progress_msg " $NAME"
       else
         log_failure_msg " (failure: No such VPN is running: $1)"
       fi
@@ -149,10 +148,10 @@ reload|force-reload)
       stop_vpn
       sleep 1
       start_vpn
-      echo -n "(restarted)"
+      log_progress_msg "(restarted)"
     else
       kill -HUP `cat $PIDFILE` || true
-    echo -n " $NAME"
+    log_progress_msg " $NAME"
     fi
   done
   log_end_msg 0

@@ -1,3 +1,10 @@
+openvpn (2.1~rc7-1ubuntu3) hardy; urgency=low
+
+  * More init script LSB compliance. (LP: #134210)
+  * Added warning about max-locked-memory-limit to Readme.Debian. (LP: #154696) 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Wed, 20 Feb 2008 13:43:29 -0500
+
 openvpn (2.1~rc7-1ubuntu2) hardy; urgency=low
 
   * Made init script more lsb compliant.
