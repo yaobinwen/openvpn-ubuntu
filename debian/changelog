@@ -1,3 +1,18 @@
+openvpn (2.0.9-5ubuntu0.1) feisty-security; urgency=low
+
+  * SECURITY UPDATE: don't allow use of known vulnerable weak SSL/TLS and
+    shared secret keys caused by Debian openssl bug
+  * init.c: patch do_init_crypto_static() to use openvpn-vulnkey and
+    do_init_crypto_tls() to use openssl-vulnkey
+  * debian/control: Depends on libssl0.9.8 (0.9.8c-4ubuntu0.3),
+    openssl-blacklist and openvpn-blacklist
+  * add critical debconf note
+  * References
+    CVE-2008-0166
+    http://www.ubuntu.com/usn/usn-612-1
+
+ -- Jamie Strandboge <jamie@ubuntu.com>  Mon, 12 May 2008 23:31:50 -0400
+
 openvpn (2.0.9-5) unstable; urgency=low
 
   * Added Galician debconf translation. (Closes: #412492)
