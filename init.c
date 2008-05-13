@@ -1327,7 +1327,16 @@ static void
 do_init_crypto_static (struct context *c, const unsigned int flags)
 {
   const struct options *options = &c->options;
+  char command_line[256];
   ASSERT (options->shared_secret_file);
+
+  /* CVE-2008-0166 (Debian weak key checks) */
+  openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
+  msg (M_INFO, "%s", command_line);
+  if (openvpn_system (command_line, c->c2.es, S_FATAL) != 0)
+    {
+      msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+    }
 
   init_crypto_pre (c, flags);
 
@@ -1490,9 +1499,21 @@ do_init_crypto_tls (struct context *c, const unsigned int flags)
   const struct options *options = &c->options;
   struct tls_options to;
   bool packet_id_long_form;
+  char command_line[256];
 
   ASSERT (options->tls_server || options->tls_client);
   ASSERT (!options->test_crypto);
+
+  /* CVE-2008-0166 (Debian weak key checks) */
+  if (options->priv_key_file)
+    {
+      openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openssl-vulnkey -q %s", options->priv_key_file);
+      msg (M_INFO, "%s", command_line);
+      if (openvpn_system (command_line, NULL, S_FATAL) != 0) 
+        {
+          msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
+        }
+    }
 
   init_crypto_pre (c, flags);
 
