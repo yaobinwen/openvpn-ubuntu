@@ -1185,11 +1185,18 @@ do_init_crypto_static (struct context *c, const unsigned int flags)
   ASSERT (options->shared_secret_file);
 
   /* CVE-2008-0166 (Debian weak key checks) */
-  openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
-  msg (M_INFO, "%s", command_line);
-  if (openvpn_system (command_line, c->c2.es, S_FATAL) != 0)
+  /* Only check if we can actually read the key file. Unless the file does not
+   * exist in the first place, this should never happen (since static keys do
+   * not work with multi-client mode), but we test it anyway to be on the safe
+   * side and avoid wrong -vulnkey alerts. */
+  if (access (options->shared_secret_file, R_OK) == 0)
     {
-      msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+      openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
+      msg (M_INFO, "%s", command_line);
+      if (openvpn_system (command_line, c->c2.es, S_FATAL) != 0)
+        {
+          msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+        }
     }
 
   init_crypto_pre (c, flags);
@@ -1326,7 +1333,10 @@ do_init_crypto_tls (struct context *c, const unsigned int flags)
   ASSERT (!options->test_crypto);
 
   /* CVE-2008-0166 (Debian weak key checks) */
-  if (options->priv_key_file)
+  /* Only check if we can actually read the key file. This will fail if we
+   * already chroot()ed/set[ug]id()'ed. An ENOENT at program start is already
+   * handled further down, so we can ignore it here. */
+  if (options->priv_key_file && access (options->priv_key_file, R_OK) == 0)
     {
       openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openssl-vulnkey -q %s", options->priv_key_file);
       msg (M_INFO, "%s", command_line);
