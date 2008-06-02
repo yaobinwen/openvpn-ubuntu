@@ -76,6 +76,9 @@ const char title_string[] =
 #ifdef USE_PTHREAD
   " [PTHREAD]"
 #endif
+#ifdef ENABLE_PKCS11
+  " [PKCS11]"
+#endif
   " built on " __DATE__
 ;
 
@@ -153,6 +156,9 @@ static const char usage_message[] =
   "--lladdr hw     : Set the link layer address of the tap device.\n"
   "--topology t    : Set --dev tun topology: 'net30', 'p2p', or 'subnet'.\n"
   "--tun-ipv6      : Build tun link capable of forwarding IPv6 traffic.\n"
+#ifdef CONFIG_FEATURE_IPROUTE
+  "--iproute cmd   : Use this command instead of default " IPROUTE_PATH ".\n"
+#endif
   "--ifconfig l rn : TUN: configure device to use IP address l as a local\n"
   "                  endpoint and rn as a remote endpoint.  l & rn should be\n"
   "                  swapped on the other peer.  l & rn must be private\n"
@@ -311,6 +317,9 @@ static const char usage_message[] =
   "                  and auth-user-pass passwords.\n"
   "--management-hold : Start " PACKAGE_NAME " in a hibernating state, until a client\n"
   "                    of the management interface explicitly starts it.\n"
+  "--management-signal : Issue SIGUSR1 when management disconnect event occurs.\n"
+  "--management-forget-disconnect : Forget passwords when management disconnect\n"
+  "                                 event occurs.\n"
   "--management-log-cache n : Cache n lines of log file history for usage\n"
   "                  by the management channel.\n"
 #endif
@@ -500,25 +509,17 @@ static const char usage_message[] =
   "--pkcs11-providers provider ... : PKCS#11 provider to load.\n"
   "--pkcs11-protected-authentication [0|1] ... : Use PKCS#11 protected authentication\n"
   "                              path. Set for each provider.\n"
-  "--pkcs11-sign-mode mode ... : PKCS#11 signature method.\n"
-  "                              auto    : Try  to determind automatically (default).\n"
-  "                              sign    : Use Sign.\n"
-  "                              recover : Use SignRecover.\n"
-  "                              any     : Use Sign and then SignRecover.\n"
+  "--pkcs11-private-mode hex ...   : PKCS#11 private key mode mask.\n"
+  "                              0       : Try  to determind automatically (default).\n"
+  "                              1       : Use Sign.\n"
+  "                              2       : Use SignRecover.\n"
+  "                              4       : Use Decrypt.\n"
+  "                              8       : Use Unwrap.\n"
   "--pkcs11-cert-private [0|1] ... : Set if login should be performed before\n"
   "                              certificate can be accessed. Set for each provider.\n"
   "--pkcs11-pin-cache seconds  : Number of seconds to cache PIN. The default is -1\n"
   "                              cache until token is removed.\n"
-  "--pkcs11-slot-type method   : Slot locate method:\n"
-  "                              id      : By slot id (numeric [prov:]slot#).\n"
-  "                              name    : By slot name.\n"
-  "                              label   : By the card label that resides in slot.\n"
-  "--pkcs11-slot name          : The slot name.\n"
-  "--pkcs11-id-type method     : Certificate and key locate method:\n"
-  "                              id      : By the object id (hex format).\n"
-  "                              label   : By the object label (string).\n"
-  "                              subject : By certificate subject (String).\n"
-  "--pkcs11-id name            : The object name.\n"
+  "--pkcs11-id serialized-id   : Identity to use, get using standalone --show-pkcs11-ids\n"
 #endif			/* ENABLE_PKCS11 */
  "\n"
   "SSL Library information:\n"
@@ -595,12 +596,14 @@ static const char usage_message[] =
   "--rmtun         : Remove a persistent tunnel.\n"
   "--dev tunX|tapX : tun/tap device\n"
   "--dev-type dt   : Device type.  See tunnel options above for details.\n"
+  "--user user     : User to set privilege to.\n"
+  "--group group   : Group to set privilege to.\n"
 #endif
 #ifdef ENABLE_PKCS11
   "\n"
   "PKCS#11 standalone options:\n"
-  "--show-pkcs11-slots provider        : Show PKCS#11 provider available slots.\n"
-  "--show-pkcs11-objects provider slot : Show PKCS#11 token objects.\n" 
+  "--show-pkcs11-ids provider [cert_private] : Show PKCS#11 available ids.\n" 
+  "                                            --verb option can be added *BEFORE* this.\n"
 #endif				/* ENABLE_PKCS11 */
  ;
 
@@ -1200,6 +1203,8 @@ show_settings (const struct options *o)
   SHOW_BOOL (management_query_passwords);
   SHOW_BOOL (management_hold);
   SHOW_BOOL (management_client);
+  SHOW_BOOL (management_signal);
+  SHOW_BOOL (management_forget_disconnect);
   SHOW_STR (management_write_peer_info_file);
 #endif
 #ifdef ENABLE_PLUGIN
@@ -1278,8 +1283,8 @@ show_settings (const struct options *o)
   }
   {
     int i;
-    for (i=0;i<MAX_PARMS && o->pkcs11_sign_mode[i] != NULL;i++)
-      SHOW_PARM (pkcs11_sign_mode, o->pkcs11_sign_mode[i], "%s");
+    for (i=0;i<MAX_PARMS;i++)
+      SHOW_PARM (pkcs11_private_mode, o->pkcs11_private_mode[i], "%08x");
   }
   {
     int i;
@@ -1287,9 +1292,6 @@ show_settings (const struct options *o)
       SHOW_PARM (pkcs11_cert_private, o->pkcs11_cert_private[i] ? "ENABLED" : "DISABLED", "%s");
   }
   SHOW_INT (pkcs11_pin_cache_period);
-  SHOW_STR (pkcs11_slot_type);
-  SHOW_STR (pkcs11_slot);
-  SHOW_STR (pkcs11_id_type);
   SHOW_STR (pkcs11_id);
 #endif			/* ENABLE_PKCS11 */
 
@@ -1527,8 +1529,9 @@ options_postprocess (struct options *options, bool first_time)
    */
 #ifdef ENABLE_MANAGEMENT
   if (!options->management_addr &&
-      (options->management_query_passwords || options->management_hold
-       || options->management_client || options->management_write_peer_info_file
+      (options->management_query_passwords || options->management_hold || options->management_signal
+       || options->management_forget_disconnect || options->management_client
+       || options->management_write_peer_info_file
        || options->management_log_history_cache != defaults.management_log_history_cache))
     msg (M_USAGE, "--management is not specified, however one or more options which modify the behavior of --management were specified");
 #endif
@@ -1762,35 +1765,7 @@ options_postprocess (struct options *options, bool first_time)
 #ifdef ENABLE_PKCS11
       if (options->pkcs11_providers[0])
        {
-        int j;
         notnull (options->ca_file, "CA file (--ca)");
-	
-	for (j=0;j<MAX_PARMS && options->pkcs11_sign_mode[j] != NULL;j++)
-	 {
-	  if (
-	   !string_defined_equal (options->pkcs11_sign_mode[j], "auto") &&
-	   !string_defined_equal (options->pkcs11_sign_mode[j], "recover") &&
-	   !string_defined_equal (options->pkcs11_sign_mode[j], "sign")
-	  )
-	    msg(M_USAGE, "Parameter --pkcs11-sign-mode value is invalid.");
-	 }
-
-	if (
-	  !string_defined_equal (options->pkcs11_slot_type, "id") &&
-	  !string_defined_equal (options->pkcs11_slot_type, "name") &&
-	  !string_defined_equal (options->pkcs11_slot_type, "label")
-	)
-	  msg(M_USAGE, "Parameter --pkcs11-slot-type value is invalid.");
-
-	notnull (options->pkcs11_slot, "PKCS#11 slot name (--pkcs11-slot)");
-
-	if (
-	  !string_defined_equal (options->pkcs11_id_type, "id") &&
-	  !string_defined_equal (options->pkcs11_id_type, "label") &&
-	  !string_defined_equal (options->pkcs11_id_type, "subject")
-	)
-	  msg(M_USAGE, "Parameter --pkcs11-id-type value is invalid.");
-
 	notnull (options->pkcs11_id, "PKCS#11 id (--pkcs11-id)");
 
 	if (options->cert_file)
@@ -1893,10 +1868,7 @@ options_postprocess (struct options *options, bool first_time)
       MUST_BE_UNDEF (remote_cert_eku);
 #ifdef ENABLE_PKCS11
       MUST_BE_UNDEF (pkcs11_providers[0]);
-      MUST_BE_UNDEF (pkcs11_sign_mode[0]);
-      MUST_BE_UNDEF (pkcs11_slot_type);
-      MUST_BE_UNDEF (pkcs11_slot);
-      MUST_BE_UNDEF (pkcs11_id_type);
+      MUST_BE_UNDEF (pkcs11_private_mode[0]);
       MUST_BE_UNDEF (pkcs11_id);
 #endif
 
@@ -2575,6 +2547,7 @@ parse_line (const char *line,
   const int STATE_READING_QUOTED_PARM = 1;
   const int STATE_READING_UNQUOTED_PARM = 2;
   const int STATE_DONE = 3;
+  const int STATE_READING_SQUOTED_PARM = 4;
 
   const char *error_prefix = "";
 
@@ -2597,7 +2570,7 @@ parse_line (const char *line,
       in = *c;
       out = 0;
 
-      if (!backslash && in == '\\')
+      if (!backslash && in == '\\' && state != STATE_READING_SQUOTED_PARM)
 	{
 	  backslash = true;
 	}
@@ -2611,6 +2584,8 @@ parse_line (const char *line,
 		    break;
 		  if (!backslash && in == '\"')
 		    state = STATE_READING_QUOTED_PARM;
+		  else if (!backslash && in == '\'')
+		    state = STATE_READING_SQUOTED_PARM;
 		  else
 		    {
 		      out = in;
@@ -2631,6 +2606,13 @@ parse_line (const char *line,
 		state = STATE_DONE;
 	      else
 		out = in;
+	    }
+	  else if (state == STATE_READING_SQUOTED_PARM)
+	    {
+	      if (in == '\'')
+	        state = STATE_DONE;
+	      else
+	        out = in;
 	    }
 	  if (state == STATE_DONE)
 	    {
@@ -2677,6 +2659,11 @@ parse_line (const char *line,
   if (state == STATE_READING_QUOTED_PARM)
     {
       msg (msglevel, "%sOptions error: No closing quotation (\") in %s:%d", error_prefix, file, line_num);
+      return 0;
+    }
+  if (state == STATE_READING_SQUOTED_PARM)
+    {
+      msg (msglevel, "%sOptions error: No closing single quotation (\') in %s:%d", error_prefix, file, line_num);
       return 0;
     }
   if (state != STATE_INITIAL)
@@ -3164,6 +3151,16 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_GENERAL);
       options->management_hold = true;
     }
+  else if (streq (p[0], "management-signal"))
+    {
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      options->management_signal = true;
+    }
+  else if (streq (p[0], "management-forget-disconnect"))
+    {
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      options->management_forget_disconnect = true;
+    }
   else if (streq (p[0], "management-client"))
     {
       VERIFY_PERMISSION (OPT_P_GENERAL);
@@ -3242,6 +3239,13 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_UP);
       options->tun_ipv6 = true;
     }
+#ifdef CONFIG_FEATURE_IPROUTE
+  else if (streq (p[0], "iproute") && p[1])
+    {
+      VERIFY_PERMISSION (OPT_P_UP);
+      iproute_path = p[1];
+    }
+#endif
   else if (streq (p[0], "ifconfig") && p[1] && p[2])
     {
       VERIFY_PERMISSION (OPT_P_UP);
@@ -5076,31 +5080,15 @@ add_option (struct options *options,
 #endif /* USE_SSL */
 #endif /* USE_CRYPTO */
 #ifdef ENABLE_PKCS11
-  else if (streq (p[0], "show-pkcs11-slots") && p[1])
-    {
-      char *module =  p[1];
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      show_pkcs11_slots (module);
-      openvpn_exit (OPENVPN_EXIT_STATUS_GOOD); /* exit point */
-    }
-  else if (streq (p[0], "show-pkcs11-objects") && p[1] && p[2])
+  else if (streq (p[0], "show-pkcs11-ids") && p[1])
     {
       char *provider =  p[1];
-      char *slot = p[2];
-      struct gc_arena gc = gc_new ();
-      struct buffer pass_prompt = alloc_buf_gc (128, &gc);
-      char pin[256];
+      bool cert_private = (p[2] == NULL ? false : ( atoi (p[2]) != 0 ));
 
       VERIFY_PERMISSION (OPT_P_GENERAL);
 
-      buf_printf (&pass_prompt, "PIN:");
-
-      if (!get_console_input (BSTR (&pass_prompt), false, pin, sizeof (pin)))
-        msg (M_FATAL, "Cannot read password from stdin");
-      
-      gc_free (&gc);
-      
-      show_pkcs11_objects (provider, slot, pin);
+      set_debug_level (options->verbosity, SDL_CONSTRAIN);
+      show_pkcs11_ids (provider, cert_private);
       openvpn_exit (OPENVPN_EXIT_STATUS_GOOD); /* exit point */
     }
   else if (streq (p[0], "pkcs11-providers") && p[1])
@@ -5121,14 +5109,14 @@ add_option (struct options *options,
       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)
         options->pkcs11_protected_authentication[j-1] = atoi (p[j]) != 0 ? 1 : 0;
     }
-  else if (streq (p[0], "pkcs11-sign-mode") && p[1])
+  else if (streq (p[0], "pkcs11-private-mode") && p[1])
     {
       int j;
       
       VERIFY_PERMISSION (OPT_P_GENERAL);
 
       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)
-      	options->pkcs11_sign_mode[j-1] = p[j];
+        sscanf (p[j], "%x", &(options->pkcs11_private_mode[j-1]));
     }
   else if (streq (p[0], "pkcs11-cert-private"))
     {
@@ -5143,21 +5131,6 @@ add_option (struct options *options,
     {
       VERIFY_PERMISSION (OPT_P_GENERAL);
       options->pkcs11_pin_cache_period = atoi (p[1]);
-    }
-  else if (streq (p[0], "pkcs11-slot-type") && p[1])
-    {
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      options->pkcs11_slot_type = p[1];
-    }
-  else if (streq (p[0], "pkcs11-slot") && p[1])
-    {
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      options->pkcs11_slot = p[1];
-    }
-  else if (streq (p[0], "pkcs11-id-type") && p[1])
-    {
-      VERIFY_PERMISSION (OPT_P_GENERAL);
-      options->pkcs11_id_type = p[1];
     }
   else if (streq (p[0], "pkcs11-id") && p[1])
     {

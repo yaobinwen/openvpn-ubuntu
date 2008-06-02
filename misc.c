@@ -44,6 +44,10 @@
 
 #include "memdbg.h"
 
+#ifdef CONFIG_FEATURE_IPROUTE
+const char *iproute_path = IPROUTE_PATH;
+#endif
+
 /* Redefine the top level directory of the filesystem
    to restrict access to files for security */
 void
@@ -1356,7 +1360,7 @@ get_platform_prefix (void)
 }
 
 void
-get_user_pass_auto_userid (struct user_pass *up)
+get_user_pass_auto_userid (struct user_pass *up, const char *tag)
 {
   struct gc_arena gc = gc_new ();
   MD5_CTX ctx;
@@ -1381,6 +1385,8 @@ get_user_pass_auto_userid (struct user_pass *up)
     {
       buf_printf (&buf, "UNKNOWN");
     }
+  if (tag && strcmp (tag, "stdin"))
+    buf_printf (&buf, "-%s", tag);
   up->defined = true;
   gc_free (&gc);
 
