@@ -863,6 +863,8 @@ socket_connect (socket_descriptor_t *sd,
 	   connect_retry_seconds,
 	   strerror_ts (status, &gc));
 
+      gc_reset (&gc);
+
       openvpn_close_socket (*sd);
       *sd = SOCKET_UNDEFINED;
 
@@ -1253,6 +1255,10 @@ link_socket_init_phase1 (struct link_socket *sock,
       resolve_bind_local (sock);
       resolve_remote (sock, 1, NULL, NULL);
     }
+
+  /* set socket file descriptor to not pass across execs, so that
+     scripts don't have access to it */
+  set_cloexec (sock->sd);
 }
 
 /* finalize socket initialization */
@@ -1458,10 +1464,6 @@ link_socket_init_phase2 (struct link_socket *sock,
 
   /* set socket to non-blocking mode */
   set_nonblock (sock->sd);
-
-  /* set socket file descriptor to not pass across execs, so that
-     scripts don't have access to it */
-  set_cloexec (sock->sd);
 
 #ifdef ENABLE_SOCKS
   if (socket_defined (sock->ctrl_sd))

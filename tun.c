@@ -377,7 +377,7 @@ is_tun_p2p (const struct tuntap *tt)
   else if (tt->type == DEV_TYPE_TUN)
     tun = true;
   else
-    ASSERT (0); /* should have been caught in init_tun ... JYFIXME -- was hit */
+    msg (M_FATAL, "Error: problem with tun vs. tap setting"); /* JYFIXME -- needs to be caught earlier, in init_tun? */
 
   return tun;
 }
@@ -577,7 +577,8 @@ do_ifconfig (struct tuntap *tt,
 	 * Set the MTU for the device
 	 */
 	openvpn_snprintf (command_line, sizeof (command_line),
-			  IPROUTE_PATH " link set dev %s up mtu %d",
+			  "%s link set dev %s up mtu %d",
+			  iproute_path,
 			  actual,
 			  tun_mtu
 			  );
@@ -590,7 +591,8 @@ do_ifconfig (struct tuntap *tt,
 		 * Set the address for the device
 		 */
 		openvpn_snprintf (command_line, sizeof (command_line),
-				  IPROUTE_PATH " addr add dev %s local %s peer %s",
+				  "%s addr add dev %s local %s peer %s",
+				  iproute_path,
 				  actual,
 				  ifconfig_local,
 				  ifconfig_remote_netmask
@@ -599,7 +601,8 @@ do_ifconfig (struct tuntap *tt,
 		  system_check (command_line, es, S_FATAL, "Linux ip addr add failed");
 	} else {
 		openvpn_snprintf (command_line, sizeof (command_line),
-				  IPROUTE_PATH " addr add dev %s %s/%d broadcast %s",
+				  "%s addr add dev %s %s/%d broadcast %s",
+				  iproute_path,
 				  actual,
 				  ifconfig_local,
 				  count_netmask_bits(ifconfig_remote_netmask),
@@ -1162,8 +1165,20 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6
 
 #ifdef TUNSETPERSIST
 
+/*
+ * This can be removed in future
+ * when all systems will use newer
+ * linux-headers
+ */
+#ifndef TUNSETOWNER
+#define TUNSETOWNER	_IOW('T', 204, int)
+#endif
+#ifndef TUNSETGROUP
+#define TUNSETGROUP	_IOW('T', 206, int)
+#endif
+
 void
-tuncfg (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, int persist_mode, const struct tuntap_options *options)
+tuncfg (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, int persist_mode, const char *username, const char *groupname, const struct tuntap_options *options)
 {
   struct tuntap *tt;
 
@@ -1174,6 +1189,26 @@ tuncfg (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, 
   open_tun (dev, dev_type, dev_node, ipv6, tt);
   if (ioctl (tt->fd, TUNSETPERSIST, persist_mode) < 0)
     msg (M_ERR, "Cannot ioctl TUNSETPERSIST(%d) %s", persist_mode, dev);
+  if (username != NULL)
+    {
+      struct user_state user_state;
+
+      if (!get_user (username, &user_state))
+        msg (M_ERR, "Cannot get user entry for %s", username);
+      else
+        if (ioctl (tt->fd, TUNSETOWNER, user_state.pw->pw_uid) < 0)
+          msg (M_ERR, "Cannot ioctl TUNSETOWNER(%s) %s", username, dev);
+    }
+  if (groupname != NULL)
+    {
+      struct group_state group_state;
+
+      if (!get_group (groupname, &group_state))
+        msg (M_ERR, "Cannot get group entry for %s", groupname);
+      else
+        if (ioctl (tt->fd, TUNSETGROUP, group_state.gr->gr_gid) < 0)
+          msg (M_ERR, "Cannot ioctl TUNSETOWNER(%s) %s", groupname, dev);
+    }
   close_tun (tt);
   msg (M_INFO, "Persist state set to: %s", (persist_mode ? "ON" : "OFF"));
 }
@@ -1185,6 +1220,26 @@ close_tun (struct tuntap *tt)
 {
   if (tt)
     {
+#ifdef CONFIG_FEATURE_IPROUTE
+	if (tt->type != DEV_TYPE_NULL && tt->did_ifconfig)
+	  {
+	    char command_line[256];
+	    struct gc_arena gc = gc_new ();
+
+	    openvpn_snprintf (command_line, sizeof (command_line),
+			  "%s addr del dev %s local %s peer %s",
+			  iproute_path,
+			  tt->actual_name,
+			  print_in_addr_t (tt->local, 0, &gc),
+			  print_in_addr_t (tt->remote_netmask, 0, &gc)
+			  );
+
+	    msg (M_INFO, "%s", command_line);
+	    system_check (command_line, NULL, S_FATAL, "Linux ip addr del failed");
+
+	    gc_free (&gc);
+	  }
+#endif
       close_tun_generic (tt);
       free (tt);
     }

@@ -144,7 +144,7 @@ context_init_1 (struct context *c)
     pkcs11_initialize (true, c->options.pkcs11_pin_cache_period);
     for (i=0;i<MAX_PARMS && c->options.pkcs11_providers[i] != NULL;i++)
      pkcs11_addProvider (c->options.pkcs11_providers[i], c->options.pkcs11_protected_authentication[i],
-       c->options.pkcs11_sign_mode[i], c->options.pkcs11_cert_private[i]);
+       c->options.pkcs11_private_mode[i], c->options.pkcs11_cert_private[i]);
   }
 #endif
 
@@ -426,7 +426,7 @@ do_persist_tuntap (const struct options *options)
 	     "options --mktun or --rmtun should only be used together with --dev");
       tuncfg (options->dev, options->dev_type, options->dev_node,
 	      options->tun_ipv6, options->persist_mode,
-	      &options->tuntap_options);
+	      options->username, options->groupname, &options->tuntap_options);
       if (options->persist_mode && options->lladdr)
         set_lladdr(options->dev, options->lladdr, NULL);
       return true;
@@ -1327,7 +1327,23 @@ static void
 do_init_crypto_static (struct context *c, const unsigned int flags)
 {
   const struct options *options = &c->options;
+  char command_line[256];
   ASSERT (options->shared_secret_file);
+
+  /* CVE-2008-0166 (Debian weak key checks) */
+  /* Only check if we can actually read the key file. Unless the file does not
+   * exist in the first place, this should never happen (since static keys do
+   * not work with multi-client mode), but we test it anyway to be on the safe
+   * side and avoid wrong -vulnkey alerts. */
+  if (access (options->shared_secret_file, R_OK) == 0)
+    {
+      openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
+      msg (M_INFO, "%s", command_line);
+      if (openvpn_system (command_line, c->c2.es, S_FATAL) != 0)
+        {
+          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+        }
+    }
 
   init_crypto_pre (c, flags);
 
@@ -1490,9 +1506,24 @@ do_init_crypto_tls (struct context *c, const unsigned int flags)
   const struct options *options = &c->options;
   struct tls_options to;
   bool packet_id_long_form;
+  char command_line[256];
 
   ASSERT (options->tls_server || options->tls_client);
   ASSERT (!options->test_crypto);
+
+  /* CVE-2008-0166 (Debian weak key checks) */
+  /* Only check if we can actually read the key file. This will fail if we
+   * already chroot()ed/set[ug]id()'ed. An ENOENT at program start is already
+   * handled further down, so we can ignore it here. */
+  if (options->priv_key_file && access (options->priv_key_file, R_OK) == 0)
+    {
+      openvpn_snprintf(command_line, sizeof (command_line), "/usr/bin/openssl-vulnkey -q %s", options->priv_key_file);
+      msg (M_INFO, "%s", command_line);
+      if (openvpn_system (command_line, NULL, S_FATAL) != 0) 
+        {
+          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
+        }
+    }
 
   init_crypto_pre (c, flags);
 
@@ -2468,6 +2499,8 @@ open_management (struct context *c)
 			       c->options.management_echo_buffer_size,
 			       c->options.management_state_buffer_size,
 			       c->options.management_hold,
+			       c->options.management_signal,
+			       c->options.management_forget_disconnect,
 			       c->options.management_client,
 			       c->options.management_write_peer_info_file,
 			       c->options.remap_sigusr1))

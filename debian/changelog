@@ -1,3 +1,79 @@
+openvpn (2.1~rc7-3ubuntu1) intrepid; urgency=low
+
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn.init.d: LSB compliant init script. (LP #134210)
+    - debian/README.Debian: Added warning about max-locked-memory-limit.
+      (LP #154696)
+    - debian/config: Disable debconf question about creation of /dev/tun if
+      /dev is managed by udev.
+  * debian/openvpn.init.d: Fixed a couple of bugs in the init scritpt
+    LSBification.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 02 Jun 2008 16:38:22 +0200
+
+openvpn (2.1~rc7-3) unstable; urgency=low
+
+  * The 'Thanks the transtalors' release
+  * Updated Japanese debconf templates. (Closes: #483848)
+  * Updated Russian debconf templates. (Closes: #483693)
+  * Updated Brazilian Portuguese debconf templates. (Closes: #483686)
+  * Updated German debconf templates. (Closes: #483610)
+  * Updated French debconf templates. (Closes: #483104)
+  * Updated Spanish debconf templates. (Closes: #482939)
+  * Updated Italian debconf templates. (Closes: #482809)
+  * Updated Finnish debconf templates. (Closes: #482763)
+  * Updated Swedish debconf templates. (Closes: #482677)
+  * Updated Vietnamese debconf templates. (Closes: #482640)
+  * Updated Galician debconf templates. (Closes: #482461)
+  * Updated Czech debconf templates. (Closes: #482430)
+  * Updated Basque debconf templates. (Closes: #482398)
+  * Updated path to openssl-vulnkey. (Closes: #483723)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 01 Jun 2008 21:11:17 +0200
+
+openvpn (2.1~rc7-2) unstable; urgency=high
+
+  * init.c: Warn of use of known vulnerable weak SSL/TLS
+    and shared secret keys caused by Debian openssl bug.
+    Patch taken from Ubuntu. CVE-2008-0166
+  * debian/(templates|postinst): Add warning on vulnerable 
+    secrect/key files.
+  * debian/control: Add dependencies on openssl-blacklist and
+    openvpn-blacklist. Bumped dependency on libssl version.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 16 May 2008 00:45:23 +0200
+
+openvpn (2.1~rc7-1) unstable; urgency=low
+
+  * New upstream release (Closes: #464181)
+    - Slashes in X509 common name allowed (Closes: #452274)
+  * init.d script: Removed /dev/null stdin redirection, so passphrases
+    can be typed in. (Closes: #454371)
+  * Set FD_CLOEXEC in socket initialization BEFORE running the 'up script'
+    Thanks a lot Julien Cristau for finding this out and sending the
+    patch (Closes: #367716)
+  * Added multiple VPN configuration in /e/n/interfaces.
+    Thanks Sam Couter for the patch (Closes: #472924)
+  * Bumped Standards-Version to 3.7.3
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. (Closes: #462048)
+  * Updated Vietnamese debconf templates. (Closes: #465535)
+  * Updated German debconf templates. (Closes: #465317)
+  * Updated Brazilian Portuguese debconf templates. (Closes: #465440)
+  * Updated Japanese debconf templates. (Closes: #462736)
+  * Updated Portuguese debconf templates. (Closes: #462795)
+  * Updated Swedish debconf templates. (Closes: #462979)
+  * Updated Galician debconf templates. (Closes: #462990)
+  * Updated Spanish debconf templates. (Closes: #463047)
+  * Updated French debconf templates. (Closes: #463636)
+  * Updated Italian debconf templates. (Closes: #463703)
+  * Updated Finnish debconf templates. (Closes: #463952)
+  * Updated Czech debconf templates. (Closes: #464221)
+  * Updated Russian debconf templates. (Closes: #464666)
+  * Updated Norwegian Bokmål debconf templates. (Closes: #462811)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 02 Feb 2008 22:41:31 +0100
+
 openvpn (2.1~rc4-2) unstable; urgency=low
 
   * Upload to unstable. New upstream fixes:

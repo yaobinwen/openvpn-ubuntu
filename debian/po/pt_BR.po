@@ -1,38 +1,34 @@
-#
-#    Translators, if you are not familiar with the PO format, gettext
-#    documentation is worth reading, especially sections dedicated to
-#    this format, e.g. by running:
-#         info -n '(gettext)PO Files'
-#         info -n '(gettext)Header Entry'
-#
-#    Some information specific to po-debconf are available at
-#            /usr/share/doc/po-debconf/README-trans
-#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
-#
-#    Developers do not need to manually edit POT or PO files.
+# openvpn Brazilian Portuguese translation
+# Copyright (C) 2007 THE openvpn'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the openvpn package.
+# Andr√© Lu√≠s Lopes <andrelop@debian.org>, 2007
+# Eder L. Marques (frolic) <frolic@debian-ce.org>, 2008.
 #
 msgid ""
-msgstr ""
-"Project-Id-Version: openvpn\n"
-"Report-Msgid-Bugs-To: agi@inittab.org\n"
-"POT-Creation-Date: 2006-05-22 03:32+0200\n"
-"PO-Revision-Date: 2005-01-24 22:05-0200\n"
-"Last-Translator: AndrÈ LuÌs Lopes <andrelop@debian.org>\n"
-"Language-Team: Debian-BR Project <debian-l10n-portuguese@lists.debian.org>\n"
+msgstr "pt_BR utf-8\n"
+"Project-Id-Version: openvpn 2.1~rc7-2\n"
+"Report-Msgid-Bugs-To: openvpn@packages.debian.org\n"
+"POT-Creation-Date: 2008-05-16 12:38+0200\n"
+"PO-Revision-Date: 2008-05-26 10:26-0300\n"
+"Last-Translator: Eder L. Marques (frolic) <frolic@debian-ce.org>\n"
+"Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms:  nplurals=2; plural=(n > 1);\n"
 
 #. Type: boolean
 #. Description
-#: ../templates:4
+#. NOT REVIEWED, obsolete
+#: ../templates:2001
 msgid "Would you like to start openvpn sooner?"
-msgstr "VocÍ gostaria de iniciar o OpenVPN antes ?"
+msgstr "Voc√™ gostaria de iniciar o openvpn antes?"
 
 #. Type: boolean
 #. Description
-#: ../templates:4
-#, fuzzy
+#. NOT REVIEWED, obsolete
+#: ../templates:2001
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
@@ -40,114 +36,129 @@ msgid ""
 "openvpn package will start earlier. (i.e. a S16openvpn link in rc[235].d "
 "instead of a S20openvpn)"
 msgstr ""
-"Versıes anteriores do OpenVPN iniciavam ao mesmo tempo em que a maioria dos "
-"outros serviÁos. Isso significa que a maioria desses serviÁos n„o podiam "
-"utilizar o OpenVPN, uma vez que o mesmo podia n„o estar disponÌvel quando os "
-"mesmos iniciavam. Novas versıes do pacote OpenVPN iniciar„o antes desses "
-"serviÁos (por exemplo, um ligaÁ„o S18openvpn em /etc/rc[235].d ao invÈs de "
-"S20openvpn)."
+"Vers√µes anteriores do openvpn iniciavam ao mesmo tempo que a maioria dos "
+"outros servi√ßos. Isso significa que a maioria desses servi√ßos n√£o podiam "
+"utilizar o openvpn, uma vez que o mesmo poderia n√£o estar dispon√≠vel quando "
+"eles iniciavam. Novas vers√µes do pacote openvpn iniciar√£o antes. (i.e. um "
+"link s16openvpn em rc[235].d ao inv√©s de um S20openvpn)"
 
 #. Type: boolean
 #. Description
-#: ../templates:18
-msgid "Would you like a TUN/TAP device to be created?"
-msgstr "VocÍ gostaria que um dispositivo TUN/TAP fosse criado ?"
-
+#. NOT REVIEWED, obsolete
 #. Type: boolean
 #. Description
-#: ../templates:18
+#. NOT REVIEWED, obsolete
+#: ../templates:2001 ../templates:6001
 msgid ""
-"If you accept here, the package will make a special device called /dev/net/"
-"tun for openvpn's use. If you refuse, the device won't be made now. Read "
-"README.Debian for details on how to make it. If you are using devfs refuse "
-"here."
+"If you accept here, the package upgrade will make this change for you. If "
+"you refuse, nothing will change, and openvpn will be working just like it "
+"did before."
 msgstr ""
-"Caso vocÍ aceite, o pacote ir· criar um dispositivo especial chamado /dev/"
-"net/tun para o uso do OpenVPN. Caso vocÍ n„o aceite, o dispositivo n„o ser· "
-"criado agora. Leio o arquivo README.Debian para maiores detalhes sobre como "
-"criar o dispositivo. Caso vocÍ esteja usando DevFS, n„o aceite a oferta de "
-"criaÁ„o do dispositivo."
+"Caso voc√™ aceite aqui, a atualiza√ß√£o do pacote ir√° fazer essa mudan√ßa para "
+"voc√™. Caso voc√™ n√£o aceite, nada ir√° mudar e o openvpn continuar√° a "
+"funcionar exatamente da maneira que funcionava anteriormente."
 
 #. Type: boolean
 #. Description
-#: ../templates:27
-msgid "Would you like to stop openvpn before it gets upgraded?"
-msgstr "VocÍ gostaria de parar o OpenVPN antes que o mesmo fosse atualizado ?"
+#: ../templates:3001
+msgid "Create the TUN/TAP device?"
+msgstr "Criar o dispositivo TUN/TAP?"
 
 #. Type: boolean
 #. Description
-#: ../templates:27
+#: ../templates:3001
 msgid ""
-"In some cases you may be upgrading openvpn in a remote server using a VPN to "
-"do so. The upgrade process stops the running daemon before  installing the "
-"new version, in that case you may lose your connection, the upgrade may be "
-"interrupted, and you may not be able to reconnect to the remote host."
+"If you choose this option, the /dev/net/tun device needed by OpenVPN will be "
+"created."
 msgstr ""
-"Em alguns casos, vocÍ pode estar atualizando o OpenVPN em um servidor remoto "
-"usando uma VPN para fazÍ-lo. O processo de atualizaÁ„o para o daemon em "
-"execuÁ„o antes de instalar a nova vers„o e, nesse caso, vocÍ pode perder sua "
-"conex„o, a atualizaÁ„o pode ser interrompida e vocÍ pode n„o ser capaz de "
-"reconectar ao host remoto."
+"Se voc√™ escolher esta op√ß√£o, o dispositivo /dev/net/tun necess√°rio ao "
+"openvpn ser√° criado."
 
 #. Type: boolean
 #. Description
-#: ../templates:27
+#: ../templates:3001
+msgid "You should not choose this option if you're using devfs."
+msgstr "Voc√™ n√£o deve escolher esta op√ß√£o se voc√™ est√° usando devfs."
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
+msgid "Stop OpenVPN when upgraded?"
+msgstr "Parar o OpenVPN quando atualizar?"
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
 msgid ""
-"Unless you do your upgrades locally, it is advised NOT to stop openvpn "
-"before it gets upgraded. The installation process will restart it once it's "
-"done."
+"The upgrade process stops the running daemon before  installing the new "
+"version. If you are installing or upgrading the system remotely, that could "
+"break the upgrade process."
 msgstr ""
-"A menos que vocÍ faÁa suas atualizaÁıes localmente, N√O È recomendado que "
-"vocÍ pare o OpenVPN antes que o mesmo seja atualizado. O processo de "
-"instalaÁ„o ir· reinici·-lo assim que seja finalizado."
+"O processo de atualiza√ß√£o p√°ra os \"daemons\" em uso antes de instalar a "
+"nova vers√£o. Se voc√™ est√° instalando ou atualizando o sistema remotamente, "
+"isso pode quebrar o processo de atualiza√ß√£o."
 
 #. Type: boolean
 #. Description
-#: ../templates:27
-msgid "This option will take effect in your next upgrade."
-msgstr "Essa opÁ„o ter· efeito em sua prÛxima atualizaÁ„o."
+#: ../templates:4001
+msgid ""
+"Unless upgrades are performed locally, you should choose to not stop OpenVPN "
+"before it is upgraded. The installation process will restart it once the "
+"upgrade is completed."
+msgstr ""
+"A menos que as atualiza√ß√µes estejam sendo feitas localmente, voc√™ n√£o deve "
+"escolher parar o OpenVPN antes que ele seja atualizado. O processo de "
+"instala√ß√£o ir√° reinici√°-lo assim que a atualiza√ß√£o estiver completa."
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
+msgid "This option will take effect for the next upgrade."
+msgstr "Essa op√ß√£o ter√° efeito na pr√≥xima atualiza√ß√£o."
 
 #. Type: note
 #. Description
-#: ../templates:42
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid "Default port has changed"
-msgstr "Porta padr„o mudou"
+msgstr "A porta padr√£o mudou"
 
 #. Type: note
 #. Description
-#: ../templates:42
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
 msgstr ""
-"A porta padr„o do OpenVPN mudou de 5000 pra 1194 (atribuÌda pelo IANA). Caso "
-"vocÍ n„o especifique a porta a ser utilizada em suas VPNs, esta atualizaÁ„o "
-"pode quebr·-las."
+"A porta padr√£o do OpenVPN mudou de 5000 para 1194 (atribu√≠da pelo IANA). "
+"Caso voc√™ n√£o especifique a porta a ser utilizada em suas VPNs, esta "
+"atualiza√ß√£o pode quebr√°-las."
 
 #. Type: note
 #. Description
-#: ../templates:42
-#, fuzzy
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid ""
 "Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
 "configuration to work."
 msgstr ""
-"Utilize a opÁ„o 'port 5000' caso vocÍ queira manter a configuraÁ„o antiga de "
+"Utilize a op√ß√£o 'port 5000' se voc√™ quer manter a configura√ß√£o antiga de "
 "porta. Opcionalmente, verifique suas regras de firewall e permita que a "
-"configuraÁ„o da nova porta padr„o funcione."
+"configura√ß√£o da nova porta padr√£o funcione."
 
 #. Type: boolean
 #. Description
-#: ../templates:54
-#, fuzzy
+#. NOT REVIEWED, obsolete
+#: ../templates:6001
 msgid "Would you like to stop openvpn later?"
-msgstr "VocÍ gostaria de iniciar o OpenVPN antes ?"
+msgstr "Voc√™ gostaria de parar o OpenVPN depois?"
 
 #. Type: boolean
 #. Description
-#: ../templates:54
-#, fuzzy
+#. NOT REVIEWED, obsolete
+#: ../templates:6001
 msgid ""
 "Previous versions of openvpn stopped at the same time as most of other "
 "services. This meant that some of services stopping later couldn't use  "
@@ -155,21 +166,48 @@ msgid ""
 "openvpn package will stop the service later. (i.e. a K80openvpn link in  rc"
 "[06].d instead of a K20openvpn)"
 msgstr ""
-"Versıes anteriores do OpenVPN iniciavam ao mesmo tempo em que a maioria dos "
-"outros serviÁos. Isso significa que a maioria desses serviÁos n„o podiam "
-"utilizar o OpenVPN, uma vez que o mesmo podia n„o estar disponÌvel quando os "
-"mesmos iniciavam. Novas versıes do pacote OpenVPN iniciar„o antes desses "
-"serviÁos (por exemplo, um ligaÁ„o S18openvpn em /etc/rc[235].d ao invÈs de "
-"S20openvpn)."
+"Vers√µes anteriores do openvpn paravam ao mesmo tempo que a maioria dos "
+"outros servi√ßos. Isto significa que alguns servi√ßos que paravam depois n√£o "
+"podiam utilizar o openvpn uma vez que ele poderia ter parado antes deles. "
+"Novas vers√µes do pacote openvpn ir√£o parar o servi√ßo depois (i.e um link "
+"K80openvpn no rc[06].d em vez de um K20openvpn)"
 
-#. Type: boolean
+#. Type: note
 #. Description
-#: ../templates:54
+#: ../templates:7001
+msgid "Vulnerable random number generator"
+msgstr "Gerador de n√∫meros aleat√≥rios vulner√°vel"
+
+#. Type: note
+#. Description
+#: ../templates:7001
 msgid ""
-"If you accept here, the package upgrade will make this change for you. If "
-"you refuse, nothing will change, and openvpn will be working just like it "
-"did before."
+"A weakness has been discovered in the random number generator used by "
+"OpenSSL on Ubuntu and Debian systems.  As a result of this weakness, certain "
+"encryption keys are generated much more frequently than they should be, such "
+"that an attacker could guess the key through a brute-force attack given "
+"minimal knowledge of the system."
 msgstr ""
-"Caso vocÍ aceite, a atualizaÁ„o do pacote ir· fazer essa mudanÁa para vocÍ. "
-"Caso vocÍ n„o aceite, nada ir· mudar e o OpenVPN continuar· a funcionar "
-"exatamente da maneira que funcionava anteriormente."
+"Uma falha foi descoberta no gerador de n√∫meros aleat√≥rios usado pelo OpenSSL "
+"em sistemas Ubuntu e Debian. Como resultado desta falha, certas chaves de "
+"encripta√ß√£o s√£o geradas muito mais frequentemente do que deveriam ser, "
+"por isso um atacante pode adivinhar a chave atrav√©s de um ataque de for√ßa "
+"bruta com um conhecimento m√≠nimo do sistema. "
+
+#. Type: note
+#. Description
+#: ../templates:7001
+msgid ""
+"Any keys created on a vulnerable system may be affected by this problem. The "
+"'openssl-vulnkey' command may be used as a partial test for RSA keys with "
+"certain bit sizes, and the 'openvpn-vulnkey' for OpenVPN shared secret keys. "
+"Users are urged to verify their keys or simply regenerate any server or "
+"client certificates and keys in use on the system."
+msgstr ""
+"Qualquer chave criada em um sistema vulner√°vel pode ser afetada por este "
+"problema. O comando 'openssl-vulnkey' pode ser usado como um teste parcial "
+"para chaves RSA com certos bits de tamanho, e o 'openvpn-vulnkey' para as "
+"chaves secretas compartilhadas do OpenVPN. Usu√°rios s√£o instados a verificar "
+"suas chaves ou simplesmente regerar qualquer certificado de servidor ou "
+"cliente e chaves em uso no sistema."
+
