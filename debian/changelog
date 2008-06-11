@@ -1,3 +1,12 @@
+openvpn (2.0.9-8ubuntu0.3) gutsy-security; urgency=low
+
+  * init.c: send modulus to openssl-vulnkey rather than calling
+    openssl-vulnkey on the file. This allows for password protected ssl keys
+    (LP: #230197)
+  * debian/control: Depends on openssl-blacklist > 0.3.2
+
+ -- Jamie Strandboge <jamie@ubuntu.com>  Wed, 11 Jun 2008 15:01:41 -0400
+
 openvpn (2.0.9-8ubuntu0.2) gutsy-security; urgency=low
 
   * init.c: Do not attempt to verify the key file with openvpn-vulnkey if it
