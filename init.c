@@ -1430,6 +1430,7 @@ static void
 do_init_crypto_tls_c1 (struct context *c)
 {
   const struct options *options = &c->options;
+  SSL *ssl;
 
   if (!c->c1.ks.ssl_ctx)
     {
@@ -1465,6 +1466,59 @@ do_init_crypto_tls_c1 (struct context *c)
       init_key_type (&c->c1.ks.key_type, options->ciphername,
 		     options->ciphername_defined, options->authname,
 		     options->authname_defined, options->keysize, true, true);
+
+      /* CVE-2008-0166 (Debian weak key checks)
+       * Obtain the modulus and bits from the certificate that was initialized,
+       * and send that to openssl-vulnkey.
+       */
+      ssl = SSL_new(c->c1.ks.ssl_ctx);
+      if (ssl != NULL)
+        {
+          X509* cert = NULL;
+          char *bn;
+          int bits;
+
+          cert = SSL_get_certificate(ssl);
+          if (cert != NULL)
+            {
+              EVP_PKEY *pkey = X509_get_pubkey (cert);
+              if (pkey != NULL)
+                {
+                  if (pkey->type == EVP_PKEY_RSA && pkey->pkey.rsa != NULL
+                      && pkey->pkey.rsa->n != NULL)
+                    {
+                      bits = BN_num_bits(pkey->pkey.rsa->n);
+                      bn = BN_bn2hex(pkey->pkey.rsa->n);
+                    }
+                  else if (pkey->type == EVP_PKEY_DSA && pkey->pkey.dsa != NULL
+                           && pkey->pkey.dsa->p != NULL)
+                    {
+                      bits = BN_num_bits(pkey->pkey.dsa->p);
+                      bn = BN_bn2hex(pkey->pkey.dsa->p);
+                    }
+                  if (bn != NULL)
+                    {
+                      int size = strlen(bn) + 256;
+                      char *command_line = NULL;
+
+                      command_line = malloc(size);
+                      check_malloc_return(command_line);
+
+                      openvpn_snprintf(command_line, size, "/usr/bin/openssl-vulnkey -q -b %d -m %s", bits, bn);
+                      msg (M_INFO, "/usr/bin/openssl-vulnkey -q -b %d -m <modulus omitted>", bits);
+                      if (openvpn_system (command_line, NULL, S_FATAL) != 0) 
+                        {
+                          msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
+                        }
+
+                      OPENSSL_free(bn);
+                      free(command_line);
+                    }
+                  EVP_PKEY_free (pkey);
+               }
+            }
+            SSL_free(ssl);
+         }
 
       /* TLS handshake authentication (--tls-auth) */
       if (options->tls_auth_file)
@@ -1506,24 +1560,9 @@ do_init_crypto_tls (struct context *c, const unsigned int flags)
   const struct options *options = &c->options;
   struct tls_options to;
   bool packet_id_long_form;
-  char command_line[256];
 
   ASSERT (options->tls_server || options->tls_client);
   ASSERT (!options->test_crypto);
-
-  /* CVE-2008-0166 (Debian weak key checks) */
-  /* Only check if we can actually read the key file. This will fail if we
-   * already chroot()ed/set[ug]id()'ed. An ENOENT at program start is already
-   * handled further down, so we can ignore it here. */
-  if (options->priv_key_file && access (options->priv_key_file, R_OK) == 0)
-    {
-      openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openssl-vulnkey -q %s", options->priv_key_file);
-      msg (M_INFO, "%s", command_line);
-      if (openvpn_system (command_line, NULL, S_FATAL) != 0) 
-        {
-          msg (M_FATAL, "ERROR: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
-        }
-    }
 
   init_crypto_pre (c, flags);
 
