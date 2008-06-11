@@ -7,7 +7,7 @@ Standards-Version: 3.7.3
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, libssl0.9.8 (>= 0.9.8g-4ubuntu3.1), openssl-blacklist, openvpn-blacklist
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, libssl0.9.8 (>= 0.9.8g-4ubuntu3.1), openssl-blacklist (>> 0.3.2), openvpn-blacklist
 Suggests: openssl, resolvconf
 Description: Virtual Private Network daemon
  An application to securely tunnel IP networks over a single UDP or TCP port.
