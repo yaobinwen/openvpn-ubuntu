@@ -144,7 +144,7 @@ context_init_1 (struct context *c)
     pkcs11_initialize (true, c->options.pkcs11_pin_cache_period);
     for (i=0;i<MAX_PARMS && c->options.pkcs11_providers[i] != NULL;i++)
      pkcs11_addProvider (c->options.pkcs11_providers[i], c->options.pkcs11_protected_authentication[i],
-       c->options.pkcs11_sign_mode[i], c->options.pkcs11_cert_private[i]);
+       c->options.pkcs11_private_mode[i], c->options.pkcs11_cert_private[i]);
   }
 #endif
 
@@ -426,7 +426,7 @@ do_persist_tuntap (const struct options *options)
 	     "options --mktun or --rmtun should only be used together with --dev");
       tuncfg (options->dev, options->dev_type, options->dev_node,
 	      options->tun_ipv6, options->persist_mode,
-	      &options->tuntap_options);
+	      options->username, options->groupname, &options->tuntap_options);
       if (options->persist_mode && options->lladdr)
         set_lladdr(options->dev, options->lladdr, NULL);
       return true;
@@ -2468,6 +2468,8 @@ open_management (struct context *c)
 			       c->options.management_echo_buffer_size,
 			       c->options.management_state_buffer_size,
 			       c->options.management_hold,
+			       c->options.management_signal,
+			       c->options.management_forget_disconnect,
 			       c->options.management_client,
 			       c->options.management_write_peer_info_file,
 			       c->options.remap_sigusr1))
