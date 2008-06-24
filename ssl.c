@@ -298,7 +298,7 @@ auth_user_pass_setup (const char *auth_file)
   if (!auth_user_pass.defined)
     {
 #if AUTO_USERID
-      get_user_pass_auto_userid (&auth_user_pass);
+      get_user_pass_auto_userid (&auth_user_pass, auth_file);
 #else
       get_user_pass (&auth_user_pass, auth_file, UP_TYPE_AUTH, GET_USER_PASS_MANAGEMENT|GET_USER_PASS_SENSITIVE);
 #endif
@@ -321,6 +321,9 @@ ssl_set_auth_nocache (void)
 void
 ssl_purge_auth (void)
 {
+#ifdef USE_PKCS11
+  pkcs11_logout ();
+#endif
   purge_user_pass (&passbuf, true);
   purge_user_pass (&auth_user_pass, true);
 }
@@ -373,6 +376,51 @@ extract_x509_field (const char *x509, const char *field_name, char *out, int siz
 	  break;
 	}
     }
+}
+
+/*
+ * Extract a field from an X509 subject name.
+ *
+ * Example:
+ *
+ * /C=US/ST=CO/L=Denver/O=ORG/CN=First-CN/CN=Test-CA/Email=jim@yonan.net
+ *
+ * The common name is 'Test-CA'
+ */
+static void
+extract_x509_field_ssl (X509_NAME *x509, const char *field_name, char *out, int size)
+{
+  int lastpos = -1;
+  int tmp = -1;
+  X509_NAME_ENTRY *x509ne = 0;
+  ASN1_STRING *asn1 = 0;
+  unsigned char *buf = 0;
+  int nid = OBJ_txt2nid(field_name);
+
+  ASSERT (size > 0);
+  *out = '\0';
+  do {
+    lastpos = tmp;
+    tmp = X509_NAME_get_index_by_NID(x509, nid, lastpos);
+  } while (tmp > 0);
+
+  /* Nothing found */
+  if (lastpos == -1)
+    return;
+
+  x509ne = X509_NAME_get_entry(x509, lastpos);
+  if (!x509ne)
+    return;
+
+  asn1 = X509_NAME_ENTRY_get_data(x509ne);
+  if (!asn1)
+    return;
+  tmp = ASN1_STRING_to_UTF8(&buf, asn1);
+  if (tmp <= 0)
+    return;
+
+  strncpynt(out, (char *)buf, size);
+  OPENSSL_free(buf);
 }
 
 static void
@@ -535,7 +583,8 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   string_mod (subject, X509_NAME_CHAR_CLASS, 0, '_');
 
   /* extract the common name */
-  extract_x509_field (subject, "CN", common_name, TLS_CN_LEN);
+  extract_x509_field_ssl (X509_get_subject_name (ctx->current_cert), "CN", common_name, TLS_CN_LEN);
+  //extract_x509_field (subject, "CN", common_name, TLS_CN_LEN);
   string_mod (common_name, COMMON_NAME_CHAR_CLASS, 0, '_');
 
 #if 0 /* print some debugging info */
@@ -1151,10 +1200,9 @@ init_ssl (const struct options *options)
       if (options->pkcs11_providers[0])
         {
          /* Load Certificate and Private Key */
-	 if (!SSL_CTX_use_pkcs11 (ctx, options->pkcs11_slot_type, options->pkcs11_slot, options->pkcs11_id_type, options->pkcs11_id))
+	 if (!SSL_CTX_use_pkcs11 (ctx, options->pkcs11_id))
 	   {
-	     msg (M_WARN, "Cannot load certificate \"%s:%s\" from slot \"%s:%s\" using PKCS#11 interface",
-               options->pkcs11_id_type, options->pkcs11_id, options->pkcs11_slot_type, options->pkcs11_slot);
+	     msg (M_WARN, "Cannot load certificate \"%s\" using PKCS#11 interface", options->pkcs11_id);
 	     goto err;
 	   }
         }
@@ -1228,7 +1276,7 @@ init_ssl (const struct options *options)
       int status;
 
 #if ENABLE_INLINE_FILES
-      if (!strcmp (options->ca_file, INLINE_FILE_TAG) && options->ca_file_inline)
+      if (options->ca_file && !strcmp (options->ca_file, INLINE_FILE_TAG) && options->ca_file_inline)
 	{
 	  status = use_inline_load_verify_locations (ctx, options->ca_file_inline);
 	}

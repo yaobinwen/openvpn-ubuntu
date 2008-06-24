@@ -14,9 +14,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openvpn\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-07-25 05:04-0600\n"
-"PO-Revision-Date: 2006-08-26 14:03+0200\n"
+"Report-Msgid-Bugs-To: openvpn@packages.debian.org\n"
+"POT-Creation-Date: 2008-05-16 12:38+0200\n"
+"PO-Revision-Date: 2008-05-22 19:43+0200\n"
 "Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
 "Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
@@ -25,13 +25,15 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#. NOT REVIEWED, obsolete
+#: ../templates:2001
 msgid "Would you like to start openvpn sooner?"
 msgstr "Chcete spouštět openvpn dříve?"
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#. NOT REVIEWED, obsolete
+#: ../templates:2001
 msgid ""
 "Previous versions of openvpn started at the same time as most of other "
 "services. This means that most of these services couldn't use openvpn since "
@@ -47,9 +49,11 @@ msgstr ""
 
 #. Type: boolean
 #. Description
+#. NOT REVIEWED, obsolete
 #. Type: boolean
 #. Description
-#: ../templates:1001 ../templates:5001
+#. NOT REVIEWED, obsolete
+#: ../templates:2001 ../templates:6001
 msgid ""
 "If you accept here, the package upgrade will make this change for you. If "
 "you refuse, nothing will change, and openvpn will be working just like it "
@@ -60,69 +64,71 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:2001
-msgid "Would you like a TUN/TAP device to be created?"
-msgstr "Chcete vytvořit zařízení TUN/TAP?"
-
-#. Type: boolean
-#. Description
-#: ../templates:2001
-msgid ""
-"If you accept here, the package will make a special device called /dev/net/"
-"tun for openvpn's use. If you refuse, the device won't be made now. Read "
-"README.Debian for details on how to make it. If you are using devfs refuse "
-"here."
-msgstr ""
-"Odpovíte-li kladně, balík vytvoří speciální zařízení nazvané /dev/net/tun. "
-"Odmítnete-li, zařízení se nyní nevytvoří. Používáte-li devfs, odmítněte. "
-"Návod na ruční vytvoření zařízení naleznete v souboru README.Debian."
-
-#. Type: boolean
-#. Description
 #: ../templates:3001
-msgid "Would you like to stop openvpn before it gets upgraded?"
-msgstr "Chcete openvpn při aktualizaci zastavit?"
+msgid "Create the TUN/TAP device?"
+msgstr "Vytvořit zařízení TUN/TAP?"
 
 #. Type: boolean
 #. Description
 #: ../templates:3001
 msgid ""
-"In some cases you may be upgrading openvpn in a remote server using a VPN to "
-"do so. The upgrade process stops the running daemon before  installing the "
-"new version, in that case you may lose your connection, the upgrade may be "
-"interrupted, and you may not be able to reconnect to the remote host."
+"If you choose this option, the /dev/net/tun device needed by OpenVPN will be "
+"created."
 msgstr ""
-"V některých případech se může stát, že budete aktualizovat openvpn na "
-"vzdáleném serveru právě přes VPN tunel. Před instalací nové verze bude "
-"běžící daemon zastaven a vy tak ztratíte své připojení, aktualizace se "
-"přeruší a už se možná ke vzdálenému počítači nebudete moci přihlásit."
+"Povolíte-li tuto možnost, vytvoří se zařízení /dev/net/tun, které je nutné "
+"pro činnost OpenVPN."
 
 #. Type: boolean
 #. Description
 #: ../templates:3001
+msgid "You should not choose this option if you're using devfs."
+msgstr "Používáte-li devfs, tuto volbu nepovolujte."
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
+msgid "Stop OpenVPN when upgraded?"
+msgstr "Zastavit OpenVPN při aktualizaci?"
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
 msgid ""
-"Unless you do your upgrades locally, it is advised NOT to stop openvpn "
-"before it gets upgraded. The installation process will restart it once it's "
-"done."
+"The upgrade process stops the running daemon before  installing the new "
+"version. If you are installing or upgrading the system remotely, that could "
+"break the upgrade process."
 msgstr ""
-"Jestliže nebudete provádět aktualizace lokálně, doporučujeme NEZASTAVOVAT "
-"openvpn před aktualizací. Instalační proces jej po instalaci restartuje."
+"Před instalací nové verze bude běžící daemon zastaven. Jestliže "
+"aktualizujete systém vzdáleně, může to vést k narušení procesu aktualizace."
 
 #. Type: boolean
 #. Description
-#: ../templates:3001
-msgid "This option will take effect in your next upgrade."
+#: ../templates:4001
+msgid ""
+"Unless upgrades are performed locally, you should choose to not stop OpenVPN "
+"before it is upgraded. The installation process will restart it once the "
+"upgrade is completed."
+msgstr ""
+"Jestliže nebudete provádět aktualizace lokálně, doporučujeme openvpn před "
+"aktualizací nezastavovat. Instalační proces jej po instalaci restartuje."
+
+#. Type: boolean
+#. Description
+#: ../templates:4001
+msgid "This option will take effect for the next upgrade."
 msgstr "Tato volba nabude účinnosti při příští aktualizaci."
 
 #. Type: note
 #. Description
-#: ../templates:4001
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid "Default port has changed"
 msgstr "Implicitní port se změnil"
 
 #. Type: note
 #. Description
-#: ../templates:4001
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid ""
 "OpenVPN's default port has changed from 5000 to 1194 (IANA assigned). If you "
 "don't specify the port to be used on your VPNs, this upgrade may break them."
@@ -133,7 +139,8 @@ msgstr ""
 
 #. Type: note
 #. Description
-#: ../templates:4001
+#. NOT REVIEWED, obsolete
+#: ../templates:5001
 msgid ""
 "Use the option 'port 5000' if you want to keep the old port configuration, "
 "or take a look at your firewall rules to allow the new default port "
@@ -145,13 +152,15 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:5001
+#. NOT REVIEWED, obsolete
+#: ../templates:6001
 msgid "Would you like to stop openvpn later?"
 msgstr "Chcete ukončovat openvpn později?"
 
 #. Type: boolean
 #. Description
-#: ../templates:5001
+#. NOT REVIEWED, obsolete
+#: ../templates:6001
 msgid ""
 "Previous versions of openvpn stopped at the same time as most of other "
 "services. This meant that some of services stopping later couldn't use  "
@@ -164,3 +173,70 @@ msgstr ""
 "tou dobou již nemuselo být k dispozici. Novější verze balíku openvpn mohou "
 "službu zastavit později (v rc[06].d se místo K20openvpn vytvoří odkaz "
 "K80openvpn)."
+
+#. Type: note
+#. Description
+#: ../templates:7001
+msgid "Vulnerable random number generator"
+msgstr "Zranitelný generátor náhodných čísel"
+
+#. Type: note
+#. Description
+#: ../templates:7001
+msgid ""
+"A weakness has been discovered in the random number generator used by "
+"OpenSSL on Ubuntu and Debian systems.  As a result of this weakness, certain "
+"encryption keys are generated much more frequently than they should be, such "
+"that an attacker could guess the key through a brute-force attack given "
+"minimal knowledge of the system."
+msgstr ""
+"V OpenSSL používaném na systémech Ubuntu a Debian byla objevena slabina "
+"v generátoru náhodných čísel. Důsledkem slabiny je fakt, že se některé "
+"šifrovací klíče generují častěji než by měly. Útočník tak může s jistou "
+"minimální znalostí systému odhalit klíč pomocí útoku hrubou silou."
+
+#. Type: note
+#. Description
+#: ../templates:7001
+msgid ""
+"Any keys created on a vulnerable system may be affected by this problem. The "
+"'openssl-vulnkey' command may be used as a partial test for RSA keys with "
+"certain bit sizes, and the 'openvpn-vulnkey' for OpenVPN shared secret keys. "
+"Users are urged to verify their keys or simply regenerate any server or "
+"client certificates and keys in use on the system."
+msgstr ""
+"Jakékoliv klíče vytvořené na postiženém systému mohou být tímto problémem "
+"zasaženy. Jako částečný test RSA klíčů s určitými délkami můžete použít "
+"příkaz „openssl-vulnkey“, případně pro sdílené tajné klíče OpenVPN příkaz "
+"„openvpn-vulnkey“. Uživatelé by měli okamžitě zkontrolovat své klíče, "
+"případně rovnou přegenerovat všechny serverové a klientské certifikáty "
+"a klíče, které se na systému používají."
+
+#~ msgid "Would you like a TUN/TAP device to be created?"
+#~ msgstr "Chcete vytvořit zařízení TUN/TAP?"
+
+#~ msgid ""
+#~ "If you accept here, the package will make a special device called /dev/"
+#~ "net/tun for openvpn's use. If you refuse, the device won't be made now. "
+#~ "Read README.Debian for details on how to make it. If you are using devfs "
+#~ "refuse here."
+#~ msgstr ""
+#~ "Odpovíte-li kladně, balík vytvoří speciální zařízení nazvané /dev/net/"
+#~ "tun. Odmítnete-li, zařízení se nyní nevytvoří. Používáte-li devfs, "
+#~ "odmítněte. Návod na ruční vytvoření zařízení naleznete v souboru README."
+#~ "Debian."
+
+#~ msgid "Would you like to stop openvpn before it gets upgraded?"
+#~ msgstr "Chcete openvpn při aktualizaci zastavit?"
+
+#~ msgid ""
+#~ "In some cases you may be upgrading openvpn in a remote server using a VPN "
+#~ "to do so. The upgrade process stops the running daemon before  installing "
+#~ "the new version, in that case you may lose your connection, the upgrade "
+#~ "may be interrupted, and you may not be able to reconnect to the remote "
+#~ "host."
+#~ msgstr ""
+#~ "V některých případech se může stát, že budete aktualizovat openvpn na "
+#~ "vzdáleném serveru právě přes VPN tunel. Před instalací nové verze bude "
+#~ "běžící daemon zastaven a vy tak ztratíte své připojení, aktualizace se "
+#~ "přeruší a už se možná ke vzdálenému počítači nebudete moci přihlásit."

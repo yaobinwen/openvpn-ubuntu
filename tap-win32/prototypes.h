@@ -187,7 +187,7 @@ VOID HookDispatchFunctions();
 
 #if ENABLE_NONADMIN
 
-#if DDKVER < 5600
+#if DDKVER_MAJOR < 5600
 /*
  * Better solution for use on Vista DDK, but possibly not compatible with
  * earlier DDKs:
@@ -222,6 +222,12 @@ ZwSetSecurityObject (
 VOID AllowNonAdmin (TapExtensionPointer p_Extension);
 
 #endif
+
+struct WIN2K_NDIS_MINIPORT_BLOCK
+{
+  unsigned char  opaque[16];
+  UNICODE_STRING MiniportName;       // how mini-port refers to us
+};
 
 #if PACKET_TRUNCATION_CHECK
 

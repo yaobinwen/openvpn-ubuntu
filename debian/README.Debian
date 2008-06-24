@@ -153,4 +153,9 @@ down /etc/openvpn/update-resolv-conf
 
 You will need to install resolvconf package.
 
+Out of Memory issues
+-------------------
+
+You might run into issues with openvpn complaining about out of memory. The reason for this behavior is that openvpn uses mlockall to pin all of its pages into memory. To correct this issue you can put a "ulimit -l <reasonable number>" in the openvpn init script.
+
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 09 Dec 2007 01:32:10 +0100

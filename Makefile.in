@@ -90,14 +90,14 @@ am_openvpn_OBJECTS = base64.$(OBJEXT) buffer.$(OBJEXT) \
 	manage.$(OBJEXT) mbuf.$(OBJEXT) misc.$(OBJEXT) \
 	mroute.$(OBJEXT) mss.$(OBJEXT) mtcp.$(OBJEXT) mtu.$(OBJEXT) \
 	mudp.$(OBJEXT) multi.$(OBJEXT) ntlm.$(OBJEXT) occ.$(OBJEXT) \
-	pkcs11.$(OBJEXT) pkcs11-helper.$(OBJEXT) openvpn.$(OBJEXT) \
-	options.$(OBJEXT) otime.$(OBJEXT) packet_id.$(OBJEXT) \
-	perf.$(OBJEXT) ping.$(OBJEXT) plugin.$(OBJEXT) pool.$(OBJEXT) \
-	proto.$(OBJEXT) proxy.$(OBJEXT) ps.$(OBJEXT) push.$(OBJEXT) \
-	reliable.$(OBJEXT) route.$(OBJEXT) schedule.$(OBJEXT) \
-	session_id.$(OBJEXT) shaper.$(OBJEXT) sig.$(OBJEXT) \
-	socket.$(OBJEXT) socks.$(OBJEXT) ssl.$(OBJEXT) \
-	status.$(OBJEXT) thread.$(OBJEXT) tun.$(OBJEXT)
+	pkcs11.$(OBJEXT) openvpn.$(OBJEXT) options.$(OBJEXT) \
+	otime.$(OBJEXT) packet_id.$(OBJEXT) perf.$(OBJEXT) \
+	ping.$(OBJEXT) plugin.$(OBJEXT) pool.$(OBJEXT) proto.$(OBJEXT) \
+	proxy.$(OBJEXT) ps.$(OBJEXT) push.$(OBJEXT) reliable.$(OBJEXT) \
+	route.$(OBJEXT) schedule.$(OBJEXT) session_id.$(OBJEXT) \
+	shaper.$(OBJEXT) sig.$(OBJEXT) socket.$(OBJEXT) \
+	socks.$(OBJEXT) ssl.$(OBJEXT) status.$(OBJEXT) \
+	thread.$(OBJEXT) tun.$(OBJEXT)
 nodist_openvpn_OBJECTS =
 openvpn_OBJECTS = $(am_openvpn_OBJECTS) $(nodist_openvpn_OBJECTS)
 openvpn_LDADD = $(LDADD)
@@ -264,7 +264,7 @@ openvpn_SOURCES = \
 	multi.c multi.h \
         ntlm.c ntlm.h \
 	occ.c occ.h occ-inline.h \
-	pkcs11.c pkcs11.h pkcs11-helper.c pkcs11-helper.h pkcs11-helper-config.h cryptoki.h \
+	pkcs11.c pkcs11.h \
 	openvpn.c openvpn.h \
 	openvpn-plugin.h \
 	options.c options.h \
@@ -322,8 +322,10 @@ EXTRA_DIST = \
 	debug \
 	plugin \
         management \
-        pkcs11-headers \
-	cryptoki-win32.h
+	images \
+	ieproxy.c \
+	ieproxy.h \
+	domake-win
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -448,7 +450,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet_id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ping.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pkcs11-helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pkcs11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
