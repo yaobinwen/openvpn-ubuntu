@@ -40,6 +40,7 @@
 #include "otime.h"
 #include "integer.h"
 #include "misc.h"
+#include "ssl.h"
 #include "manage.h"
 
 #include "memdbg.h"
@@ -70,6 +71,7 @@ man_help ()
   msg (M_CLIENT, "bytecount n            : Show bytes in/out, update every n secs (0=off).");
   msg (M_CLIENT, "echo [on|off] [N|all]  : Like log, but only show messages in echo buffer.");
   msg (M_CLIENT, "exit|quit              : Close management session.");
+  msg (M_CLIENT, "forget-passwords       : Forget passwords entered so far.");
   msg (M_CLIENT, "help                   : Print this message.");
   msg (M_CLIENT, "hold [on|off|release]  : Set/show hold flag to on/off state, or"); 
   msg (M_CLIENT, "                         release current hold and start tunnel."); 
@@ -602,6 +604,13 @@ man_query_need_ok (struct management *man, const char *type, const char *action)
 }
 
 static void
+man_forget_passwords (struct management *man)
+{
+  ssl_purge_auth ();
+  msg (M_CLIENT, "SUCCESS: Passwords were forgotten");
+}
+
+static void
 man_net (struct management *man)
 {
   if (man->persist.callback.show_net)
@@ -788,6 +797,10 @@ man_dispatch_command (struct management *man, struct status_output *so, const ch
     {
       if (man_need (man, p, 2, 0))
 	man_query_password (man, p[1], p[2]);
+    }
+  else if (streq (p[0], "forget-passwords"))
+    {
+      man_forget_passwords (man);
     }
   else if (streq (p[0], "needok"))
     {
@@ -1067,6 +1080,18 @@ man_reset_client_socket (struct management *man, const bool exiting)
     }
   if (!exiting)
     {
+      if (man->settings.management_forget_disconnect)
+	 ssl_purge_auth ();
+
+      if (man->settings.signal_on_disconnect) {
+      	  int mysig = man_mod_signal (man, SIGUSR1);
+	  if (mysig >= 0)
+	    {
+	      msg (D_MANAGEMENT, "MANAGEMENT: Triggering management signal");
+	      throw_signal_soft (mysig, "management-disconnect");
+	    }
+      }
+
       if (man->settings.connect_as_client)
 	{
 	  msg (D_MANAGEMENT, "MANAGEMENT: Triggering management exit");
@@ -1310,6 +1335,8 @@ man_settings_init (struct man_settings *ms,
 		   const int echo_buffer_size,
 		   const int state_buffer_size,
 		   const bool hold,
+		   const bool signal_on_disconnect,
+		   const bool management_forget_disconnect,
 		   const bool connect_as_client,
 		   const char *write_peer_info_file,
 		   const int remap_sigusr1)
@@ -1340,6 +1367,18 @@ man_settings_init (struct man_settings *ms,
        * Should OpenVPN hibernate on startup?
        */
       ms->hold = hold;
+
+      /*
+       * Should OpenVPN be signaled if management
+       * disconnects?
+       */
+      ms->signal_on_disconnect = signal_on_disconnect;
+
+      /*
+       * Should OpenVPN forget passwords when managmenet
+       * session disconnects?
+       */
+      ms->management_forget_disconnect = management_forget_disconnect;
 
       /*
        * Should OpenVPN connect to management interface as a client
@@ -1483,6 +1522,8 @@ management_open (struct management *man,
 		 const int echo_buffer_size,
 		 const int state_buffer_size,
 		 const bool hold,
+		 const bool signal_on_disconnect,
+		 const bool management_forget_disconnect,
 		 const bool connect_as_client,
 		 const char *write_peer_info_file,
 		 const int remap_sigusr1)
@@ -1503,6 +1544,8 @@ management_open (struct management *man,
 		     echo_buffer_size,
 		     state_buffer_size,
 		     hold,
+		     signal_on_disconnect,
+		     management_forget_disconnect,
 		     connect_as_client,
 		     write_peer_info_file,
 		     remap_sigusr1);
