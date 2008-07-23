@@ -1,8 +1,163 @@
 OpenVPN
-Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
 
-$Id: ChangeLog 1881 2007-04-25 23:52:12Z james $
+$Id: ChangeLog 2994 2008-06-11 21:38:07Z james $
 
+2008.06.11 -- Version 2.1_rc8
+
+* Added client authentication and packet filtering capability
+  to management interface.  In addition, allow OpenVPN plugins
+  to take advantage of deferred authentication and packet
+  filtering capability.
+
+* Added support for client-side connection profiles.
+
+* Fixed unbounded memory growth bug in environmental variable
+  code that could have caused long-running OpenVPN sessions
+  with many TLS renegotiations to incrementally
+  increase memory usage over time.
+
+* Windows release now packages openssl-0.9.8h.
+
+* Build system changes -- allow building on Windows using
+  autoconf/automake scripts (Alon Bar-Lev).
+
+* Changes to Windows build system to make it easier to do
+  partial builds, with a reduced set of prerequisites,
+  where only a subset of OpenVPN installer
+  components are built.  See ./domake-win comments.
+
+* Cleanup IP address for persistence interfaces for tap and also
+  using ifconfig, gentoo#209055 (Alon Bar-Lev).
+
+* Fall back to old version of extract_x509_field for OpenSSL 0.9.6.
+
+* Clarified tcp-queue-limit man page entry (Matti Linnanvuori).
+
+* Added new OpenVPN icon and installer graphic.
+
+* Minor pkitool changes.
+
+* Added --pkcs11-id-management option, which will cause OpenVPN to
+  query the management interface via the new NEED-STR asynchronous
+  notification query to get additional PKCS#11 options (Alon Bar-Lev).
+
+* Added NEED-STR management interface asynchronous query and
+  "needstr" management interface command to respond to the query
+  (Alon Bar-Lev).
+
+* Added Dragonfly BSD support (Francis-Gudin).
+
+* Quote device names before passing to up/down script (Josh Cepek).
+
+* Bracketed struct openvpn_pktinfo with #pragma pack(1) to
+  prevent structure padding from causing an incorrect length
+  to be returned by sizeof (struct openvpn_pktinfo) on 64-bit
+  platforms.
+
+* On systems that support res_init, always call it
+  before calling gethostbyname to ensure that
+  resolver configuration state is current.
+
+* Added NTLMv2 proxy support (Miroslav Zajic).
+
+* Fixed an issue in extract_x509_field_ssl where the extraction
+  would fail on the first field of the subject name, such as
+  the common name in:  /CN=foo/emailAddress=foo@bar.com
+
+* Made "Linux ip addr del failed" error nonfatal.
+
+* Amplified --client-cert-not-required warning.
+
+* Added #pragma pack to proto.h.
+
+2008.01.29 -- Version 2.1_rc7
+
+* Added a few extra files that exist in the svn repo but were
+  not being copied into the tarball by make dist.
+
+* Fixup null interface on close, don't use ip addr flush (Alon Bar-Lev).
+
+2008.01.24 -- Version 2.1_rc6
+
+* Fixed options checking bug introduced in rc5 where legitimate configuration
+  files might elicit the error: "Options error: Parameter pkcs11_private_mode
+  can only be specified in TLS-mode, i.e. where --tls-server or --tls-client
+  is also specified."
+	
+2008.01.23 -- Version 2.1_rc5
+
+* Fixed Win2K TAP driver bug that was introduced by Vista fixes,
+  incremented driver version to 9.4.
+
+* Windows build system changes:
+
+  Incremented included OpenSSL version to openssl-0.9.7m.
+
+  Updated openssl.patch for openssl-0.9.7m and added some
+  brief usage comments to the head of the patch.
+
+  Added build-pkcs11-helper.sh for building the pkcs11-helper
+  library.
+
+  Integrated inclusion of pkcs11-helper into Windows build
+  system.
+
+  Upgraded TAP build scripts to use WDK 6001.17121
+  (Windows 2008 Server pre-RTM).
+
+* Windows installer changes:
+
+  Clean up the start menu folder.
+
+  Allow for a site-specific sample configuration file and keys
+  to be included in a custom installer (see SAMPCONF macros
+  in settings.in). 
+
+  New icon (temporary).
+
+* Added "forget-passwords" command to the management interface
+  (Alon Bar-Lev).
+
+* Added --management-signal option to signal SIGUSR1 when the
+  management interface disconnects (Alon Bar-Lev).
+
+* Modified command line and config file parser to allow
+  quoted strings using single quotes ('') (Alon Bar-Lev).
+
+* Use pkcs11-helper as external library, can be downloaded from
+  https://www.opensc-project.org/pkcs11-helper (Alon Bar-Lev).
+
+* Fixed interim memory growth issue in TCP connect loop where
+  "TCP: connect to %s failed, will try again in %d seconds: %s"
+  is output.
+
+* Fixed bug in epoll driver in event.c, where the lack of a
+  handler for EPOLLHUP could cause 99% CPU usage.
+
+* Defined ALLOW_NON_CBC_CIPHERS for people who don't
+  want to use a CBC cipher for OpenVPN's data channel.
+
+* Added PLUGIN_LIBDIR preprocessor string to prepend a default
+  plugin directory to the dlopen search list when the user
+  specifies the basename of the plugin only (Marius Tomaschewski).
+
+* Rewrote extract_x509_field and modified COMMON_NAME_CHAR_CLASS
+  to allow forward slash characters ("/") in the X509 common name
+  (Pavel Shramov).
+
+* Allow OpenVPN to run completely unprivileged under Linux
+  by allowing openvpn --mktun to be used with --user and --group
+  to set the UID/GID of the tun device node.  Also added --iproute
+  option to allow an alternative command to be executed in place
+  of the default iproute2 command (Alon Bar-Lev).
+
+* Fixed --disable-iproute2 in ./configure to actually disable
+  iproute2 usage (Alon Bar-Lev).
+
+* Added --management-forget-disconnect option -- forget
+  passwords when management session disconnects (Alon Bar-Lev).
+	
 2007.04.25 -- Version 2.1_rc4
 
 * Worked out remaining issues with TAP driver signing

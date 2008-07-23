@@ -15,3 +15,5 @@
 #
 #STATUSREFRESH=10
 #STATUSREFRESH=0
+# Optional arguments to openvpn's command line
+OPTARGS=""

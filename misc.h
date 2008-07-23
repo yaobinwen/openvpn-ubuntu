@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -165,6 +165,9 @@ void setenv_str (struct env_set *es, const char *name, const char *value);
 void setenv_str_safe (struct env_set *es, const char *name, const char *value);
 void setenv_del (struct env_set *es, const char *name);
 
+void setenv_int_i (struct env_set *es, const char *name, const int value, const int i);
+void setenv_str_i (struct env_set *es, const char *name, const char *value, const int i);
+
 /* struct env_set functions */
 
 struct env_set *env_set_create (struct gc_arena *gc);
@@ -206,7 +209,7 @@ long int get_random(void);
 bool test_file (const char *filename);
 
 /* create a temporary filename in directory */
-const char *create_temp_filename (const char *directory, struct gc_arena *gc);
+const char *create_temp_filename (const char *directory, const char *prefix, struct gc_arena *gc);
 
 /* put a directory and filename together */
 const char *gen_path (const char *directory, const char *filename, struct gc_arena *gc);
@@ -227,7 +230,11 @@ struct user_pass
   bool nocache;
 
 /* max length of username/password */
-# define USER_PASS_LEN 128
+# ifdef ENABLE_PKCS11
+#   define USER_PASS_LEN 4096
+# else
+#   define USER_PASS_LEN 128
+# endif
   char username[USER_PASS_LEN];
   char password[USER_PASS_LEN];
 };
@@ -242,6 +249,7 @@ bool get_console_input (const char *prompt, const bool echo, char *input, const 
 #define GET_USER_PASS_PASSWORD_ONLY (1<<2)
 #define GET_USER_PASS_NEED_OK       (1<<3)
 #define GET_USER_PASS_NOFATAL       (1<<4)
+#define GET_USER_PASS_NEED_STR      (1<<5)
 
 bool get_user_pass (struct user_pass *up,
 		    const char *auth_file,
@@ -266,7 +274,14 @@ void openvpn_sleep (const int n);
 void configure_path (void);
 
 #if AUTO_USERID
-void get_user_pass_auto_userid (struct user_pass *up);
+void get_user_pass_auto_userid (struct user_pass *up, const char *tag);
+#endif
+
+/*
+ * /sbin/ip path, may be overridden
+ */
+#ifdef CONFIG_FEATURE_IPROUTE
+extern const char *iproute_path;
 #endif
 
 #endif

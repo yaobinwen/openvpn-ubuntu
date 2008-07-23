@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -45,29 +45,34 @@ bool
 pkcs11_addProvider (
 	const char * const provider,
 	const bool fProtectedAuthentication,
-	const char * const sign_mode,
+	const unsigned private_mode,
 	const bool fCertIsPrivate
+);
+
+int
+pkcs11_logout();
+
+int
+pkcs11_management_id_count ();
+
+bool
+pkcs11_management_id_get (
+	const int index,
+	char ** id,
+	char **base64
 );
 
 int
 SSL_CTX_use_pkcs11 (
 	SSL_CTX * const ssl_ctx,
-	const char * const pkcs11_slot_type,
-	const char * const pkcs11_slot,
-	const char * const pkcs11_id_type,
+	bool pkcs11_id_management,
 	const char * const pkcs11_id
 );
 
 void
-show_pkcs11_slots (
-	const char * const provider
-);
-
-void
-show_pkcs11_objects (
+show_pkcs11_ids (
 	const char * const provider,
-	const char * const slot,
-	const char * const pin
+	bool cert_private
 );
 
 #endif			/* ENABLE_PKCS11 */

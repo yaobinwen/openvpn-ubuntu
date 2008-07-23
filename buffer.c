@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -21,12 +21,6 @@
  *  distribution); if not, write to the Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
 
 #include "syshead.h"
 
@@ -321,6 +315,26 @@ x_gc_free (struct gc_arena *a)
 }
 
 /*
+ * Transfer src arena to dest, resetting src to an empty arena.
+ */
+void
+gc_transfer (struct gc_arena *dest, struct gc_arena *src)
+{
+  if (dest && src)
+    {
+      struct gc_entry *e = src->list;
+      if (e)
+	{
+	  while (e->next != NULL)
+	    e = e->next;
+	  e->next = dest->list;
+	  dest->list = src->list;
+	  src->list = NULL;
+	}
+    }
+}
+
+/*
  * Hex dump -- Output a binary buffer to a hex string and return it.
  */
 
@@ -430,6 +444,15 @@ string_null_terminate (char *str, int len, int capacity)
 void
 chomp (char *str)
 {
+  rm_trailing_chars (str, "\r\n");
+}
+
+/*
+ * Remove trailing chars
+ */
+void
+rm_trailing_chars (char *str, const char *what_to_delete)
+{
   bool modified;
   do {
     const int len = strlen (str);
@@ -437,7 +460,7 @@ chomp (char *str)
     if (len > 0)
       {
 	char *cp = str + (len - 1);
-	if (*cp == '\n' || *cp == '\r')
+	if (strchr (what_to_delete, *cp) != NULL)
 	  {
 	    *cp = '\0';
 	    modified = true;
@@ -815,4 +838,131 @@ valign4 (const struct buffer *buf, const char *file, const int line)
 	   buf_debug_line (buf));
     }
 }
+#endif
+
+/*
+ * struct buffer_list
+ */
+
+#ifdef ENABLE_BUFFER_LIST
+
+struct buffer_list *
+buffer_list_new (const int max_size)
+{
+  struct buffer_list *ret;
+  ALLOC_OBJ_CLEAR (ret, struct buffer_list);
+  ret->max_size = max_size;
+  ret->size = 0;
+  return ret;
+}
+
+void
+buffer_list_free (struct buffer_list *ol)
+{
+  buffer_list_reset (ol);
+  free (ol);
+}
+
+bool
+buffer_list_defined (const struct buffer_list *ol)
+{
+  return ol->head != NULL;
+}
+
+void
+buffer_list_reset (struct buffer_list *ol)
+{
+  struct buffer_entry *e = ol->head;
+  while (e)
+    {
+      struct buffer_entry *next = e->next;
+      free_buf (&e->buf);
+      free (e);
+      e = next;
+    }
+  ol->head = ol->tail = NULL;
+  ol->size = 0;
+}
+
+void
+buffer_list_push (struct buffer_list *ol, const unsigned char *str)
+{
+  if (!ol->max_size || ol->size < ol->max_size)
+    {
+      struct buffer_entry *e;
+      ALLOC_OBJ_CLEAR (e, struct buffer_entry);
+
+      ++ol->size;
+      if (ol->tail)
+	{
+	  ASSERT (ol->head);
+	  ol->tail->next = e;
+	}
+      else
+	{
+	  ASSERT (!ol->head);
+	  ol->head = e;
+	}
+      e->buf = string_alloc_buf ((const char *) str, NULL);
+      ol->tail = e;
+    }
+}
+
+const struct buffer *
+buffer_list_peek (struct buffer_list *ol)
+{
+  if (ol->head)
+    return &ol->head->buf;
+  else
+    return NULL;
+}
+
+static void
+buffer_list_pop (struct buffer_list *ol)
+{
+  if (ol->head)
+    {
+      struct buffer_entry *e = ol->head->next;
+      free_buf (&ol->head->buf);
+      free (ol->head);
+      ol->head = e;
+      --ol->size;
+      if (!e)
+	ol->tail = NULL;
+    }
+}
+
+void
+buffer_list_advance (struct buffer_list *ol, int n)
+{
+  if (ol->head)
+    {
+      struct buffer *buf = &ol->head->buf;
+      ASSERT (buf_advance (buf, n));
+      if (!BLEN (buf))
+	buffer_list_pop (ol);
+    }
+}
+
+struct buffer_list *
+buffer_list_file (const char *fn, int max_line_len)
+{
+  FILE *fp = fopen (fn, "r");
+  struct buffer_list *bl = NULL;
+
+  if (fp)
+    {
+      char *line = (char *) malloc (max_line_len);
+      if (line)
+	{
+	  bl = buffer_list_new (0);
+	  while (fgets (line, max_line_len, fp) != NULL)
+	    buffer_list_push (bl, (unsigned char *)line);
+	  free (line);
+	}
+      fclose (fp);
+    }
+  return bl;
+}
+
 #endif

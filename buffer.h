@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -137,6 +137,13 @@ buf_reset (struct buffer *buf)
   buf->data = NULL;
 }
 
+static inline void
+buf_reset_len (struct buffer *buf)
+{
+  buf->len = 0;
+  buf->offset = 0;
+}
+
 static inline bool
 buf_init_dowork (struct buffer *buf, int offset)
 {
@@ -224,6 +231,7 @@ void buf_rmtail (struct buffer *buf, uint8_t remove);
  * non-buffer string functions
  */
 void chomp (char *str);
+void rm_trailing_chars (char *str, const char *what_to_delete);
 const char *skip_leading_whitespace (const char *str);
 void string_null_terminate (char *str, int len, int capacity);
 
@@ -624,6 +632,8 @@ void character_class_debug (void);
  * char ptrs to malloced strings.
  */
 
+void gc_transfer (struct gc_arena *dest, struct gc_arena *src);
+
 void x_gc_free (struct gc_arena *a);
 
 static inline void
@@ -714,5 +724,39 @@ check_malloc_return (void *p)
   if (!p)
     out_of_memory ();
 }
+
+/*
+ * Manage lists of buffers
+ */
+
+#ifdef ENABLE_BUFFER_LIST
+
+struct buffer_entry
+{
+  struct buffer buf;
+  struct buffer_entry *next;
+};
+
+struct buffer_list
+{
+  struct buffer_entry *head; /* next item to pop/peek */
+  struct buffer_entry *tail; /* last item pushed */
+  int size;                  /* current number of entries */
+  int max_size;              /* maximum size list should grow to */
+};
+
+struct buffer_list *buffer_list_new (const int max_size);
+void buffer_list_free (struct buffer_list *ol);
+
+bool buffer_list_defined (const struct buffer_list *ol);
+void buffer_list_reset (struct buffer_list *ol);
+
+void buffer_list_push (struct buffer_list *ol, const unsigned char *str);
+const struct buffer *buffer_list_peek (struct buffer_list *ol);
+void buffer_list_advance (struct buffer_list *ol, int n);
+
+struct buffer_list *buffer_list_file (const char *fn, int max_line_len);
+
+#endif
 
 #endif /* BUFFER_H */

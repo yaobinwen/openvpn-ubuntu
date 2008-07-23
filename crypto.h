@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -25,6 +25,8 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 #ifdef USE_CRYPTO
+
+#define ALLOW_NON_CBC_CIPHERS
 
 /*
  * Does our OpenSSL library support crypto hardware acceleration?
@@ -66,6 +68,9 @@
  */
 
 #if SSLEAY_VERSION_NUMBER < 0x00907000L
+
+/* Workaround: OpenSSL 0.9.6 breaks extract_x509_field_ssl function */
+#define USE_OLD_EXTRACT_X509_FIELD
 
 /* Workaround: EVP_CIPHER_mode is defined wrong in OpenSSL 0.9.6 but is fixed in 0.9.7 */
 #undef EVP_CIPHER_mode

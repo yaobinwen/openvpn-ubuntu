@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -658,7 +658,7 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
   struct user_pass up;
   int command;
 #if DLOPEN_PAM
-  static const char pam_so[] = "libpam.so.0";
+  static const char pam_so[] = "libpam.so";
 #endif
 
   /*
@@ -715,8 +715,14 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
 	    }
 
 	  if (DEBUG (verb))
-	    fprintf (stderr, "AUTH-PAM: BACKGROUND: USER/PASS: %s/%s\n",
-		     up.username, up.password);
+	    {
+#if 0
+	      fprintf (stderr, "AUTH-PAM: BACKGROUND: USER/PASS: %s/%s\n",
+		       up.username, up.password);
+#else
+	      fprintf (stderr, "AUTH-PAM: BACKGROUND: USER: %s\n", up.username);
+#endif
+	    }
 
 	  if (pam_auth (service, &up)) /* Succeeded */
 	    {

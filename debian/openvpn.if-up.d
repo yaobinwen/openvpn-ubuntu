@@ -7,5 +7,7 @@ if [ ! -x $OPENVPN ]; then
 fi
 
 if [ -n "$IF_OPENVPN" ]; then
-  $OPENVPN start $IF_OPENVPN
+  for vpn in $IF_OPENVPN; do
+    $OPENVPN start $vpn
+  done
 fi

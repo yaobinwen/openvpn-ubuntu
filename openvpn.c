@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -21,12 +21,6 @@
  *  distribution); if not, write to the Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
 
 #include "syshead.h"
 
@@ -136,7 +130,7 @@ main (int argc, char *argv[])
 	  gc_init (&c.gc);
 
 	  /* initialize environmental variable store */
-	  c.es = env_set_create (&c.gc);
+	  c.es = env_set_create (NULL);
 
 #ifdef ENABLE_MANAGEMENT
 	  /* initialize management subsystem */
@@ -144,7 +138,7 @@ main (int argc, char *argv[])
 #endif
 
 	  /* initialize options to default state */
-	  init_options (&c.options);
+	  init_options (&c.options, true);
 
 	  /* parse command line options, and read configuration file */
 	  parse_argv (&c.options, argc, argv, M_USAGE, OPT_P_DEFAULT, NULL, c.es);
@@ -175,7 +169,7 @@ main (int argc, char *argv[])
 	    break;
 
 	  /* sanity check on options */
-	  options_postprocess (&c.options, c.first_time);
+	  options_postprocess (&c.options);
 
 	  /* show all option settings */
 	  show_settings (&c.options);
@@ -238,6 +232,8 @@ main (int argc, char *argv[])
     }
 
   context_gc_free (&c);
+
+  env_set_destroy (c.es);
 
 #ifdef ENABLE_MANAGEMENT
   /* close management interface */
