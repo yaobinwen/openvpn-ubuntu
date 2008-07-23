@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -21,12 +21,6 @@
  *  distribution); if not, write to the Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
 
 #include "syshead.h"
 
@@ -555,7 +549,7 @@ ep_wait (struct event_set *es, const struct timeval *tv, struct event_set_return
       for (i = 0; i < stat; ++i)
 	{
 	  esr->rwflags = 0;
-	  if (ev->events & (EPOLLIN|EPOLLPRI|EPOLLERR))
+	  if (ev->events & (EPOLLIN|EPOLLPRI|EPOLLERR|EPOLLHUP))
 	    esr->rwflags |= EVENT_READ;
 	  if (ev->events & EPOLLOUT)
 	    esr->rwflags |= EVENT_WRITE;

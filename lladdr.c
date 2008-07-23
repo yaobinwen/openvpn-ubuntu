@@ -2,12 +2,6 @@
  * Support routine for configuring link layer address 
  */
 
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
-
 #include "syshead.h"
 #include "error.h"
 #include "misc.h"
@@ -24,8 +18,8 @@ int set_lladdr(const char *ifname, const char *lladdr,
 #if defined(TARGET_LINUX)
 #ifdef CONFIG_FEATURE_IPROUTE
   openvpn_snprintf (cmd, sizeof (cmd),
-		    IPROUTE_PATH " link set addr %s dev %s",
-		    lladdr, ifname);
+		    "%s link set addr %s dev %s",
+		    iproute_path, lladdr, ifname);
 #else
   openvpn_snprintf (cmd, sizeof (cmd),
 		    IFCONFIG_PATH " %s hw ether %s",

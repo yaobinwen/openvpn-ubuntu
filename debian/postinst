@@ -21,36 +21,27 @@ case "$1" in
     fi
     # Do we want to move the old S20 symlinks to S18 ones?
     if [ -n "$2" ] ; then
-      if dpkg --compare-versions "$2" lt 2.0.2-1 ; then
-        db_get openvpn/change_init || RET="false"
-        db_get openvpn/change_init2
-        if [ "$RET" = "true" ]; then
-          /usr/sbin/update-rc.d -f openvpn remove > /dev/null
-        fi
+      # PRNG warning
+      show_vuln_keys=""
+      if dpkg --compare-versions "$2" ge 2.0.6-2 && dpkg --compare-versions "$2" lt 2.1~rc7-2 ; then
+        show_vuln_keys="yes"
       fi
+
+      if [ "$show_vuln_keys" = "yes" ]; then
+        db_version 2.0
+        db_input critical openvpn/vulnerable_prng || true
+        db_go
+      fi
+
     fi
   ;;
 esac
 
 if [ -x "/etc/init.d/openvpn" ]; then
-        # defaults to true, better start it again than starting none
-        db_get openvpn/stop2upgrade || RET="true"
 	if [ -x /usr/sbin/invoke-rc.d ]; then
-                # if it is a new install or stopped on upgrade
-                # start instead
-                if [ -z "$2" -o "$RET" = "true" ] ; then
-                  invoke-rc.d openvpn start
-                else
-      	          invoke-rc.d openvpn cond-restart || invoke-rc.d openvpn restart
-                fi
+	   invoke-rc.d openvpn cond-restart || invoke-rc.d openvpn restart
 	else
-                # if it is a new install or stopped on upgrade
-                # start instead
-                if [ -z "$2" -o "$RET" = "true" ] ; then
-                  /etc/init.d/openvpn start
-                else
-		  /etc/init.d/openvpn cond-restart || /etc/init.d/openvpn restart
-                fi
+	   /etc/init.d/openvpn cond-restart || /etc/init.d/openvpn restart
 	fi
 fi
 

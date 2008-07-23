@@ -20,13 +20,8 @@ stop_vpn () {
 
 case "$1" in
   upgrade)
-    # use debconf
-    . /usr/share/debconf/confmodule
-    # stop the VPNs to upgrade?
-    db_get openvpn/stop2upgrade || RET="false"
-    if [ "$RET" = "true" ]; then
-      stop_vpn
-    fi
+    # don't stop the vpn, it will be restarted after the upgrade
+    true
   ;;
   *)
     stop_vpn

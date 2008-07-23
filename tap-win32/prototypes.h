@@ -4,7 +4,7 @@
  *
  *  This code was inspired by the CIPE-Win32 driver by Damion K. Wilson.
  *
- *  This source code is Copyright (C) 2002-2007 OpenVPN Solutions LLC,
+ *  This source code is Copyright (C) 2002-2008 OpenVPN Solutions LLC,
  *  and is released under the GPL version 2 (see below), however due
  *  to the extra costs of supporting Windows Vista, OpenVPN Solutions
  *  LLC reserves the right to change the terms of the TAP-Win32/TAP-Win64
@@ -187,7 +187,7 @@ VOID HookDispatchFunctions();
 
 #if ENABLE_NONADMIN
 
-#if DDKVER < 5600
+#if DDKVER_MAJOR < 5600
 /*
  * Better solution for use on Vista DDK, but possibly not compatible with
  * earlier DDKs:
@@ -222,6 +222,12 @@ ZwSetSecurityObject (
 VOID AllowNonAdmin (TapExtensionPointer p_Extension);
 
 #endif
+
+struct WIN2K_NDIS_MINIPORT_BLOCK
+{
+  unsigned char  opaque[16];
+  UNICODE_STRING MiniportName;       // how mini-port refers to us
+};
 
 #if PACKET_TRUNCATION_CHECK
 
