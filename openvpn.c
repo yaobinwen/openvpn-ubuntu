@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -27,6 +27,7 @@
 #include "init.h"
 #include "forward.h"
 #include "multi.h"
+#include "win32.h"
 
 #include "memdbg.h"
 
@@ -131,6 +132,9 @@ main (int argc, char *argv[])
 
 	  /* initialize environmental variable store */
 	  c.es = env_set_create (NULL);
+#ifdef WIN32
+	  env_set_add_win32 (c.es);
+#endif
 
 #ifdef ENABLE_MANAGEMENT
 	  /* initialize management subsystem */
