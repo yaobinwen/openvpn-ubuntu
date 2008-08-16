@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -339,44 +339,6 @@ tmp_rsa_cb (SSL * s, int is_export, int keylength)
   return (rsa_tmp);
 }
 
-#ifdef USE_OLD_EXTRACT_X509_FIELD
-
-/*
- * Extract a field from an X509 subject name.
- *
- * Example:
- *
- * /C=US/ST=CO/L=Denver/O=ORG/CN=Test-CA/Email=jim@yonan.net
- *
- * The common name is 'Test-CA'
- */
-static void
-extract_x509_field (const char *x509, const char *field_name, char *out, int size)
-{
-  char field_buf[256];
-  struct buffer x509_buf;
-
-  ASSERT (size > 0);
-  *out = '\0';
-  buf_set_read (&x509_buf, (uint8_t *)x509, strlen (x509));
-  while (buf_parse (&x509_buf, '/', field_buf, sizeof (field_buf)))
-    {
-      struct buffer component_buf;
-      char field_name_buf[64];
-      char field_value_buf[256];
-      buf_set_read (&component_buf, (const uint8_t *) field_buf, strlen (field_buf));
-      buf_parse (&component_buf, '=', field_name_buf, sizeof (field_name_buf));
-      buf_parse (&component_buf, '=', field_value_buf, sizeof (field_value_buf));
-      if (!strcmp (field_name_buf, field_name))
-	{
-	  strncpynt (out, field_value_buf, size);
-	  break;
-	}
-    }
-}
-
-#else
-
 /*
  * Extract a field from an X509 subject name.
  *
@@ -385,8 +347,11 @@ extract_x509_field (const char *x509, const char *field_name, char *out, int siz
  * /C=US/ST=CO/L=Denver/O=ORG/CN=First-CN/CN=Test-CA/Email=jim@yonan.net
  *
  * The common name is 'Test-CA'
+ *
+ * Return true on success, false on error (insufficient buffer size in 'out'
+ * to contain result is grounds for error).
  */
-static void
+static bool
 extract_x509_field_ssl (X509_NAME *x509, const char *field_name, char *out, int size)
 {
   int lastpos = -1;
@@ -405,24 +370,27 @@ extract_x509_field_ssl (X509_NAME *x509, const char *field_name, char *out, int 
 
   /* Nothing found */
   if (lastpos == -1)
-    return;
+    return false;
 
   x509ne = X509_NAME_get_entry(x509, lastpos);
   if (!x509ne)
-    return;
+    return false;
 
   asn1 = X509_NAME_ENTRY_get_data(x509ne);
   if (!asn1)
-    return;
+    return false;
   tmp = ASN1_STRING_to_UTF8(&buf, asn1);
   if (tmp <= 0)
-    return;
+    return false;
 
   strncpynt(out, (char *)buf, size);
-  OPENSSL_free(buf);
-}
 
-#endif
+  {
+    const bool ret = (strlen ((char *)buf) < size);
+    OPENSSL_free (buf);
+    return ret;
+  }
+}
 
 static void
 setenv_untrusted (struct tls_session *session)
@@ -569,13 +537,14 @@ print_nsCertType (int type)
 static int
 verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
 {
-  char subject[256];
+  char *subject = NULL;
   char envname[64];
   char common_name[TLS_CN_LEN];
   SSL *ssl;
   struct tls_session *session;
   const struct tls_options *opt;
   const int max_depth = 8;
+  struct argv argv = argv_new ();
 
   /* get the tls_session pointer */
   ssl = X509_STORE_CTX_get_ex_data (ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
@@ -588,19 +557,28 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   session->verified = false;
 
   /* get the X509 name */
-  X509_NAME_oneline (X509_get_subject_name (ctx->current_cert), subject,
-		     sizeof (subject));
-  subject[sizeof (subject) - 1] = '\0';
+  subject = X509_NAME_oneline (X509_get_subject_name (ctx->current_cert), NULL, 0);
+  if (!subject)
+    {
+      msg (D_TLS_ERRORS, "VERIFY ERROR: depth=%d, could not extract X509 subject string from certificate", ctx->error_depth);
+      goto err;
+    }
 
   /* enforce character class restrictions in X509 name */
   string_mod (subject, X509_NAME_CHAR_CLASS, 0, '_');
+  string_replace_leading (subject, '-', '_');
 
   /* extract the common name */
-#ifdef USE_OLD_EXTRACT_X509_FIELD
-  extract_x509_field (subject, "CN", common_name, TLS_CN_LEN);
-#else
-  extract_x509_field_ssl (X509_get_subject_name (ctx->current_cert), "CN", common_name, TLS_CN_LEN);
-#endif
+  if (!extract_x509_field_ssl (X509_get_subject_name (ctx->current_cert), "CN", common_name, TLS_CN_LEN))
+    {
+      if (!ctx->error_depth)
+	{
+	  msg (D_TLS_ERRORS, "VERIFY ERROR: could not extract Common Name from X509 subject string ('%s') -- note that the Common Name length is limited to %d characters",
+	       subject,
+	       TLS_CN_LEN);
+	  goto err;
+	}
+    }
 
   string_mod (common_name, COMMON_NAME_CHAR_CLASS, 0, '_');
 
@@ -712,16 +690,13 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   /* call --tls-verify plug-in(s) */
   if (plugin_defined (opt->plugins, OPENVPN_PLUGIN_TLS_VERIFY))
     {
-      char command[256];
-      struct buffer out;
       int ret;
 
-      buf_set_write (&out, (uint8_t*)command, sizeof (command));
-      buf_printf (&out, "%d %s",
-		  ctx->error_depth,
-		  subject);
+      argv_printf (&argv, "%d %s",
+		   ctx->error_depth,
+		   subject);
 
-      ret = plugin_call (opt->plugins, OPENVPN_PLUGIN_TLS_VERIFY, command, NULL, opt->es);
+      ret = plugin_call (opt->plugins, OPENVPN_PLUGIN_TLS_VERIFY, &argv, NULL, opt->es);
 
       if (ret == OPENVPN_PLUGIN_FUNC_SUCCESS)
 	{
@@ -739,19 +714,16 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   /* run --tls-verify script */
   if (opt->verify_command)
     {
-      char command[256];
-      struct buffer out;
       int ret;
 
       setenv_str (opt->es, "script_type", "tls-verify");
 
-      buf_set_write (&out, (uint8_t*)command, sizeof (command));
-      buf_printf (&out, "%s %d %s",
-		  opt->verify_command,
-		  ctx->error_depth,
-		  subject);
-      dmsg (D_TLS_DEBUG, "TLS: executing verify command: %s", command);
-      ret = openvpn_system (command, opt->es, S_SCRIPT);
+      argv_printf (&argv, "%s %d %s",
+		   opt->verify_command,
+		   ctx->error_depth,
+		   subject);
+      argv_msg_prefix (D_TLS_DEBUG, &argv, "TLS: executing verify command");
+      ret = openvpn_execve (&argv, opt->es, S_SCRIPT);
 
       if (system_ok (ret))
 	{
@@ -761,7 +733,7 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
       else
 	{
 	  if (!system_executed (ret))
-	    msg (M_ERR, "Verify command failed to execute: %s", command);
+	    argv_msg_prefix (M_ERR, &argv, "Verify command failed to execute");
 	  msg (D_HANDSHAKE, "VERIFY SCRIPT ERROR: depth=%d, %s",
 	       ctx->error_depth, subject);
 	  goto err;		/* Reject connection */
@@ -823,10 +795,14 @@ verify_callback (int preverify_ok, X509_STORE_CTX * ctx)
   msg (D_HANDSHAKE, "VERIFY OK: depth=%d, %s", ctx->error_depth, subject);
 
   session->verified = true;
+  free (subject);
+  argv_reset (&argv);
   return 1;			/* Accept connection */
 
  err:
   ERR_clear_error ();
+  free (subject);
+  argv_reset (&argv);
   return 0;                     /* Reject connection */
 }
 
@@ -2922,7 +2898,7 @@ static bool
 verify_user_pass_script (struct tls_session *session, const struct user_pass *up)
 {
   struct gc_arena gc = gc_new ();
-  struct buffer cmd = alloc_buf_gc (256, &gc);
+  struct argv argv = argv_new ();
   const char *tmp_file = "";
   int retval;
   bool ret = false;
@@ -2961,16 +2937,16 @@ verify_user_pass_script (struct tls_session *session, const struct user_pass *up
       setenv_untrusted (session);
 
       /* format command line */
-      buf_printf (&cmd, "%s %s", session->opt->auth_user_pass_verify_script, tmp_file);
+      argv_printf (&argv, "%s %s", session->opt->auth_user_pass_verify_script, tmp_file);
       
       /* call command */
-      retval = openvpn_system (BSTR (&cmd), session->opt->es, S_SCRIPT);
+      retval = openvpn_execve (&argv, session->opt->es, S_SCRIPT);
 
       /* test return status of command */
       if (system_ok (retval))
 	ret = true;
       else if (!system_executed (retval))
-	msg (D_TLS_ERRORS, "TLS Auth Error: user-pass-verify script failed to execute: %s", BSTR (&cmd));
+	argv_msg_prefix (D_TLS_ERRORS, &argv, "TLS Auth Error: user-pass-verify script failed to execute");
 	  
       if (!session->opt->auth_user_pass_verify_script_via_file)
 	setenv_del (session->opt->es, "password");
@@ -2984,6 +2960,7 @@ verify_user_pass_script (struct tls_session *session, const struct user_pass *up
   if (strlen (tmp_file) > 0)
     delete_file (tmp_file);
 
+  argv_reset (&argv);
   gc_free (&gc);
   return ret;
 }
@@ -3328,7 +3305,14 @@ key_method_2_read (struct buffer *buf, struct tls_multi *multi, struct tls_sessi
 	s1 = verify_user_pass_plugin (session, up, raw_username);
       if (session->opt->auth_user_pass_verify_script)
 	s2 = verify_user_pass_script (session, up);
-      
+
+      /* check sizing of username if it will become our common name */
+      if (session->opt->username_as_common_name && strlen (up->username) >= TLS_CN_LEN)
+	{
+	  msg (D_TLS_ERRORS, "TLS Auth Error: --username-as-common name specified and username is longer than the maximum permitted Common Name length of %d characters", TLS_CN_LEN);
+	  s1 = OPENVPN_PLUGIN_FUNC_ERROR;
+	}
+
       /* auth succeeded? */
       if ((s1 == OPENVPN_PLUGIN_FUNC_SUCCESS
 #ifdef PLUGIN_DEF_AUTH
@@ -4819,25 +4803,6 @@ print_data:
 done:
   return BSTR (&out);
 }
-
-#ifdef EXTRACT_X509_FIELD_TEST
-
-void
-extract_x509_field_test (void)
-{
-  char line[8];
-  char field[4];
-  static const char field_name[] = "CN";
-
-  while (fgets (line, sizeof (line), stdin))
-    {
-      chomp (line);
-      extract_x509_field (line, field_name, field, sizeof (field));
-      printf ("CN: '%s'\n", field);
-    }
-}
-
-#endif
 
 #else
 static void dummy(void) {}

@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -630,8 +630,10 @@ man_query_need_str (struct management *man, const char *type, const char *action
 static void
 man_forget_passwords (struct management *man)
 {
+#if defined(USE_CRYPTO) && defined(USE_SSL)
   ssl_purge_auth ();
   msg (M_CLIENT, "SUCCESS: Passwords were forgotten");
+#endif
 }
 
 static void
@@ -1375,9 +1377,10 @@ man_reset_client_socket (struct management *man, const bool exiting)
     }
   if (!exiting)
     {
+#if defined(USE_CRYPTO) && defined(USE_SSL)
       if (man->settings.flags & MF_FORGET_DISCONNECT)
-	 ssl_purge_auth ();
-
+	ssl_purge_auth ();
+#endif
       if (man->settings.flags & MF_SIGNAL) {
       	  int mysig = man_mod_signal (man, SIGUSR1);
 	  if (mysig >= 0)

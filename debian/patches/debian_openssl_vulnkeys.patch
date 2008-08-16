@@ -1,12 +1,9 @@
-Index: openvpn-2.1_rc8/init.c
+Index: trunk/init.c
 ===================================================================
---- openvpn-2.1_rc8.orig/init.c	2008-07-23 10:46:18.622183899 +0200
-+++ openvpn-2.1_rc8/init.c	2008-07-23 10:46:32.210385575 +0200
-@@ -1474,8 +1474,24 @@
- do_init_crypto_static (struct context *c, const unsigned int flags)
- {
+--- trunk/init.c	(revision 56669)
++++ trunk/init.c	(working copy)
+@@ -1513,6 +1513,23 @@
    const struct options *options = &c->options;
-+  char command_line[256];
    ASSERT (options->shared_secret_file);
  
 +  /* CVE-2008-0166 (Debian weak key checks) */
@@ -16,18 +13,20 @@ Index: openvpn-2.1_rc8/init.c
 +   * side and avoid wrong -vulnkey alerts. */
 +  if (access (options->shared_secret_file, R_OK) == 0)
 +    {
-+      openvpn_snprintf(command_line, sizeof (command_line), "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
-+      msg (M_INFO, "%s", command_line);
-+      if (openvpn_system (command_line, c->c2.es, S_FATAL) != 0)
++      struct argv argv = argv_new ();
++      argv_printf (&argv, "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
++      argv_msg (M_INFO, &argv);
++      if (openvpn_execve (&argv, c->c2.es, 0) != 0)
 +        {
 +          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
 +        }
++      argv_reset (&argv);
 +    }
 +
    init_crypto_pre (c, flags);
  
    /* Initialize packet ID tracking */
-@@ -1561,6 +1577,7 @@
+@@ -1598,6 +1615,7 @@
  do_init_crypto_tls_c1 (struct context *c)
  {
    const struct options *options = &c->options;
@@ -35,7 +34,7 @@ Index: openvpn-2.1_rc8/init.c
  
    if (!c->c1.ks.ssl_ctx)
      {
-@@ -1597,6 +1614,59 @@
+@@ -1634,6 +1652,53 @@
  		     options->ciphername_defined, options->authname,
  		     options->authname_defined, options->keysize, true, true);
  
@@ -70,21 +69,15 @@ Index: openvpn-2.1_rc8/init.c
 +                    }
 +                  if (bn != NULL)
 +                    {
-+                      int size = strlen(bn) + 256;
-+                      char *command_line = NULL;
-+
-+                      command_line = malloc(size);
-+                      check_malloc_return(command_line);
-+
-+                      openvpn_snprintf(command_line, size, "/usr/bin/openssl-vulnkey -q -b %d -m %s", bits, bn);
-+                      msg (M_INFO, "/usr/bin/openssl-vulnkey -q -b %d -m <modulus omitted>", bits);
-+                      if (openvpn_system (command_line, NULL, S_FATAL) != 0)
-+                        {
-+                          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
-+                        }
-+
++                      struct argv argv = argv_new ();
++                      argv_printf (&argv, "/usr/bin/openssl-vulnkey -q -b %d -m %s", bits, bn);
 +                      OPENSSL_free(bn);
-+                      free(command_line);
++                      msg (M_INFO, "/usr/bin/openssl-vulnkey -q -b %d -m <modulus omitted>", bits);
++                      if (openvpn_execve (&argv, NULL, 0) != 0)
++                        {
++                          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
++                        }
++                      argv_reset (&argv);
 +                    }
 +                  EVP_PKEY_free (pkey);
 +               }

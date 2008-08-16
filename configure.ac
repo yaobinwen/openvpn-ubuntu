@@ -4,7 +4,7 @@ dnl             session authentication and key exchange,
 dnl             packet encryption, packet authentication, and
 dnl             packet compression.
 dnl
-dnl  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+dnl  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
 dnl
 dnl  This program is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU General Public License as published by
@@ -462,7 +462,8 @@ AC_CHECK_FUNCS(daemon chroot getpwnam setuid nice system getpid dup dup2 dnl
 	       getpass strerror syslog openlog mlockall getgrnam setgid dnl
 	       setgroups stat flock readv writev setsockopt getsockopt dnl
 	       setsid chdir putenv getpeername unlink dnl
-	       poll chsize ftruncate sendmsg recvmsg getsockname)
+	       poll chsize ftruncate sendmsg recvmsg getsockname dnl
+	       execve)
 AC_CACHE_SAVE
 
 if test "${WIN32}" = "yes"; then

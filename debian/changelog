@@ -1,3 +1,29 @@
+openvpn (2.1~rc9-3) unstable; urgency=low
+
+  * debian/rules: run ./configure with path to 'route', for
+    those build daemons without 'route'. (Closes: #495082)
+  * Created NEWS.Debian with info on new option script-security.
+    (Closes: #494998)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 16 Aug 2008 13:34:24 +0200
+
+openvpn (2.1~rc9-2) unstable; urgency=low
+
+  * debian/rules: run ./configure with path to ifconfig, for
+    those build daemons without ifconfig. (Closes: #494918)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 13 Aug 2008 13:37:01 +0200
+
+openvpn (2.1~rc9-1) unstable; urgency=high
+
+  * New upstream version.
+  * Urgency high since it fixes a security bug in versions
+    2.1-beta14 to 2.1-rc8. CVE-2008-3459. (Closes: #493488)
+  * Added sample-scripts/ to examples directory.
+  * Thanks Tristan Hill for rewritten debian_openssl_vulnkeys.patch
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 11 Aug 2008 19:40:11 +0200
+
 openvpn (2.1~rc8-1) unstable; urgency=low
 
   * New upstream version

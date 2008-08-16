@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -34,6 +34,15 @@
 #else
 #include "config.h"
 #endif
+#endif
+
+/* branch prediction hints */
+#if defined(__GNUC__)
+# define likely(x)       __builtin_expect((x),1)
+# define unlikely(x)     __builtin_expect((x),0)
+#else
+# define likely(x)      (x)
+# define unlikely(x)    (x)
 #endif
 
 #if defined(_WIN32) && !defined(WIN32)
@@ -439,6 +448,14 @@ socket_defined (const socket_descriptor_t sd)
 #define USE_64_BIT_COUNTERS
 
 /*
+ * Should we enable the use of execve() for calling subprocesses,
+ * instead of system()?
+ */
+#if defined(HAVE_EXECVE) && defined(HAVE_FORK)
+#define ENABLE_EXECVE
+#endif
+
+/*
  * Do we have point-to-multipoint capability?
  */
 
@@ -474,10 +491,10 @@ socket_defined (const socket_descriptor_t sd)
  * Enable deferred authentication?
  */
 #define CONFIGURE_DEF_AUTH /* this should be set by autoconf and config.h */
-#if defined(CONFIGURE_DEF_AUTH) && defined(P2MP_SERVER) && defined(ENABLE_PLUGIN)
+#if defined(CONFIGURE_DEF_AUTH) && P2MP_SERVER && defined(ENABLE_PLUGIN)
 #define PLUGIN_DEF_AUTH
 #endif
-#if defined(CONFIGURE_DEF_AUTH) && defined(P2MP_SERVER) && defined(ENABLE_MANAGEMENT)
+#if defined(CONFIGURE_DEF_AUTH) && P2MP_SERVER && defined(ENABLE_MANAGEMENT)
 #define MANAGEMENT_DEF_AUTH
 #endif
 #if defined(PLUGIN_DEF_AUTH) || defined(MANAGEMENT_DEF_AUTH)
@@ -488,10 +505,10 @@ socket_defined (const socket_descriptor_t sd)
  * Enable packet filter?
  */
 #define CONFIGURE_PF /* this should be set by autoconf and config.h */
-#if defined(CONFIGURE_PF) && defined(P2MP_SERVER) && defined(ENABLE_PLUGIN) && defined(HAVE_STAT)
+#if defined(CONFIGURE_PF) && P2MP_SERVER && defined(ENABLE_PLUGIN) && defined(HAVE_STAT)
 #define PLUGIN_PF
 #endif
-#if defined(CONFIGURE_PF) && defined(P2MP_SERVER) && defined(MANAGEMENT_DEF_AUTH)
+#if defined(CONFIGURE_PF) && P2MP_SERVER && defined(MANAGEMENT_DEF_AUTH)
 #define MANAGEMENT_PF
 #endif
 #if defined(PLUGIN_PF) || defined(MANAGEMENT_PF)

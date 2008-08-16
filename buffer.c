@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -32,6 +32,22 @@
 
 #include "memdbg.h"
 
+size_t
+array_mult_safe (const size_t m1, const size_t m2)
+{
+  const size_t limit = 0xFFFFFFFF;
+  unsigned long long res = (unsigned long long)m1 * (unsigned long long)m2;
+  if (unlikely(m1 > limit) || unlikely(m2 > limit) || unlikely(res > (unsigned long long)limit))
+    msg (M_FATAL, "attemped allocation of excessively large array");
+  return (size_t) res;
+}
+
+void
+buf_size_error (size_t size)
+{
+  msg (M_FATAL, "fatal buffer size error, size=%lu", (unsigned long)size);
+}
+
 struct buffer
 #ifdef DMALLOC
 alloc_buf_debug (size_t size, const char *file, int line)
@@ -54,6 +70,8 @@ alloc_buf_gc (size_t size, struct gc_arena *gc)
 #endif
 {
   struct buffer buf;
+  if (!buf_size_valid (size))
+    buf_size_error (size);
   buf.capacity = (int)size;
   buf.offset = 0;
   buf.len = 0;
@@ -172,9 +190,10 @@ buf_sub (struct buffer *buf, int size, bool prepend)
 /*
  * printf append to a buffer with overflow check
  */
-void
+bool
 buf_printf (struct buffer *buf, const char *format, ...)
 {
+  int ret = false;
   if (buf_defined (buf))
     {
       va_list arglist;
@@ -183,13 +202,17 @@ buf_printf (struct buffer *buf, const char *format, ...)
 
       if (cap > 0)
 	{
+	  int stat;
 	  va_start (arglist, format);
-	  vsnprintf ((char *)ptr, cap, format, arglist);
+	  stat = vsnprintf ((char *)ptr, cap, format, arglist);
 	  va_end (arglist);
 	  *(buf->data + buf->capacity - 1) = 0; /* windows vsnprintf needs this */
 	  buf->len += (int) strlen ((char *)ptr);
+	  if (stat >= 0 && stat < cap)
+	    ret = true;
 	}
     }
+  return ret;
 }
 
 /*
@@ -209,6 +232,258 @@ int openvpn_snprintf(char *str, size_t size, const char *format, ...)
       str[size - 1] = 0;
     }
   return ret;
+}
+
+/*
+ * A printf-like function (that only recognizes a subset of standard printf
+ * format operators) that prints arguments to an argv list instead
+ * of a standard string.  This is used to build up argv arrays for passing
+ * to execve.
+ */
+
+void
+argv_init (struct argv *a)
+{
+  a->argc = 0;
+  a->argv = NULL;
+}
+
+struct argv
+argv_new (void)
+{
+  struct argv ret;
+  argv_init (&ret);
+  return ret;
+}
+
+void
+argv_reset (struct argv *a)
+{
+  size_t i;
+  for (i = 0; i < a->argc; ++i)
+    free (a->argv[i]);
+  free (a->argv);
+  a->argc = 0;
+  a->argv = NULL;
+}
+
+size_t
+argv_argc (const char *format)
+{
+  char *term;
+  const char *f = format;
+  size_t argc = 0;
+
+  while ((term = argv_term (&f)) != NULL) 
+    {
+      ++argc;
+      free (term);
+    }
+  return argc;
+}
+
+struct argv
+argv_insert_head (const struct argv *a, const char *head)
+{
+  struct argv r;
+  size_t i;
+
+  r.argc = (a ? a->argc : 0) + 1;
+  ALLOC_ARRAY_CLEAR (r.argv, char *, r.argc + 1);
+  r.argv[0] = string_alloc (head, NULL);
+  if (a)
+    {
+      for (i = 0; i < a->argc; ++i)
+	r.argv[i+1] = string_alloc (a->argv[i], NULL);
+    }
+  return r;
+}
+
+char *
+argv_term (const char **f)
+{
+  const char *p = *f;
+  const char *term = NULL;
+  size_t termlen = 0;
+
+  if (*p == '\0')
+    return NULL;
+
+  while (true)
+    {
+      const int c = *p;
+      if (c == '\0')
+	break;
+      if (term)
+	{
+	  if (!isspace (c))
+	    ++termlen;
+	  else
+	    break;
+	}
+      else
+	{
+	  if (!isspace (c))
+	    {
+	      term = p;
+	      termlen = 1;
+	    }
+	}
+      ++p;
+    }
+  *f = p;
+
+  if (term)
+    {
+      char *ret;
+      ASSERT (termlen > 0);
+      ret = malloc (termlen + 1);
+      check_malloc_return (ret);
+      memcpy (ret, term, termlen);
+      ret[termlen] = '\0';
+      return ret;
+    }
+  else
+    return NULL;
+}
+
+const char *
+argv_str (const struct argv *a, struct gc_arena *gc, const unsigned int flags)
+{
+  if (a->argv)
+    return print_argv ((const char **)a->argv, gc, flags);
+  else
+    return "";
+}
+
+void
+argv_msg (const int msglev, const struct argv *a)
+{
+  struct gc_arena gc = gc_new ();
+  msg (msglev, "%s", argv_str (a, &gc, 0));
+  gc_free (&gc);
+}
+
+void
+argv_msg_prefix (const int msglev, const struct argv *a, const char *prefix)
+{
+  struct gc_arena gc = gc_new ();
+  msg (msglev, "%s: %s", prefix, argv_str (a, &gc, 0));
+  gc_free (&gc);
+}
+
+void
+argv_printf (struct argv *a, const char *format, ...)
+{
+  va_list arglist;
+  va_start (arglist, format);
+  argv_printf_arglist (a, format, 0, arglist);
+  va_end (arglist);
+ }
+
+void
+argv_printf_cat (struct argv *a, const char *format, ...)
+{
+  va_list arglist;
+  va_start (arglist, format);
+  argv_printf_arglist (a, format, APA_CAT, arglist);
+  va_end (arglist);
+}
+
+void
+argv_printf_arglist (struct argv *a, const char *format, const unsigned int flags, va_list arglist)
+{
+  char *term;
+  const char *f = format;
+  size_t argc = 0;
+
+  if (flags & APA_CAT)
+    {
+      char **old_argv = a->argv;
+      size_t i;
+      argc = a->argc;
+      a->argc += argv_argc (format);
+      ALLOC_ARRAY_CLEAR (a->argv, char *, a->argc + 1);
+      for (i = 0; i < argc; ++i)
+	a->argv[i] = old_argv[i];
+      free (old_argv);
+    }
+  else
+    {
+      argv_reset (a);
+      a->argc = argv_argc (format);
+      ALLOC_ARRAY_CLEAR (a->argv, char *, a->argc + 1);
+    }
+
+  while ((term = argv_term (&f)) != NULL) 
+    {
+      ASSERT (argc < a->argc);
+      if (term[0] == '%')
+	{
+	  if (!strcmp (term, "%s"))
+	    {
+	      char *s = va_arg (arglist, char *);
+	      if (!s)
+		s = "";
+	      a->argv[argc++] = string_alloc (s, NULL);
+	    }
+	  else if (!strcmp (term, "%d"))
+	    {
+	      char numstr[64];
+	      openvpn_snprintf (numstr, sizeof (numstr), "%d", va_arg (arglist, int));
+	      a->argv[argc++] = string_alloc (numstr, NULL);
+	    }
+	  else if (!strcmp (term, "%u"))
+	    {
+	      char numstr[64];
+	      openvpn_snprintf (numstr, sizeof (numstr), "%u", va_arg (arglist, unsigned int));
+	      a->argv[argc++] = string_alloc (numstr, NULL);
+	    }
+	  else if (!strcmp (term, "%s/%d"))
+	    {
+	      char numstr[64];
+	      char *s = va_arg (arglist, char *);
+
+	      if (!s)
+		s = "";
+
+	      openvpn_snprintf (numstr, sizeof (numstr), "%d", va_arg (arglist, int));
+
+	      {
+		const size_t len = strlen(s) + strlen(numstr) + 2;
+		char *combined = (char *) malloc (len);
+		check_malloc_return (combined);
+
+		strcpy (combined, s);
+		strcat (combined, "/");
+		strcat (combined, numstr);
+		a->argv[argc++] = combined;
+	      }
+	    }
+	  else if (!strcmp (term, "%s%s"))
+	    {
+	      char *s1 = va_arg (arglist, char *);
+	      char *s2 = va_arg (arglist, char *);
+	      char *combined;
+
+	      if (!s1) s1 = "";
+	      if (!s2) s2 = "";
+	      combined = (char *) malloc (strlen(s1) + strlen(s2) + 1);
+	      check_malloc_return (combined);
+	      strcpy (combined, s1);
+	      strcat (combined, s2);
+	      a->argv[argc++] = combined;
+	    }
+	  else
+	    ASSERT (0);
+	  free (term);
+	}
+      else
+	{
+	  a->argv[argc++] = term;
+	}
+    }
+  ASSERT (argc == a->argc);
 }
 
 /*
@@ -792,6 +1067,20 @@ string_mod_const (const char *str,
     }
   else
     return NULL;
+}
+
+void
+string_replace_leading (char *str, const char match, const char replace)
+{
+  ASSERT (match != '\0');
+  while (*str)
+    {
+      if (*str == match)
+	*str = replace;
+      else
+	break;
+      ++str;
+    }
 }
 
 #ifdef CHARACTER_CLASS_DEBUG
