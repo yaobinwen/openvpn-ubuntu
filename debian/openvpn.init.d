@@ -54,6 +54,11 @@ start_vpn () {
     log_progress_msg "$NAME"
     STATUS=0
 
+    # Handle backwards compatibility
+    if test -z $( grep '^[[:space:]]*script-security[[:space:]]' $CONFIG_DIR/$NAME.conf ) ; then
+        script_security="--script-security 2"
+    fi
+	
     # Check to see if it's already started...
     if test -e /var/run/openvpn.$NAME.pid ; then
       log_failure_msg "Already running (PID file exists)"
@@ -61,7 +66,7 @@ start_vpn () {
     else
       $DAEMON $OPTARGS --writepid /var/run/openvpn.$NAME.pid \
 	      $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
-	      --config $CONFIG_DIR/$NAME.conf || STATUS=1
+	      --config $CONFIG_DIR/$NAME.conf $script_security || STATUS=1
     fi
 }
 stop_vpn () {
