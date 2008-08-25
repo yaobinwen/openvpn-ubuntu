@@ -1,3 +1,10 @@
+openvpn (2.1~rc9-3ubuntu1) intrepid; urgency=low
+
+  * debian/openvpn.init.d: Add "--script-security 2" by default for backwards compatibility
+    (LP: #260291)
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 25 Aug 2008 10:20:31 -0400
+
 openvpn (2.1~rc9-3) unstable; urgency=low
 
   * debian/rules: run ./configure with path to 'route', for
