@@ -1,3 +1,11 @@
+openvpn (2.1~rc7-1ubuntu3.4) hardy-proposed; urgency=low
+
+  * ssl.c: applied fix from upstream to fix extract_x509_field_ssl
+    where the extraction would fail on the first field of
+    the subject name (LP: #265058)
+
+ -- Stefan Lesicnik <stefan@lsd.co.za>  Mon, 08 Sep 2008 16:11:35 +0200
+
 openvpn (2.1~rc7-1ubuntu3.3) hardy-security; urgency=low
 
   * init.c: send modulus to openssl-vulnkey rather than calling
