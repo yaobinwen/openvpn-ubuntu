@@ -19,7 +19,7 @@
 test $DEBIAN_SCRIPT_DEBUG && set -v -x
 
 DAEMON=/usr/sbin/openvpn
-DESC="virtual private network daemon"
+DESC="virtual private network daemon(s)"
 CONFIG_DIR=/etc/openvpn
 test -x $DAEMON || exit 0
 test -d $CONFIG_DIR || exit 0
@@ -51,7 +51,7 @@ start_vpn () {
       STATUSARG="--status /var/run/openvpn.$NAME.status $STATUSREFRESH"
     fi
 
-    log_progress_msg "$NAME"
+    log_end_msg 0
     STATUS=0
 
     # Handle backwards compatibility
@@ -73,32 +73,35 @@ stop_vpn () {
   kill `cat $PIDFILE` || true
   rm -f $PIDFILE
   rm -f /var/run/openvpn.$NAME.status 2> /dev/null
+  log_end_msg 0
 }
 
 case "$1" in
 start)
-  log_daemon_msg "Starting $DESC"
+  log_action_begin_msg "Starting $DESC"
 
   # autostart VPNs
   if test -z "$2" ; then
     # check if automatic startup is disabled by AUTOSTART=none
     if test "x$AUTOSTART" = "xnone" -o -z "$AUTOSTART" ; then
-      log_warning_msg " Autostart disabled."
+      log_warning_msg "  Autostart disabled, no VPN will be started."
       exit 0
     fi
     if test -z "$AUTOSTART" -o "x$AUTOSTART" = "xall" ; then
       # all VPNs shall be started automatically
       for CONFIG in `cd $CONFIG_DIR; ls *.conf 2> /dev/null`; do
         NAME=${CONFIG%%.conf}
+        log_daemon_msg "  Autostarting VPN '$NAME'"
         start_vpn
       done
     else
       # start only specified VPNs
       for NAME in $AUTOSTART ; do
         if test -e $CONFIG_DIR/$NAME.conf ; then
+          log_daemon_msg "  Autostarting VPN '$NAME'"
           start_vpn
         else
-          log_failure_msg "No such VPN: $NAME"
+          log_failure_msg "  Autostarting VPN '$NAME': missing $CONFIG_DIR/$NAME.conf file !"
           STATUS=1
         fi
       done
@@ -107,76 +110,85 @@ start)
   else
     while shift ; do
       [ -z "$1" ] && break
-      if test -e $CONFIG_DIR/$1.conf ; then
-        NAME=$1
+      NAME=$1
+      if test -e $CONFIG_DIR/$NAME.conf ; then
+        log_daemon_msg "  Starting VPN '$NAME'"
         start_vpn
       else
-       log_failure_msg " No such VPN: $1"
+        log_failure_msg "  Starting VPN '$NAME': missing $CONFIG_DIR/$NAME.conf file !"
        STATUS=1
       fi
     done
   fi
-  log_end_msg ${STATUS:-0}
-
+  exit ${STATUS:-0}
   ;;
 stop)
-  log_daemon_msg "Stopping $DESC"
-
+  log_action_begin_msg "Stopping $DESC"
   if test -z "$2" ; then
+    PIDFILE=
     for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
       NAME=`echo $PIDFILE | cut -c18-`
       NAME=${NAME%%.pid}
+      log_daemon_msg "  Stopping VPN '$NAME'"
       stop_vpn
-      log_progress_msg "$NAME"
     done
+    if test -z "$PIDFILE" ; then
+      log_warning_msg "  No VPN is running."
+    fi
   else
     while shift ; do
       [ -z "$1" ] && break
       if test -e /var/run/openvpn.$1.pid ; then
+        log_daemon_msg "  Stopping VPN '$1'"
         PIDFILE=`ls /var/run/openvpn.$1.pid 2> /dev/null`
         NAME=`echo $PIDFILE | cut -c18-`
         NAME=${NAME%%.pid}
         stop_vpn
-        log_progress_msg "$NAME"
       else
-        log_failure_msg " (failure: No such VPN is running: $1)"
+        log_failure_msg "  Stopping VPN '$1': No such VPN is running."
       fi
     done
   fi
-  log_end_msg 0
   ;;
 # Only 'reload' running VPNs. New ones will only start with 'start' or 'restart'.
 reload|force-reload)
- log_daemon_msg "Reloading $DESC"
+  log_action_begin_msg "Reloading $DESC"
+  PIDFILE=
   for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
     NAME=`echo $PIDFILE | cut -c18-`
     NAME=${NAME%%.pid}
 # If openvpn if running under a different user than root we'll need to restart
     if egrep '^[[:blank:]]*user[[:blank:]]' $CONFIG_DIR/$NAME.conf > /dev/null 2>&1 ; then
+      log_daemon_msg "  Stopping VPN '$NAME'"
       stop_vpn
       sleep 1
+      log_daemon_msg "  Restarting VPN '$NAME'"
       start_vpn
-      log_progress_msg "(restarted)"
     else
+      log_daemon_msg "  Restarting VPN '$NAME'"
       kill -HUP `cat $PIDFILE` || true
-    log_progress_msg "$NAME"
+      log_end_msg 0
     fi
   done
-  log_end_msg 0
+  if test -z "$PIDFILE" ; then
+    log_warning_msg "  No VPN is running."
+  fi
   ;;
-
 # Only 'soft-restart' running VPNs. New ones will only start with 'start' or 'restart'.
 soft-restart)
- log_daemon_msg "$DESC sending SIGUSR1"
+  log_action_begin_msg "Soft-restarting $DESC"
+  PIDFILE=
   for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
     NAME=`echo $PIDFILE | cut -c18-`
     NAME=${NAME%%.pid}
+    log_daemon_msg "  Soft-restarting VPN '$NAME'"
     kill -USR1 `cat $PIDFILE` || true
-    log_progress_msg "$NAME"
+    log_end_msg 0
   done
-  log_end_msg 0
- ;;
-
+  if test -z "$PIDFILE" ; then
+    log_warning_msg "  No VPN is running."
+  fi
+  ;;
 restart)
   shift
   $0 stop ${@}
@@ -184,18 +196,85 @@ restart)
   $0 start ${@}
   ;;
 cond-restart)
-  log_daemon_msg "Restarting $DESC."
+  log_action_begin_msg "Restarting $DESC"
+  PIDFILE=
   for PIDFILE in `ls /var/run/openvpn.*.pid 2> /dev/null`; do
     NAME=`echo $PIDFILE | cut -c18-`
     NAME=${NAME%%.pid}
+    log_daemon_msg "  Stopping VPN '$NAME'"
     stop_vpn
     sleep 1
+    log_daemon_msg "  Restarting VPN '$NAME'"
     start_vpn
   done
-  log_end_msg 0
+  if test -z "$PIDFILE" ; then
+    log_warning_msg "  No VPN is running."
+  fi
+  ;;
+status)
+  GLOBAL_STATUS=0
+  if test -z "$2" ; then
+    # We want status for all defined VPNs.
+    # Returns success if all autostarted VPNs are defined and running
+    if test "x$AUTOSTART" = "xnone" ; then
+      # Consider it a failure if AUTOSTART=none
+      log_warning_msg "No VPN autostarted"
+      GLOBAL_STATUS=1
+    else
+      if ! test -z "$AUTOSTART" -o "x$AUTOSTART" = "xall" ; then
+        # Consider it a failure if one of the autostarted VPN is not defined
+        for VPN in $AUTOSTART ; do
+          if ! test -f $CONFIG_DIR/$VPN.conf ; then
+            log_warning_msg "VPN '$VPN' is in AUTOSTART but is not defined"
+            GLOBAL_STATUS=1
+          fi
+        done
+      fi
+    fi
+    for CONFIG in `cd $CONFIG_DIR; ls *.conf 2> /dev/null`; do
+      NAME=${CONFIG%%.conf}
+      # Is it an autostarted VPN ?
+      if test -z "$AUTOSTART" -o "x$AUTOSTART" = "xall" ; then
+        AUTOVPN=1
+      else
+        if test "x$AUTOSTART" = "xnone" ; then
+          AUTOVPN=0
+        else
+          AUTOVPN=0
+          for VPN in $AUTOSTART; do
+            if test "x$VPN" = "x$NAME" ; then
+              AUTOVPN=1
+            fi
+          done
+        fi
+      fi
+      if test "x$AUTOVPN" = "x1" ; then
+        # If it is autostarted, then it contributes to global status
+        status_of_proc -p /var/run/openvpn.${NAME}.pid openvpn "VPN '${NAME}'" || GLOBAL_STATUS=1
+      else
+        status_of_proc -p /var/run/openvpn.${NAME}.pid openvpn "VPN '${NAME}' (non autostarted)" || true
+      fi
+    done
+  else
+    # We just want status for specified VPNs.
+    # Returns success if all specified VPNs are defined and running
+    while shift ; do
+      [ -z "$1" ] && break
+      NAME=$1
+      if test -e $CONFIG_DIR/$NAME.conf ; then
+        # Config exists
+        status_of_proc -p /var/run/openvpn.${NAME}.pid openvpn "VPN '${NAME}'" || GLOBAL_STATUS=1
+      else
+        # Config does not exist
+        log_warning_msg "VPN '$NAME': missing $CONFIG_DIR/$NAME.conf file !"
+        GLOBAL_STATUS=1
+      fi
+    done
+  fi
+  exit $GLOBAL_STATUS
   ;;
 *)
-  echo "Usage: $0 {start|stop|reload|restart|force-reload|cond-restart}" >&2
+  echo "Usage: $0 {start|stop|reload|restart|force-reload|cond-restart|status}" >&2
   exit 1
   ;;
 esac
