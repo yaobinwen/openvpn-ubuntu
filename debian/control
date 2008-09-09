@@ -8,7 +8,7 @@ Standards-Version: 3.7.3
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, libssl0.9.8 (>= 0.9.8g-9), openssl-blacklist (>= 0.4), openvpn-blacklist
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, libssl0.9.8 (>= 0.9.8g-9), openssl-blacklist (>= 0.4), openvpn-blacklist, lsb-base (>= 3.2-14)
 Recommends: net-tools
 Suggests: openssl, resolvconf
 Description: virtual private network daemon
