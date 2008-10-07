@@ -62,7 +62,7 @@ start_vpn () {
     # Check to see if it's already started...
     if test -e /var/run/openvpn.$NAME.pid ; then
       log_failure_msg "Already running (PID file exists)"
-      STATUS=1
+      STATUS=0
     else
       $DAEMON $OPTARGS --writepid /var/run/openvpn.$NAME.pid \
 	      $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
