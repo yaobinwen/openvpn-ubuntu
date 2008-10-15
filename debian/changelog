@@ -1,3 +1,12 @@
+openvpn (2.1~rc11-1ubuntu2) intrepid; urgency=low
+
+  * debian/openvpn.init.d:
+    - Revert fix from #454371 that was merged at 2.1~rc7-4 to prevent
+      openvpn prompts from blocking the boot (LP: #280428)
+    - Fix VPNs always reported started [ OK ]
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Wed, 15 Oct 2008 17:12:54 +0200
+
 openvpn (2.1~rc11-1ubuntu1) intrepid; urgency=low
 
   * Merge with Debian (LP: #279655), remaining diffs:
