@@ -1,3 +1,10 @@
+openvpn (2.1~rc11-1ubuntu3) jaunty; urgency=low
+
+  * debian/openvpn.init.d:
+    - Fix unexpected operator on startup (LP: #340120)
+
+ -- Michael Jeanson <mjeanson@revolutionlinux.com>  Mon, 09 Mar 2009 16:02:50 -0400
+
 openvpn (2.1~rc11-1ubuntu2) intrepid; urgency=low
 
   * debian/openvpn.init.d:
