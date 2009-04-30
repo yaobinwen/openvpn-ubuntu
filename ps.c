@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -793,7 +793,7 @@ port_share_open (const char *host, const int port)
       set_nonblock (fd[1]);
 
       /* initialize prng */
-      prng_init ();
+      prng_init (NULL, 0);
 
       /* execute the event loop */
       port_share_proxy (hostaddr, port, fd[1]);

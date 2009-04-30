@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -707,12 +707,17 @@ process_incoming_link (struct context *c)
       c->c2.original_recv_size = c->c2.buf.len;
 #ifdef ENABLE_MANAGEMENT
       if (management)
-	management_bytes_in (management, c->c2.buf.len);
+	{
+	  management_bytes_in (management, c->c2.buf.len);
+#ifdef MANAGEMENT_DEF_AUTH
+	  management_bytes_server (management, &c->c2.link_read_bytes, &c->c2.link_write_bytes, &c->c2.mda_context);
+#endif
+	}
 #endif
     }
   else
     c->c2.original_recv_size = 0;
-
+  
 #ifdef ENABLE_DEBUG
   /* take action to corrupt packet if we are in gremlin test mode */
   if (c->options.gremlin) {
@@ -1100,7 +1105,12 @@ process_outgoing_link (struct context *c)
 	      c->c2.link_write_bytes += size;
 #ifdef ENABLE_MANAGEMENT
 	      if (management)
-		management_bytes_out (management, size);
+		{
+		  management_bytes_out (management, size);
+#ifdef MANAGEMENT_DEF_AUTH
+		  management_bytes_server (management, &c->c2.link_read_bytes, &c->c2.link_write_bytes, &c->c2.mda_context);
+#endif
+		}
 #endif
 	    }
 	}
@@ -1290,11 +1300,11 @@ io_wait_dowork (struct context *c, const unsigned int flags)
   struct event_set_return esr[4];
 
   /* These shifts all depend on EVENT_READ and EVENT_WRITE */
-  static const int socket_shift = 0;     /* depends on SOCKET_READ and SOCKET_WRITE */
-  static const int tun_shift = 2;        /* depends on TUN_READ and TUN_WRITE */
-  static const int err_shift = 4;        /* depends on ES_ERROR */
+  static int socket_shift = 0;     /* depends on SOCKET_READ and SOCKET_WRITE */
+  static int tun_shift = 2;        /* depends on TUN_READ and TUN_WRITE */
+  static int err_shift = 4;        /* depends on ES_ERROR */
 #ifdef ENABLE_MANAGEMENT
-  static const int management_shift = 6; /* depends on MANAGEMENT_READ and MANAGEMENT_WRITE */
+  static int management_shift = 6; /* depends on MANAGEMENT_READ and MANAGEMENT_WRITE */
 #endif
 
   /*

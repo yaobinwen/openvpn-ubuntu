@@ -1,8 +1,8 @@
-Index: trunk/init.c
+Index: openvpn-2.1_rc15/init.c
 ===================================================================
---- trunk/init.c	(revision 56669)
-+++ trunk/init.c	(working copy)
-@@ -1513,6 +1513,23 @@
+--- openvpn-2.1_rc15.orig/init.c	2009-04-30 12:58:46.264809894 +0200
++++ openvpn-2.1_rc15/init.c	2009-04-30 12:59:07.530865201 +0200
+@@ -1536,6 +1536,23 @@
    const struct options *options = &c->options;
    ASSERT (options->shared_secret_file);
  
@@ -26,7 +26,7 @@ Index: trunk/init.c
    init_crypto_pre (c, flags);
  
    /* Initialize packet ID tracking */
-@@ -1598,6 +1615,7 @@
+@@ -1621,6 +1638,7 @@
  do_init_crypto_tls_c1 (struct context *c)
  {
    const struct options *options = &c->options;
@@ -34,9 +34,9 @@ Index: trunk/init.c
  
    if (!c->c1.ks.ssl_ctx)
      {
-@@ -1634,6 +1652,53 @@
- 		     options->ciphername_defined, options->authname,
- 		     options->authname_defined, options->keysize, true, true);
+@@ -1660,6 +1678,53 @@
+       /* Initialize PRNG with config-specified digest */
+       prng_init (options->prng_hash, options->prng_nonce_secret_len);
  
 +      /* CVE-2008-0166 (Debian weak key checks)
 +       * Obtain the modulus and bits from the certificate that was initialized,
