@@ -1,3 +1,22 @@
+openvpn (2.1~rc15-1) unstable; urgency=low
+
+  * New upstream version (Closes: #515575)
+  * remote_env.patch: patched options.c to fix remote* enviroment vars.
+  * openvpn-pkcs11warn.patch: warn on deprecated pkcs11 options.
+    Thanks A LOT to Florian Kulzer for the README.Debian text & patch!
+    (Closes: #475353)
+  * Removed lladdr-is-not-ip.patch, since it was included upstream.
+  * init.d script: Use start-stop-daemon to avoid failure on start when
+    a PID file is not deleted. (Closes: #445061)
+  * init.d script: Added 'status' action. Thanks Thierry Carrez for
+    the patch. (Closes: #498493)
+  * Updated debian/copyright: Point to GPL-2
+  * Updated debian/control: Added ${misc:Depends}
+  * Bumped Standards-Version to 3.8.1
+  * Moved to debhelper compat 7.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 30 Apr 2009 12:35:05 +0200
+
 openvpn (2.1~rc11-1) unstable; urgency=low
 
   * New upstream version

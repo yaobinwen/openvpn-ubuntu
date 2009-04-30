@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -56,13 +56,6 @@ struct buffer
   const char *debug_file;
   int debug_line;
 #endif
-};
-
-/* used by argv_x functions */
-struct argv {
-  size_t capacity;
-  size_t argc;
-  char **argv;
 };
 
 /* for garbage collection */
