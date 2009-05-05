@@ -1,13 +1,14 @@
 Source: openvpn
 Section: net
 Priority: optional
-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 7), libssl-dev (>> 0.9.8g-9), liblzo2-dev, libpam0g-dev, quilt, libpkcs11-helper1-dev
 Standards-Version: 3.8.1
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, libssl0.9.8 (>= 0.9.8g-9), openssl-blacklist (>= 0.4), openvpn-blacklist
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, libssl0.9.8 (>= 0.9.8g-9), openssl-blacklist (>= 0.4), openvpn-blacklist, lsb-base (>= 3.2-14)
 Recommends: net-tools
 Suggests: openssl, resolvconf
 Description: virtual private network daemon
