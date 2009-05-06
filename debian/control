@@ -2,7 +2,7 @@ Source: openvpn
 Section: net
 Priority: optional
 Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-OriginalMaintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
+XSBC-Original-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 4.1.16), libssl-dev (>> 0.9.6), liblzo2-dev, libpam0g-dev
 Standards-Version: 3.7.3
 
