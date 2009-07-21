@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -2701,6 +2701,16 @@ socket_accept_unix (socket_descriptor_t sd,
   CLEAR (*remote);
   ret = accept (sd, (struct sockaddr *) remote, &remote_len);
   return ret;
+}
+
+int
+socket_connect_unix (socket_descriptor_t sd,
+		     struct sockaddr_un *remote)
+{
+  int status = connect (sd, (struct sockaddr *) remote, sizeof (struct sockaddr_un));
+  if (status)
+    status = openvpn_errno_socket ();
+  return status;
 }
 
 void
