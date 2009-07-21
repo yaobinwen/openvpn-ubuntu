@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -1716,8 +1716,8 @@ state_name (int state)
       return "S_GOT_KEY";
     case S_ACTIVE:
       return "S_ACTIVE";
-    case S_NORMAL:
-      return "S_NORMAL";
+    case S_NORMAL_OP:
+      return "S_NORMAL_OP";
     case S_ERROR:
       return "S_ERROR";
     default:
@@ -3398,14 +3398,17 @@ key_method_2_read (struct buffer *buf, struct tls_multi *multi, struct tls_sessi
 	    
 	  if ((session->opt->ssl_flags & SSLF_USERNAME_AS_COMMON_NAME))
 	    set_common_name (session, up->username);
-	  msg (D_HANDSHAKE, "TLS: Username/Password authentication %s for username '%s' %s",
 #ifdef ENABLE_DEF_AUTH
+	  msg (D_HANDSHAKE, "TLS: Username/Password authentication %s for username '%s' %s",
 	       ks->auth_deferred ? "deferred" : "succeeded",
-#else
-	       "succeeded",
-#endif
 	       up->username,
 	       (session->opt->ssl_flags & SSLF_USERNAME_AS_COMMON_NAME) ? "[CN SET]" : "");
+#else
+	  msg (D_HANDSHAKE, "TLS: Username/Password authentication %s for username '%s' %s",
+	       "succeeded",
+	       up->username,
+	       (session->opt->ssl_flags & SSLF_USERNAME_AS_COMMON_NAME) ? "[CN SET]" : "");
+#endif
 	}
       else
 	{
@@ -3639,8 +3642,8 @@ tls_process (struct tls_multi *multi,
 		}
 	      else /* assume that ks->state == S_ACTIVE */
 		{
-		  dmsg (D_TLS_DEBUG_MED, "STATE S_NORMAL");
-		  ks->state = S_NORMAL;
+		  dmsg (D_TLS_DEBUG_MED, "STATE S_NORMAL_OP");
+		  ks->state = S_NORMAL_OP;
 		  ks->must_negotiate = 0;
 		}
 	    }

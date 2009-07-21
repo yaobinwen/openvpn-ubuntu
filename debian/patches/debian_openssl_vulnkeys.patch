@@ -1,8 +1,8 @@
-Index: openvpn-2.1_rc15/init.c
+Index: openvpn-2.1_rc19/init.c
 ===================================================================
---- openvpn-2.1_rc15.orig/init.c	2009-04-30 12:58:46.264809894 +0200
-+++ openvpn-2.1_rc15/init.c	2009-04-30 12:59:07.530865201 +0200
-@@ -1536,6 +1536,23 @@
+--- openvpn-2.1_rc19.orig/init.c	2009-07-21 18:54:51.151257670 +0200
++++ openvpn-2.1_rc19/init.c	2009-07-21 18:55:04.267592028 +0200
+@@ -1537,6 +1537,23 @@
    const struct options *options = &c->options;
    ASSERT (options->shared_secret_file);
  
@@ -26,7 +26,7 @@ Index: openvpn-2.1_rc15/init.c
    init_crypto_pre (c, flags);
  
    /* Initialize packet ID tracking */
-@@ -1621,6 +1638,7 @@
+@@ -1622,6 +1639,7 @@
  do_init_crypto_tls_c1 (struct context *c)
  {
    const struct options *options = &c->options;
@@ -34,7 +34,7 @@ Index: openvpn-2.1_rc15/init.c
  
    if (!c->c1.ks.ssl_ctx)
      {
-@@ -1660,6 +1678,53 @@
+@@ -1661,6 +1679,53 @@
        /* Initialize PRNG with config-specified digest */
        prng_init (options->prng_hash, options->prng_nonce_secret_len);
  

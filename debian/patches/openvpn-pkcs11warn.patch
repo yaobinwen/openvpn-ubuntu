@@ -1,8 +1,8 @@
-Index: openvpn-2.1_rc15/options.c
+Index: openvpn-2.1_rc19/options.c
 ===================================================================
---- openvpn-2.1_rc15.orig/options.c	2009-04-30 16:42:22.251278888 +0200
-+++ openvpn-2.1_rc15/options.c	2009-04-30 16:42:41.970770508 +0200
-@@ -5606,6 +5606,20 @@
+--- openvpn-2.1_rc19.orig/options.c	2009-07-21 18:54:50.517436162 +0200
++++ openvpn-2.1_rc19/options.c	2009-07-21 18:55:11.642531413 +0200
+@@ -5625,6 +5625,20 @@
        VERIFY_PERMISSION (OPT_P_GENERAL);
        options->pkcs11_id_management = true;
      }

@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -35,6 +35,7 @@
 #include "pkcs11.h"
 #include "ps.h"
 #include "lladdr.h"
+#include "ping.h"
 
 #include "memdbg.h"
 
@@ -1680,7 +1681,7 @@ do_init_crypto_tls_c1 (struct context *c)
 				 flags);
 	}
 
-#if ENABLE_INLINE_FILES
+#if 0 /* was: #if ENABLE_INLINE_FILES --  Note that enabling this code will break restarts */
       if (options->priv_key_file_inline)
 	{
 	  string_clear (c->options.priv_key_file_inline);
