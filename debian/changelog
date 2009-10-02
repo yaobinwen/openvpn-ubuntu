@@ -1,3 +1,11 @@
+openvpn (2.1~rc20-1) unstable; urgency=low
+
+  * New upstream version.
+    - Fixes redirect-gateway option parsing. (Closes: #541450)
+  * Changed init.d Provides from 'vpn' to 'openvpn'. (Closes: #497563)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 02 Oct 2009 17:24:38 +0200
+
 openvpn (2.1~rc19-2) unstable; urgency=low
 
   * Fixed init.d script to depend on $remote_fs and $syslog (Closes: #539764)

@@ -1,8 +1,8 @@
-Index: openvpn-2.1_rc15/socket.c
+Index: openvpn-2.1_rc20/socket.c
 ===================================================================
---- openvpn-2.1_rc15.orig/socket.c	2009-04-30 12:58:46.786663525 +0200
-+++ openvpn-2.1_rc15/socket.c	2009-04-30 12:58:58.144489503 +0200
-@@ -1273,6 +1273,10 @@
+--- openvpn-2.1_rc20.orig/socket.c	2009-10-05 12:58:37.905447156 +0200
++++ openvpn-2.1_rc20/socket.c	2009-10-05 12:58:43.635844642 +0200
+@@ -1294,6 +1294,10 @@
        resolve_bind_local (sock);
        resolve_remote (sock, 1, NULL, NULL);
      }
@@ -13,7 +13,7 @@ Index: openvpn-2.1_rc15/socket.c
  }
  
  /* finalize socket initialization */
-@@ -1479,10 +1483,6 @@
+@@ -1502,10 +1506,6 @@
    /* set socket to non-blocking mode */
    set_nonblock (sock->sd);
  
