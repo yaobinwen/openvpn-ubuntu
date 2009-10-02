@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 ### BEGIN INIT INFO
-# Provides:          vpn
+# Provides:          openvpn
 # Required-Start:    $network $remote_fs $syslog
 # Required-Stop:     $network $remote_fs $syslog
 # Default-Start:     2 3 4 5
