@@ -1,0 +1,17 @@
+Index: openvpn-2.1~rc19/options.c
+===================================================================
+--- openvpn-2.1~rc19.orig/options.c	2009-10-13 09:30:40.000000000 +0200
++++ openvpn-2.1~rc19/options.c	2009-10-13 09:30:51.000000000 +0200
+@@ -4398,10 +4398,10 @@
+       int j;
+       VERIFY_PERMISSION (OPT_P_ROUTE);
+       rol_check_alloc (options);
++      if (streq (p[0], "redirect-gateway"))
++	options->routes->flags |= RG_REROUTE_GW;
+       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)
+ 	{
+-	  if (streq (p[0], "redirect-gateway"))
+-	    options->routes->flags |= RG_REROUTE_GW;
+ 	  if (streq (p[j], "local"))
+ 	    options->routes->flags |= RG_LOCAL;
+ 	  else if (streq (p[j], "autolocal"))

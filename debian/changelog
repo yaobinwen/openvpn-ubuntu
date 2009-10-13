@@ -1,3 +1,11 @@
+openvpn (2.1~rc19-1ubuntu2) karmic; urgency=low
+
+  * debian/patches/redirect-gateway.patch: Fix regression introduced in
+    2.1rc17 that makes redirect-gateway (without options) to be ignored.
+    Patch cherrypicked from upstream 2.1rc20 (SVN r5011), LP: #445695
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Tue, 13 Oct 2009 09:31:20 +0200
+
 openvpn (2.1~rc19-1ubuntu1) karmic; urgency=low
 
   * Merge from debian unstable (LP: #404099), remaining changes:
