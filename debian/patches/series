@@ -5,3 +5,4 @@ debian_nogroup_for_sample_files.patch
 debian_openssl_vulnkeys.patch
 attemping_typo
 openvpn-pkcs11warn.patch
+redirect-gateway.patch
