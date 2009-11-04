@@ -1,7 +1,23 @@
 Index: openvpn-2.1_rc20/openvpn.8
 ===================================================================
---- openvpn-2.1_rc20.orig/openvpn.8	2009-10-01 20:02:18.000000000 +0200
-+++ openvpn-2.1_rc20/openvpn.8	2009-10-05 13:03:01.435813078 +0200
+--- openvpn-2.1_rc20.orig/openvpn.8	2009-11-04 18:10:44.130982642 +0100
++++ openvpn-2.1_rc20/openvpn.8	2009-11-04 18:11:26.521136832 +0100
+@@ -21,13 +21,13 @@
+ .\"  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ .\"
+ .\" Manual page for openvpn
+-.\
++.\"
+ .\" SH section heading
+ .\" SS subsection heading
+ .\" LP paragraph
+ .\" IP indented paragraph
+ .\" TP hanging label
+-.\
++.\"
+ .\" .nf -- no formatting
+ .\" .fi -- resume formatting
+ .\" .ft 3 -- boldface
 @@ -97,25 +97,25 @@
  .SH OPTIONS
  OpenVPN allows any option to be placed either on the command line
@@ -2274,7 +2290,7 @@ Index: openvpn-2.1_rc20/openvpn.8
  .B 2
 --- Use 
 -.B --client-config-dir
-+\-\- Use 
++\-\- Use
 +.B \-\-client-config-dir
  file for static IP (next choice).
  .br

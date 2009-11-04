@@ -1,7 +1,7 @@
 Index: openvpn-2.1_rc20/README.ipv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1_rc20/README.ipv6	2009-10-06 13:13:05.865653654 +0200
++++ openvpn-2.1_rc20/README.ipv6	2009-11-04 17:29:57.676541303 +0100
 @@ -0,0 +1,74 @@
 +[ Last updated: 17-Sep-2009. ]
 +This README covers UDP/IPv6 v0.4.x ( --udp6 and --tcp6-xxxxxx  ) support
@@ -80,7 +80,7 @@ Index: openvpn-2.1_rc20/README.ipv6
 Index: openvpn-2.1_rc20/TODO.ipv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1_rc20/TODO.ipv6	2009-10-06 13:13:05.933630190 +0200
++++ openvpn-2.1_rc20/TODO.ipv6	2009-11-04 17:29:57.677541582 +0100
 @@ -0,0 +1,26 @@
 +* All platforms:
 +  o mgmt console: as currently passes straight in_addr_t bits around
@@ -110,8 +110,8 @@ Index: openvpn-2.1_rc20/TODO.ipv6
 +    support in this patch 
 Index: openvpn-2.1_rc20/buffer.c
 ===================================================================
---- openvpn-2.1_rc20.orig/buffer.c	2009-10-06 13:12:48.146601698 +0200
-+++ openvpn-2.1_rc20/buffer.c	2009-10-06 13:13:05.750682704 +0200
+--- openvpn-2.1_rc20.orig/buffer.c	2009-11-04 17:29:34.812930966 +0100
++++ openvpn-2.1_rc20/buffer.c	2009-11-04 17:29:57.718529571 +0100
 @@ -215,6 +215,23 @@
    return ret;
  }
@@ -138,8 +138,8 @@ Index: openvpn-2.1_rc20/buffer.c
   * that don't guarantee null termination for size > 0.
 Index: openvpn-2.1_rc20/buffer.h
 ===================================================================
---- openvpn-2.1_rc20.orig/buffer.h	2009-10-06 13:12:48.319554771 +0200
-+++ openvpn-2.1_rc20/buffer.h	2009-10-06 13:13:05.753682983 +0200
+--- openvpn-2.1_rc20.orig/buffer.h	2009-11-04 17:29:34.866914206 +0100
++++ openvpn-2.1_rc20/buffer.h	2009-11-04 17:29:57.720582085 +0100
 @@ -278,6 +278,11 @@
      ;
  
@@ -154,8 +154,8 @@ Index: openvpn-2.1_rc20/buffer.h
  int openvpn_snprintf(char *str, size_t size, const char *format, ...)
 Index: openvpn-2.1_rc20/config.h.in
 ===================================================================
---- openvpn-2.1_rc20.orig/config.h.in	2009-10-06 13:12:48.457514547 +0200
-+++ openvpn-2.1_rc20/config.h.in	2009-10-06 13:13:05.758683263 +0200
+--- openvpn-2.1_rc20.orig/config.h.in	2009-11-04 17:29:34.933896329 +0100
++++ openvpn-2.1_rc20/config.h.in	2009-11-04 17:29:57.724527615 +0100
 @@ -529,6 +529,9 @@
  /* Use LZO compression library */
  #undef USE_LZO
@@ -168,8 +168,8 @@ Index: openvpn-2.1_rc20/config.h.in
  
 Index: openvpn-2.1_rc20/configure
 ===================================================================
---- openvpn-2.1_rc20.orig/configure	2009-10-06 13:12:48.606473765 +0200
-+++ openvpn-2.1_rc20/configure	2009-10-06 13:13:05.786672927 +0200
+--- openvpn-2.1_rc20.orig/configure	2009-11-04 17:29:34.988879569 +0100
++++ openvpn-2.1_rc20/configure	2009-11-04 17:29:57.740524822 +0100
 @@ -1323,6 +1323,7 @@
    --disable-http          Disable HTTP proxy support
    --disable-fragment      Disable internal fragmentation support (--fragment)
@@ -270,8 +270,8 @@ Index: openvpn-2.1_rc20/configure
     { echo "$as_me:$LINENO: checking for valgrind tool and Header files..." >&5
 Index: openvpn-2.1_rc20/configure.ac
 ===================================================================
---- openvpn-2.1_rc20.orig/configure.ac	2009-10-06 13:12:48.746436335 +0200
-+++ openvpn-2.1_rc20/configure.ac	2009-10-06 13:13:05.791673486 +0200
+--- openvpn-2.1_rc20.orig/configure.ac	2009-11-04 17:29:35.046862530 +0100
++++ openvpn-2.1_rc20/configure.ac	2009-11-04 17:29:57.798604710 +0100
 @@ -135,6 +135,12 @@
     [MULTIHOME="yes"]
  )
@@ -304,8 +304,8 @@ Index: openvpn-2.1_rc20/configure.ac
  dnl
 Index: openvpn-2.1_rc20/init.c
 ===================================================================
---- openvpn-2.1_rc20.orig/init.c	2009-10-06 13:12:48.882395274 +0200
-+++ openvpn-2.1_rc20/init.c	2009-10-06 13:13:05.807667061 +0200
+--- openvpn-2.1_rc20.orig/init.c	2009-11-04 17:29:54.124535715 +0100
++++ openvpn-2.1_rc20/init.c	2009-11-04 17:29:57.804503314 +0100
 @@ -94,7 +94,7 @@
     */
    if (options->pull
@@ -361,7 +361,7 @@ Index: openvpn-2.1_rc20/init.c
        sec = c->options.ce.connect_retry_seconds;
        break;
      }
-@@ -2637,7 +2651,7 @@
+@@ -2649,7 +2663,7 @@
  #ifdef WIN32
        msg (M_INFO, "NOTE: --fast-io is disabled since we are running on Windows");
  #else
@@ -370,7 +370,7 @@ Index: openvpn-2.1_rc20/init.c
  	msg (M_INFO, "NOTE: --fast-io is disabled since we are not using UDP");
        else
  	{
-@@ -2899,7 +2913,11 @@
+@@ -2911,7 +2925,11 @@
    /* link_socket_mode allows CM_CHILD_TCP
       instances to inherit acceptable fds
       from a top-level parent */
@@ -383,7 +383,7 @@ Index: openvpn-2.1_rc20/init.c
      {
        if (c->mode == CM_TOP)
  	link_socket_mode = LS_MODE_TCP_LISTEN;
-@@ -3182,17 +3200,8 @@
+@@ -3194,17 +3212,8 @@
  {
    CLEAR (*dest);
  
@@ -403,7 +403,7 @@ Index: openvpn-2.1_rc20/init.c
  
    dest->gc = gc_new ();
  
-@@ -3298,7 +3307,7 @@
+@@ -3310,7 +3319,7 @@
    dest->c2.es_owned = false;
  
    dest->c2.event_set = NULL;
@@ -414,8 +414,8 @@ Index: openvpn-2.1_rc20/init.c
  
 Index: openvpn-2.1_rc20/manage.c
 ===================================================================
---- openvpn-2.1_rc20.orig/manage.c	2009-10-06 13:12:49.020358682 +0200
-+++ openvpn-2.1_rc20/manage.c	2009-10-06 13:13:05.813665385 +0200
+--- openvpn-2.1_rc20.orig/manage.c	2009-11-04 17:29:35.178827335 +0100
++++ openvpn-2.1_rc20/manage.c	2009-11-04 17:29:57.810505548 +0100
 @@ -1877,9 +1877,9 @@
  	  /*
  	   * Initialize socket address
@@ -449,8 +449,8 @@ Index: openvpn-2.1_rc20/manage.c
  
 Index: openvpn-2.1_rc20/mroute.c
 ===================================================================
---- openvpn-2.1_rc20.orig/mroute.c	2009-10-06 13:12:49.161317899 +0200
-+++ openvpn-2.1_rc20/mroute.c	2009-10-06 13:13:05.815664268 +0200
+--- openvpn-2.1_rc20.orig/mroute.c	2009-11-04 17:29:35.233811972 +0100
++++ openvpn-2.1_rc20/mroute.c	2009-11-04 17:29:57.815500800 +0100
 @@ -226,25 +226,47 @@
  				      const struct openvpn_sockaddr *osaddr,
  				      bool use_port)
@@ -543,8 +543,8 @@ Index: openvpn-2.1_rc20/mroute.c
  	  buf_printf (&out, "UNKNOWN"); 
 Index: openvpn-2.1_rc20/mtcp.c
 ===================================================================
---- openvpn-2.1_rc20.orig/mtcp.c	2009-10-06 13:12:49.295281028 +0200
-+++ openvpn-2.1_rc20/mtcp.c	2009-10-06 13:13:05.818662033 +0200
+--- openvpn-2.1_rc20.orig/mtcp.c	2009-11-04 17:29:35.290796050 +0100
++++ openvpn-2.1_rc20/mtcp.c	2009-11-04 17:29:57.822498007 +0100
 @@ -153,6 +153,11 @@
    ASSERT (mi->context.c2.link_socket);
    ASSERT (mi->context.c2.link_socket->info.lsa);
@@ -559,8 +559,8 @@ Index: openvpn-2.1_rc20/mtcp.c
        msg (D_MULTI_ERRORS, "MULTI TCP: TCP client address is undefined");
 Index: openvpn-2.1_rc20/multi.c
 ===================================================================
---- openvpn-2.1_rc20.orig/multi.c	2009-10-06 13:12:49.436241922 +0200
-+++ openvpn-2.1_rc20/multi.c	2009-10-06 13:13:05.828660078 +0200
+--- openvpn-2.1_rc20.orig/multi.c	2009-11-04 17:29:35.345781525 +0100
++++ openvpn-2.1_rc20/multi.c	2009-11-04 17:29:57.825498565 +0100
 @@ -1066,8 +1066,8 @@
    struct mroute_addr addr;
  
@@ -622,8 +622,8 @@ Index: openvpn-2.1_rc20/multi.c
  #else
 Index: openvpn-2.1_rc20/occ.c
 ===================================================================
---- openvpn-2.1_rc20.orig/occ.c	2009-10-06 13:12:49.567205330 +0200
-+++ openvpn-2.1_rc20/occ.c	2009-10-06 13:13:05.834659799 +0200
+--- openvpn-2.1_rc20.orig/occ.c	2009-11-04 17:29:35.401763927 +0100
++++ openvpn-2.1_rc20/occ.c	2009-11-04 17:29:57.830557224 +0100
 @@ -369,7 +369,7 @@
  	       c->c2.max_send_size_remote,
  	       c->c2.max_recv_size_local);
@@ -635,8 +635,8 @@ Index: openvpn-2.1_rc20/occ.c
  		  || c->c2.max_recv_size_local < c->c2.max_send_size_remote))
 Index: openvpn-2.1_rc20/options.c
 ===================================================================
---- openvpn-2.1_rc20.orig/options.c	2009-10-06 13:12:49.718163709 +0200
-+++ openvpn-2.1_rc20/options.c	2009-10-06 13:13:05.860652816 +0200
+--- openvpn-2.1_rc20.orig/options.c	2009-11-04 17:29:56.717812531 +0100
++++ openvpn-2.1_rc20/options.c	2009-11-04 17:29:57.839495493 +0100
 @@ -73,6 +73,12 @@
  #ifdef ENABLE_PKCS11
    " [PKCS11]"
@@ -798,8 +798,8 @@ Index: openvpn-2.1_rc20/options.c
  
 Index: openvpn-2.1_rc20/ps.c
 ===================================================================
---- openvpn-2.1_rc20.orig/ps.c	2009-10-06 13:12:49.850126279 +0200
-+++ openvpn-2.1_rc20/ps.c	2009-10-06 13:13:05.863650302 +0200
+--- openvpn-2.1_rc20.orig/ps.c	2009-11-04 17:29:35.517733480 +0100
++++ openvpn-2.1_rc20/ps.c	2009-11-04 17:29:57.846546331 +0100
 @@ -332,9 +332,9 @@
  	       const int port)
  {
@@ -815,8 +815,8 @@ Index: openvpn-2.1_rc20/ps.c
  static inline void
 Index: openvpn-2.1_rc20/socket.c
 ===================================================================
---- openvpn-2.1_rc20.orig/socket.c	2009-10-06 13:12:50.149042201 +0200
-+++ openvpn-2.1_rc20/socket.c	2009-10-06 13:13:05.892642760 +0200
+--- openvpn-2.1_rc20.orig/socket.c	2009-11-04 17:29:55.862048565 +0100
++++ openvpn-2.1_rc20/socket.c	2009-11-04 17:29:57.860492420 +0100
 @@ -37,23 +37,28 @@
  #include "memdbg.h"
  
@@ -2204,8 +2204,8 @@ Index: openvpn-2.1_rc20/socket.c
    if (buf)
 Index: openvpn-2.1_rc20/socket.h
 ===================================================================
---- openvpn-2.1_rc20.orig/socket.h	2009-10-06 13:12:50.296999464 +0200
-+++ openvpn-2.1_rc20/socket.h	2009-10-06 13:13:05.895640804 +0200
+--- openvpn-2.1_rc20.orig/socket.h	2009-11-04 17:29:35.626702195 +0100
++++ openvpn-2.1_rc20/socket.h	2009-11-04 17:29:57.867487392 +0100
 @@ -70,7 +70,13 @@
  struct openvpn_sockaddr
  {
@@ -2571,8 +2571,8 @@ Index: openvpn-2.1_rc20/socket.h
      }
 Index: openvpn-2.1_rc20/socks.c
 ===================================================================
---- openvpn-2.1_rc20.orig/socks.c	2009-10-06 13:12:50.441961475 +0200
-+++ openvpn-2.1_rc20/socks.c	2009-10-06 13:13:05.897641642 +0200
+--- openvpn-2.1_rc20.orig/socks.c	2009-11-04 17:29:35.694682642 +0100
++++ openvpn-2.1_rc20/socks.c	2009-11-04 17:29:57.871485716 +0100
 @@ -174,9 +174,9 @@
  
    if (addr != NULL)
@@ -2621,8 +2621,8 @@ Index: openvpn-2.1_rc20/socks.c
  }
 Index: openvpn-2.1_rc20/syshead.h
 ===================================================================
---- openvpn-2.1_rc20.orig/syshead.h	2009-10-06 13:12:50.596917341 +0200
-+++ openvpn-2.1_rc20/syshead.h	2009-10-06 13:13:05.911636335 +0200
+--- openvpn-2.1_rc20.orig/syshead.h	2009-11-04 17:29:35.753667279 +0100
++++ openvpn-2.1_rc20/syshead.h	2009-11-04 17:29:57.873539068 +0100
 @@ -28,6 +28,10 @@
  /*
   * Only include if not during configure
@@ -2646,8 +2646,8 @@ Index: openvpn-2.1_rc20/syshead.h
  #ifdef HAVE_SYS_MMAN_H
 Index: openvpn-2.1_rc20/win32.h
 ===================================================================
---- openvpn-2.1_rc20.orig/win32.h	2009-10-06 13:12:50.835850022 +0200
-+++ openvpn-2.1_rc20/win32.h	2009-10-06 13:13:05.935629911 +0200
+--- openvpn-2.1_rc20.orig/win32.h	2009-11-04 17:29:35.811650519 +0100
++++ openvpn-2.1_rc20/win32.h	2009-11-04 17:29:57.877484878 +0100
 @@ -193,7 +193,10 @@
    DWORD flags;
    int status;
