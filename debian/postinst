@@ -17,7 +17,7 @@ case "$1" in
     db_get openvpn/create_tun || RET="false"
     if [ "$RET" = "true" ]; then
       [ -e /dev/net ] || mkdir -m 755 /dev/net
-      [ -d /dev/net -a ! -e /dev/net/tun ] && /bin/mknod /dev/net/tun c 10 200
+      [ -d /dev/net -a ! -e /dev/net/tun ] && mknod /dev/net/tun c 10 200
     fi
     # Do we want to move the old S20 symlinks to S18 ones?
     if [ -n "$2" ] ; then

@@ -90,6 +90,9 @@ binary-arch: build install
 	dh_installexamples
 	## remove windoze stuff
 	rm -rf $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/examples/easy-rsa/Windows
+	# clean permissions to make lintian happy
+	chmod a-x $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/examples/easy-rsa/2.0/vars
+	chmod a-x $(CURDIR)/debian/openvpn/usr/share/doc/openvpn/examples/easy-rsa/2.0/openssl.cnf
 	dh_installmenu
 #	dh_installlogrotate
 #	dh_installemacsen

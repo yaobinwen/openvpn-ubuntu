@@ -1,3 +1,11 @@
+openvpn (2.1~rc20-3) unstable; urgency=low
+
+  * Updated debian_openssl_vulnkeys.patch to fix false vulnerable
+    key detection. (Closes: #483139).
+    Thanks a lot Kees Cook and Jamie Strandboge for working on this!
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 04 Nov 2009 17:18:03 +0100
+
 openvpn (2.1~rc20-2) unstable; urgency=low
 
   * init.d script: Added X-Interactive header. (Closes: #549424)
