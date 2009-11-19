@@ -6,3 +6,4 @@ debian_openssl_vulnkeys.patch
 attemping_typo
 openvpn-pkcs11warn.patch
 jjo-ipv6-support.patch
+eurephia.patch

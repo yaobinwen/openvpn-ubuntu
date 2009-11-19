@@ -1,3 +1,10 @@
+openvpn (2.1~rc21-2) unstable; urgency=low
+
+  * debian/patches: Added eurephia.patch to support eurephia plug-in.
+  * debian/patches: updated openvpn over ipv6 support to v0.4.10
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 19 Nov 2009 18:00:27 +0100
+
 openvpn (2.1~rc21-1) unstable; urgency=low
 
   * New upstream release
