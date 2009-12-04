@@ -1,7 +1,7 @@
-Index: openvpn-2.1~rc21/README.eurephia
+Index: openvpn-2.1~rc22/README.eurephia
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1~rc21/README.eurephia	2009-11-19 18:09:44.939585899 +0100
++++ openvpn-2.1~rc22/README.eurephia	2009-12-04 17:00:48.412768130 +0100
 @@ -0,0 +1,24 @@
 +
 +  OpenVPN - eurephia version
@@ -27,10 +27,10 @@ Index: openvpn-2.1~rc21/README.eurephia
 +
 +             http://www.eurephia.net/
 +
-Index: openvpn-2.1~rc21/options.c
+Index: openvpn-2.1~rc22/options.c
 ===================================================================
---- openvpn-2.1~rc21.orig/options.c	2009-11-19 18:09:34.832413274 +0100
-+++ openvpn-2.1~rc21/options.c	2009-11-19 18:09:44.946584223 +0100
+--- openvpn-2.1~rc22.orig/options.c	2009-12-04 17:00:48.271809191 +0100
++++ openvpn-2.1~rc22/options.c	2009-12-04 17:00:48.417769526 +0100
 @@ -7,6 +7,9 @@
   *
   *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
@@ -49,10 +49,10 @@ Index: openvpn-2.1~rc21/options.c
    " built on " __DATE__
  ;
  
-Index: openvpn-2.1~rc21/ssl.c
+Index: openvpn-2.1~rc22/ssl.c
 ===================================================================
---- openvpn-2.1~rc21.orig/ssl.c	2009-11-19 18:09:05.545594839 +0100
-+++ openvpn-2.1~rc21/ssl.c	2009-11-19 18:09:44.955584502 +0100
+--- openvpn-2.1~rc22.orig/ssl.c	2009-11-12 21:30:36.000000000 +0100
++++ openvpn-2.1~rc22/ssl.c	2009-12-04 17:00:48.427767013 +0100
 @@ -7,6 +7,10 @@
   *
   *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
@@ -64,7 +64,7 @@ Index: openvpn-2.1~rc21/ssl.c
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License version 2
   *  as published by the Free Software Foundation.
-@@ -777,6 +781,14 @@
+@@ -780,6 +784,14 @@
    openvpn_snprintf (envname, sizeof(envname), "tls_id_%d", ctx->error_depth);
    setenv_str (opt->es, envname, subject);
  

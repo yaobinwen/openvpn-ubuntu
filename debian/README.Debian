@@ -7,6 +7,8 @@ In this file:
 - Changes in string remapping (affects tls-remote certificate names)
 - plugin support
 - Using resolvconf
+- Out of memory issues
+- LDAP+TLS authentication runs into file exhaustion
 
 
 openvpn for Debian
@@ -156,6 +158,26 @@ You will need to install resolvconf package.
 Out of Memory issues
 -------------------
 
-You might run into issues with openvpn complaining about out of memory. The reason for this behavior is that openvpn uses mlockall to pin all of its pages into memory. To correct this issue you can put a "ulimit -l <reasonable number>" in the openvpn init script.
+You might run into issues with openvpn complaining about out of memory. The
+reason for this behavior is that openvpn uses mlockall to pin all of its
+pages into memory. To correct this issue you can put a "ulimit -l
+<reasonable number>" in the openvpn init script.
 
- -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 09 Dec 2007 01:32:10 +0100
+LDAP+TLS authentication runs into file exhaustion
+-------------------------------------------------
+
+When LDAP is used with TLS support a file handle to /dev/urandom is created but
+never released on every authentication. This is due to a bug in libgcrypt. 
+
+Lars Ellenberg provided the following worked around: 
+Append LD_PRELOAD=/lib/security/pam_ldap.so before the call to openvpn (in the
+init.d script). ie:
+
+..... (around line 58 of the init.d script)....
+LD_PRELOAD=/lib/security/pam_ldap.so start-stop-daemon --start --quiet --oknodo 
+
+Thanks Andreas Metzler, Lars Ellenberg, Simon Josefsson & chantra for folling
+this issue.
+
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 04 Dec 2009 16:42:04 +0100
