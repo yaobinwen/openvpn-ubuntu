@@ -1,3 +1,12 @@
+openvpn (2.1.0-1) unstable; urgency=low
+
+  * New upstream release
+  * init.d script: added soft-restart to the options output. (Closes: #558174)
+  * debian/control: Promoted net-tools from Recommends to Depends.
+    (Closes: #557906)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 11 Dec 2009 12:08:50 +0100
+
 openvpn (2.1~rc22-1) unstable; urgency=low
 
   * New upstream release

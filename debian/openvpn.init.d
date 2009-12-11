@@ -249,7 +249,7 @@ status)
   exit $GLOBAL_STATUS
   ;;
 *)
-  echo "Usage: $0 {start|stop|reload|restart|force-reload|cond-restart|status}" >&2
+  echo "Usage: $0 {start|stop|reload|restart|force-reload|cond-restart|soft-restart|status}" >&2
   exit 1
   ;;
 esac
