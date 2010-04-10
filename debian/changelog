@@ -1,3 +1,15 @@
+openvpn (2.1.0-2) unstable; urgency=low
+
+  * Patched ssl.[ch] to fix integer overflow. (Closes: #576827)
+    Thanks David Sommerseth for the patch.
+  * Fixed manpage typo. (Closes: #576823)
+  * Bloat the init.d script with more dependencies required by the
+    new init systems. Sucky. (Closes: #568647, #553338)
+  * Reworded README.Debian (Closes: #550164)
+  * Switch to dpkg-source 3.0 (quilt) format
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 10 Apr 2010 17:26:42 +0200
+
 openvpn (2.1.0-1) unstable; urgency=low
 
   * New upstream release

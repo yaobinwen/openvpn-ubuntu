@@ -33,9 +33,10 @@ script won't be able to stop/reload the tunnels.
 Multiple tunnels
 ----------------
 
-When OpenVPN is started by /etc/init.d/openvpn a separate OpenVPN daemon will
-be started for each .conf configuration file in the /etc/openvpn directory.
-This allows you to define multiple VPN connections. 
+When OpenVPN is started by /etc/init.d/openvpn the default is to start
+a separate openvpn daemon for each .conf configuration file in the
+/etc/openvpn directory.  The /etc/default/openvpn file may be used to
+alter this behavior.
 
 [UPDATE: with OpenVPN 2.0 one openvpn daemon can serve multiple clients. That
 way multiple instances of openvpn are no longer required to achieve this, and

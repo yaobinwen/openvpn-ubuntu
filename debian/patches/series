@@ -7,3 +7,5 @@ attemping_typo
 openvpn-pkcs11warn.patch
 jjo-ipv6-support.patch
 eurephia.patch
+counter_type_for_bytes.patch
+route_default_nil.patch
