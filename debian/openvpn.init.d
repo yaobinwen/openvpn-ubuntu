@@ -4,6 +4,9 @@
 # Provides:          openvpn
 # Required-Start:    $network $remote_fs $syslog
 # Required-Stop:     $network $remote_fs $syslog
+# Should-Start:      network-manager
+# Should-Stop:       network-manager
+# X-Start-Before:    $x-display-manager gdm kdm xdm wdm ldm sdm nodm
 # X-Interactive:     true
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6

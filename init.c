@@ -94,7 +94,7 @@ update_options_ce_post (struct options *options)
    */
   if (options->pull
       && options->ping_rec_timeout_action == PING_UNDEF
-      && options->ce.proto == PROTO_UDPv4)
+      && proto_is_dgram(options->ce.proto))
     {
       options->ping_rec_timeout = PRE_PULL_INITIAL_PING_RESTART;
       options->ping_rec_timeout_action = PING_RESTART;
@@ -933,7 +933,12 @@ initialization_sequence_completed (struct context *c, const unsigned int flags)
       const char *detail = "SUCCESS";
       if (c->c1.tuntap)
 	tun_local = c->c1.tuntap->local;
-      tun_remote = htonl (c->c1.link_socket_addr.actual.dest.sa.sin_addr.s_addr);
+      /* TODO(jjo): for ipv6 this will convert some 32bits in the ipv6 addr
+       *            to a meaningless ipv4 address.
+       *            In any case, is somewhat inconsistent to send local tunnel
+       *            addr with remote _endpoint_ addr (?)
+       */
+      tun_remote = htonl (c->c1.link_socket_addr.actual.dest.addr.in4.sin_addr.s_addr);
       if (flags & ISC_ERRORS)
 	detail = "ERROR";
       management_set_state (management,
@@ -1335,7 +1340,7 @@ do_deferred_options (struct context *c, const unsigned int found)
 #ifdef ENABLE_OCC
   if (found & OPT_P_EXPLICIT_NOTIFY)
     {
-      if (c->options.ce.proto != PROTO_UDPv4 && c->options.explicit_exit_notification)
+      if (!proto_is_udp(c->options.ce.proto) && c->options.explicit_exit_notification)
 	{
 	  msg (D_PUSH, "OPTIONS IMPORT: --explicit-exit-notify can only be used with --proto udp");
 	  c->options.explicit_exit_notification = 0;
@@ -1430,13 +1435,22 @@ socket_restart_pause (struct context *c)
   switch (c->options.ce.proto)
     {
     case PROTO_UDPv4:
+#ifdef USE_PF_INET6
+    case PROTO_UDPv6:
+#endif
       if (proxy)
 	sec = c->options.ce.connect_retry_seconds;
       break;
     case PROTO_TCPv4_SERVER:
+#ifdef USE_PF_INET6
+    case PROTO_TCPv6_SERVER:
+#endif
       sec = 1;
       break;
     case PROTO_TCPv4_CLIENT:
+#ifdef USE_PF_INET6
+    case PROTO_TCPv6_CLIENT:
+#endif
       sec = c->options.ce.connect_retry_seconds;
       break;
     }
@@ -1564,6 +1578,29 @@ do_init_crypto_static (struct context *c, const unsigned int flags)
   const struct options *options = &c->options;
   ASSERT (options->shared_secret_file);
 
+  /* CVE-2008-0166 (Debian weak key checks) */
+  /* Only check if we can actually read the key file. Unless the file does not
+   * exist in the first place, this should never happen (since static keys do
+   * not work with multi-client mode), but we test it anyway to be on the safe
+   * side and avoid wrong -vulnkey alerts. */
+  if (access (options->shared_secret_file, R_OK) == 0)
+    {
+      struct argv argv = argv_new ();
+      int ret;
+      argv_printf (&argv, "/usr/sbin/openvpn-vulnkey -q %s", options->shared_secret_file);
+      argv_msg (M_INFO, &argv);
+      ret = openvpn_execve (&argv, c->c2.es, 0);
+      if (WEXITSTATUS (ret) == 1)
+        {
+          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+        }
+      else if (WEXITSTATUS (ret) != 0)
+        {
+          msg (M_WARN, "******* WARNING *******: '%s' cannot be verified as a non-vulnerable key. See 'man openvpn-vulnkey' for details.", options->shared_secret_file);
+        }
+      argv_reset (&argv);
+    }
+
   init_crypto_pre (c, flags);
 
   /* Initialize packet ID tracking */
@@ -1649,6 +1686,7 @@ static void
 do_init_crypto_tls_c1 (struct context *c)
 {
   const struct options *options = &c->options;
+  SSL *ssl;
 
   if (!c->c1.ks.ssl_ctx)
     {
@@ -1687,6 +1725,59 @@ do_init_crypto_tls_c1 (struct context *c)
 
       /* Initialize PRNG with config-specified digest */
       prng_init (options->prng_hash, options->prng_nonce_secret_len);
+
+      /* CVE-2008-0166 (Debian weak key checks)
+       * Obtain the modulus and bits from the certificate that was initialized,
+       * and send that to openssl-vulnkey.
+       */
+      ssl = SSL_new(c->c1.ks.ssl_ctx);
+      if (ssl != NULL)
+        {
+          X509* cert = NULL;
+          char *bn;
+          int bits;
+
+          cert = SSL_get_certificate(ssl);
+          if (cert != NULL)
+            {
+              EVP_PKEY *pkey = X509_get_pubkey (cert);
+              if (pkey != NULL)
+                {
+                  if (pkey->type == EVP_PKEY_RSA && pkey->pkey.rsa != NULL
+                      && pkey->pkey.rsa->n != NULL)
+                    {
+                      bits = BN_num_bits(pkey->pkey.rsa->n);
+                      bn = BN_bn2hex(pkey->pkey.rsa->n);
+                    }
+                  else if (pkey->type == EVP_PKEY_DSA && pkey->pkey.dsa != NULL
+                           && pkey->pkey.dsa->p != NULL)
+                    {
+                      bits = BN_num_bits(pkey->pkey.dsa->p);
+                      bn = BN_bn2hex(pkey->pkey.dsa->p);
+                    }
+                  if (bn != NULL)
+                    {
+                      int ret;
+                      struct argv argv = argv_new ();
+                      argv_printf (&argv, "/usr/bin/openssl-vulnkey -q -b %d -m %s", bits, bn);
+                      OPENSSL_free(bn);
+                      msg (M_INFO, "/usr/bin/openssl-vulnkey -q -b %d -m <modulus omitted>", bits);
+                      ret = openvpn_execve (&argv, NULL, 0);
+                      if (WEXITSTATUS (ret) == 1)
+                        {
+                          msg (M_WARN, "******* WARNING *******: '%s' is a known vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
+                        }
+                      else if (WEXITSTATUS (ret) != 0)
+                        {
+                          msg (M_WARN, "******* WARNING *******: '%s' cannot be verified as a non-vulnerable key. See 'man openssl-vulnkey' for details.", options->priv_key_file);
+                        }
+                      argv_reset (&argv);
+                    }
+                  EVP_PKEY_free (pkey);
+               }
+            }
+            SSL_free(ssl);
+         }
 
       /* TLS handshake authentication (--tls-auth) */
       if (options->tls_auth_file)
@@ -2572,7 +2663,7 @@ do_setup_fast_io (struct context *c)
 #ifdef WIN32
       msg (M_INFO, "NOTE: --fast-io is disabled since we are running on Windows");
 #else
-      if (c->options.ce.proto != PROTO_UDPv4)
+      if (!proto_is_udp(c->options.ce.proto))
 	msg (M_INFO, "NOTE: --fast-io is disabled since we are not using UDP");
       else
 	{
@@ -2834,7 +2925,11 @@ init_instance (struct context *c, const struct env_set *env, const unsigned int 
   /* link_socket_mode allows CM_CHILD_TCP
      instances to inherit acceptable fds
      from a top-level parent */
-  if (c->options.ce.proto == PROTO_TCPv4_SERVER)
+  if (c->options.ce.proto == PROTO_TCPv4_SERVER
+#ifdef USE_PF_INET6
+      || c->options.ce.proto == PROTO_TCPv6_SERVER
+#endif
+     )
     {
       if (c->mode == CM_TOP)
 	link_socket_mode = LS_MODE_TCP_LISTEN;
@@ -3117,17 +3212,8 @@ inherit_context_child (struct context *dest,
 {
   CLEAR (*dest);
 
-  switch (src->options.ce.proto)
-    {
-    case PROTO_UDPv4:
-      dest->mode = CM_CHILD_UDP;
-      break;
-    case PROTO_TCPv4_SERVER:
-      dest->mode = CM_CHILD_TCP;
-      break;
-    default:
-      ASSERT (0);
-    }
+  /* proto_is_dgram will ASSERT(0) if proto is invalid */
+  dest->mode = proto_is_dgram(src->options.ce.proto)? CM_CHILD_UDP : CM_CHILD_TCP;
 
   dest->gc = gc_new ();
 
@@ -3233,7 +3319,7 @@ inherit_context_top (struct context *dest,
   dest->c2.es_owned = false;
 
   dest->c2.event_set = NULL;
-  if (src->options.ce.proto == PROTO_UDPv4)
+  if (proto_is_dgram(src->options.ce.proto))
     do_event_set_init (dest, false);
 }
 
