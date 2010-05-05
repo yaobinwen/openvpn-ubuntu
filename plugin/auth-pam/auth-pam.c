@@ -660,7 +660,7 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
   struct user_pass up;
   int command;
 #if DLOPEN_PAM
-  static const char pam_so[] = "libpam.so";
+  static const char pam_so[] = "libpam.so.0";
 #endif
 
   /*
