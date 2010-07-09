@@ -9,6 +9,7 @@ In this file:
 - Using resolvconf
 - Out of memory issues
 - LDAP+TLS authentication runs into file exhaustion
+- Possible consequences of the 'chroot' option
 
 
 openvpn for Debian
@@ -181,4 +182,17 @@ Thanks Andreas Metzler, Lars Ellenberg, Simon Josefsson & chantra for folling
 this issue.
 
 
- -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 04 Dec 2009 16:42:04 +0100
+Possible consequences of the 'chroot' option
+--------------------------------------------
+
+When running OpenVPN on a chroot environment you have to take into account that
+things as /dev/log may change (i.e. when syslog is reloaded by logrotate) and
+that may result in OpenVPN not logging anymore.
+
+Christian Schneider suggested this solution:
+Create an additional "dev/log" socket in the jail by "-a" option to sysklogd or
+"$AddUnixListenSocket" parameter in /etc/rsyslog.conf, respectively
+
+Kudos to him, for finding out and proposing a solution.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 09 Jul 2010 12:46:30 +0200

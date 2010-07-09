@@ -1,3 +1,12 @@
+openvpn (2.1.0-3) unstable; urgency=low
+
+  * The 'happy birthday to me' release
+  * Fixed client hang when server does not push anything. (Closes: #587414)
+    Thanks Thierry Carrez for the heads up.
+  * Document possible problems when using 'chroot' option
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 09 Jul 2010 12:22:09 +0200
+
 openvpn (2.1.0-2) unstable; urgency=low
 
   * Patched ssl.[ch] to fix integer overflow. (Closes: #576827)

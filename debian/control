@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 7), libssl-dev (>> 0.9.8g-9), liblzo2-dev, libpam0g-dev, quilt, libpkcs11-helper1-dev
-Standards-Version: 3.8.4
+Standards-Version: 3.9.0
 
 Package: openvpn
 Architecture: any
