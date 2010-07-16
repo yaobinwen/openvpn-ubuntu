@@ -7,3 +7,4 @@ attemping_typo
 openvpn-pkcs11warn.patch
 jjo-ipv6-support.patch
 eurephia.patch
+client_hang_when_server_dont_push.patch

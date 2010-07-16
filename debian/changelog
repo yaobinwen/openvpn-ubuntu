@@ -1,3 +1,10 @@
+openvpn (2.1.0-1ubuntu1.1) lucid-proposed; urgency=low
+
+  * debian/patches/client_hang_when_server_dont_push.patch: Fix client hanging
+    on PUSH_REQUEST when server does not push any option (LP: #579737) 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Fri, 16 Jul 2010 13:46:18 -0400
+
 openvpn (2.1.0-1ubuntu1) lucid; urgency=low
 
   * Merge from debian testing (LP: #509078), remaining changes:
