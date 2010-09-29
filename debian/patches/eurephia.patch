@@ -1,7 +1,7 @@
-Index: openvpn-2.1~rc22/README.eurephia
+Index: openvpn-2.1.3/README.eurephia
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1~rc22/README.eurephia	2009-12-04 17:00:48.412768130 +0100
++++ openvpn-2.1.3/README.eurephia	2010-09-29 13:15:32.005461607 +0200
 @@ -0,0 +1,24 @@
 +
 +  OpenVPN - eurephia version
@@ -27,13 +27,13 @@ Index: openvpn-2.1~rc22/README.eurephia
 +
 +             http://www.eurephia.net/
 +
-Index: openvpn-2.1~rc22/options.c
+Index: openvpn-2.1.3/options.c
 ===================================================================
---- openvpn-2.1~rc22.orig/options.c	2009-12-04 17:00:48.271809191 +0100
-+++ openvpn-2.1~rc22/options.c	2009-12-04 17:00:48.417769526 +0100
+--- openvpn-2.1.3.orig/options.c	2010-09-29 13:11:17.080458491 +0200
++++ openvpn-2.1.3/options.c	2010-09-29 13:15:32.005461607 +0200
 @@ -7,6 +7,9 @@
   *
-  *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
+  *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
   *
 + *  Additions for eurephia plugin done by:
 + *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2009
@@ -49,13 +49,13 @@ Index: openvpn-2.1~rc22/options.c
    " built on " __DATE__
  ;
  
-Index: openvpn-2.1~rc22/ssl.c
+Index: openvpn-2.1.3/ssl.c
 ===================================================================
---- openvpn-2.1~rc22.orig/ssl.c	2009-11-12 21:30:36.000000000 +0100
-+++ openvpn-2.1~rc22/ssl.c	2009-12-04 17:00:48.427767013 +0100
+--- openvpn-2.1.3.orig/ssl.c	2010-07-27 08:12:04.000000000 +0200
++++ openvpn-2.1.3/ssl.c	2010-09-29 13:15:32.009457925 +0200
 @@ -7,6 +7,10 @@
   *
-  *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
+  *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
   *
 + *  Additions for eurephia plugin done by:
 + *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2008-2009

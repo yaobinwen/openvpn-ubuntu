@@ -9,11 +9,11 @@ Origin: upstream, https://community.openvpn.net/openvpn/attachment/ticket/13/000
 Bug: https://community.openvpn.net/openvpn/ticket/13
 Reviewed-By: James Yonan <james@openvpn.net>
 
-Index: openvpn/push.c
+Index: openvpn-2.1.3/push.c
 ===================================================================
---- openvpn.orig/push.c	2010-06-28 11:02:21.697220261 +0200
-+++ openvpn/push.c	2010-06-28 11:02:24.247222587 +0200
-@@ -176,6 +176,7 @@
+--- openvpn-2.1.3.orig/push.c	2010-05-31 09:05:55.000000000 +0200
++++ openvpn-2.1.3/push.c	2010-09-29 13:15:46.788461606 +0200
+@@ -177,6 +177,7 @@
    static char cmd[] = "PUSH_REPLY";
    const int extra = 64; /* extra space for possible trailing ifconfig and push-continuation */
    const int safe_cap = BCAP (&buf) - extra;
@@ -21,7 +21,7 @@ Index: openvpn/push.c
  
    buf_printf (&buf, cmd);
  
-@@ -191,6 +192,7 @@
+@@ -192,6 +193,7 @@
  		const bool status = send_control_channel_string (c, BSTR (&buf), D_PUSH);
  		if (!status)
  		  goto fail;
@@ -29,7 +29,7 @@ Index: openvpn/push.c
  		multi_push = true;
  		buf_reset_len (&buf);
  		buf_printf (&buf, cmd);
-@@ -217,6 +219,21 @@
+@@ -218,6 +220,21 @@
      {
        const bool status = send_control_channel_string (c, BSTR (&buf), D_PUSH);
        if (!status)
