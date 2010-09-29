@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -538,11 +538,9 @@ socket_defined (const socket_descriptor_t sd)
 #endif
 
 /*
- * Don't compile the struct buffer_list code unless something needs it
+ * Compile the struct buffer_list code
  */
-#if defined(ENABLE_MANAGEMENT) || defined(ENABLE_PF)
 #define ENABLE_BUFFER_LIST
-#endif
 
 /*
  * Do we have pthread capability?
@@ -576,6 +574,15 @@ socket_defined (const socket_descriptor_t sd)
 #define NTLM 1
 #else
 #define NTLM 0
+#endif
+
+/*
+ * Should we include proxy digest auth functionality
+ */
+#if defined(USE_CRYPTO) && defined(ENABLE_HTTP_PROXY)
+#define PROXY_DIGEST_AUTH 1
+#else
+#define PROXY_DIGEST_AUTH 0
 #endif
 
 /*
@@ -623,6 +630,22 @@ socket_defined (const socket_descriptor_t sd)
 #define ENABLE_INLINE_FILES 1
 
 /*
+ * Support "connection" directive
+ */
+#if ENABLE_INLINE_FILES
+#define ENABLE_CONNECTION 1
+#endif
+
+/*
+ * Should we include http proxy fallback functionality
+ */
+#if defined(ENABLE_CONNECTION) && defined(ENABLE_MANAGEMENT) && defined(ENABLE_HTTP_PROXY)
+#define HTTP_PROXY_FALLBACK 1
+#else
+#define HTTP_PROXY_FALLBACK 0
+#endif
+
+/*
  * Reduce sensitivity to system clock instability
  * and backtracks.
  */
@@ -645,10 +668,8 @@ socket_defined (const socket_descriptor_t sd)
 #endif
 
 /*
- * Support "connection" directive
+ * Do we support pushing peer info?
  */
-#if ENABLE_INLINE_FILES
-#define ENABLE_CONNECTION 1
-#endif
+#define ENABLE_PUSH_PEER_INFO
 
 #endif

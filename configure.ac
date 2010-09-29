@@ -4,7 +4,7 @@ dnl             session authentication and key exchange,
 dnl             packet encryption, packet authentication, and
 dnl             packet compression.
 dnl
-dnl  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
+dnl  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
 dnl
 dnl  This program is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU General Public License as published by
@@ -133,12 +133,6 @@ AC_ARG_ENABLE(multihome,
    [  --disable-multihome     Disable multi-homed UDP server support (--multihome)],
    [MULTIHOME="$enableval"],
    [MULTIHOME="yes"]
-)
-
-AC_ARG_ENABLE(ipv6,
-   [  --disable-ipv6          Disable UDP/IPv6 support],
-   [PF_INET6="$enableval"],
-   [PF_INET6="yes"]
 )
 
 AC_ARG_ENABLE(port-share,
@@ -556,16 +550,6 @@ LDFLAGS="$LDFLAGS -Wl,--fatal-warnings"
 AC_CHECK_FUNC(epoll_create, AC_DEFINE(HAVE_EPOLL_CREATE, 1, [epoll_create function is defined]))
 LDFLAGS="$OLDLDFLAGS"
 
-dnl ipv6 support
-if test "$PF_INET6" = "yes"; then
-  AC_CHECKING([for struct sockaddr_in6 for IPv6 support])
-  AC_CHECK_TYPE(
-      [struct sockaddr_in6],
-      [AC_DEFINE(USE_PF_INET6, 1, [struct sockaddr_in6 is needed for IPv6 peer support])],
-      [],
-      [#include "syshead.h"])
-fi
-
 dnl
 dnl check for valgrind tool
 dnl
@@ -930,7 +914,6 @@ fi
 AC_OUTPUT([
 	Makefile
 	openvpn.spec
-	config-win32.h
 	images/Makefile
 	service-win32/Makefile
 	install-win32/Makefile

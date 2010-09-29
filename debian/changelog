@@ -1,3 +1,14 @@
+openvpn (2.1.3-1) unstable; urgency=low
+
+  * New upstream release (Closes: #595684)
+  * Fixed multiple building in a row (Closes: #592086)
+  * Added handling of newer DEB_BUILD_OPTIONS.
+    Thanks Lionel Elie Mamane for the patch. (Closes: #592098)
+  * Updated IPv6 patch from JuanJo Ciarlante.
+    Fixes --multihome option. (Closes: #562099)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 29 Sep 2010 13:07:37 +0200
+
 openvpn (2.1.0-3) unstable; urgency=low
 
   * The 'happy birthday to me' release

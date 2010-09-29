@@ -1,7 +1,7 @@
-Index: openvpn-2.1.0/openvpn.8
+Index: openvpn-2.1.3/openvpn.8
 ===================================================================
---- openvpn-2.1.0.orig/openvpn.8	2009-12-11 09:04:24.000000000 +0100
-+++ openvpn-2.1.0/openvpn.8	2009-12-11 12:10:46.404912972 +0100
+--- openvpn-2.1.3.orig/openvpn.8	2010-08-10 19:27:02.000000000 +0200
++++ openvpn-2.1.3/openvpn.8	2010-09-29 13:10:52.308509129 +0200
 @@ -21,13 +21,13 @@
  .\"  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  .\"
@@ -230,13 +230,13 @@ Index: openvpn-2.1.0/openvpn.8
  This option exists in OpenVPN 2.1 or higher.
  .\"*********************************************************
  .TP
--.B --http-proxy server port [authfile|'auto'] [auth-method]
-+.B \-\-http-proxy server port [authfile|'auto'] [auth-method]
+-.B --http-proxy server port [authfile|'auto'|'auto-nct'] [auth-method]
++.B \-\-http-proxy server port [authfile|'auto'|'auto-nct'] [auth-method]
  Connect to remote host through an HTTP proxy at address
  .B server
  and port
-@@ -496,32 +496,32 @@
- exists on OpenVPN 2.1 or higher.
+@@ -509,32 +509,32 @@
+ authentication protocols such as HTTP Basic Authentication.
  .\"*********************************************************
  .TP
 -.B --http-proxy-retry
@@ -274,7 +274,7 @@ Index: openvpn-2.1.0/openvpn.8
  Connect to remote host through a Socks5 proxy at address
  .B server
  and port
-@@ -529,14 +529,14 @@
+@@ -542,14 +542,14 @@
  (default=1080).
  .\"*********************************************************
  .TP
@@ -292,7 +292,7 @@ Index: openvpn-2.1.0/openvpn.8
  retry resolve for
  .B n
  seconds before failing.
-@@ -546,18 +546,18 @@
+@@ -559,18 +559,18 @@
  to "infinite" to retry indefinitely.
  
  By default,
@@ -316,7 +316,7 @@ Index: openvpn-2.1.0/openvpn.8
  allows an OpenVPN session to initially connect to a peer
  at a known address, however if packets arrive from a new
  address and pass all authentication tests, the new address
-@@ -566,14 +566,14 @@
+@@ -579,14 +579,14 @@
  such as a dial-in user or DHCP client.
  
  Essentially,
@@ -334,7 +334,7 @@ Index: openvpn-2.1.0/openvpn.8
  Execute shell command
  .B cmd
  when our remote ip-address is initially authenticated or
-@@ -584,11 +584,11 @@
+@@ -597,11 +597,11 @@
  .B cmd ip_address port_number
  
  Don't use
@@ -349,7 +349,7 @@ Index: openvpn-2.1.0/openvpn.8
  script instead.
  
  See the "Environmental Variables" section below for
-@@ -623,41 +623,41 @@
+@@ -636,41 +636,41 @@
  peer on its new IP address.
  .\"*********************************************************
  .TP
@@ -401,7 +401,7 @@ Index: openvpn-2.1.0/openvpn.8
  TUN/TAP virtual network device (
  .B X
  can be omitted for a dynamic device.)
-@@ -675,7 +675,7 @@
+@@ -688,7 +688,7 @@
  devices encapsulate Ethernet 802.3 (OSI Layer 2).
  .\"*********************************************************
  .TP
@@ -410,7 +410,7 @@ Index: openvpn-2.1.0/openvpn.8
  Which device type are we using?
  .B device-type
  should be
-@@ -685,60 +685,60 @@
+@@ -698,60 +698,60 @@
  .B tap
  (OSI Layer 2).
  Use this option only if the TUN/TAP device used with
@@ -484,7 +484,7 @@ Index: openvpn-2.1.0/openvpn.8
  directive code.  When used on Windows, requires version 8.2 or higher
  of the TAP-Win32 driver.  When used on *nix, requires that the tun
  driver supports an
-@@ -748,26 +748,26 @@
+@@ -761,26 +761,26 @@
  This option exists in OpenVPN 2.1 or higher.
  .\"*********************************************************
  .TP
@@ -517,7 +517,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  On Windows systems, select the TAP-Win32 adapter which
  is named
-@@ -775,24 +775,24 @@
+@@ -788,24 +788,24 @@
  in the Network Connections Control Panel or the
  raw GUID of the adapter enclosed by braces.
  The
@@ -546,7 +546,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set TUN/TAP adapter parameters. 
  .B l
  is the IP address of the local VPN endpoint.
-@@ -807,7 +807,7 @@
+@@ -820,7 +820,7 @@
  For TUN devices, which facilitate virtual
  point-to-point IP connections,
  the proper usage of
@@ -555,7 +555,7 @@ Index: openvpn-2.1.0/openvpn.8
  is to use two private IP addresses
  which are not a member of any
  existing subnet which is in use.
-@@ -821,7 +821,7 @@
+@@ -834,7 +834,7 @@
  For TAP devices, which provide
  the ability to create virtual
  ethernet segments,
@@ -564,7 +564,7 @@ Index: openvpn-2.1.0/openvpn.8
  is used to set an IP address and
  subnet mask just as a physical
  ethernet adapter would be
-@@ -842,42 +842,42 @@
+@@ -855,42 +855,42 @@
  ifconfig implementations on different
  platforms.
  
@@ -616,7 +616,7 @@ Index: openvpn-2.1.0/openvpn.8
  on the local host.
  
  This option will also silence warnings about potential
-@@ -885,7 +885,7 @@
+@@ -898,7 +898,7 @@
  users by triggering "false positive" warnings.
  .\"*********************************************************
  .TP
@@ -625,7 +625,7 @@ Index: openvpn-2.1.0/openvpn.8
  Add route to routing table after connection is established.
  Multiple routes can be specified.  Routes will be
  automatically torn down in reverse order prior to
-@@ -899,20 +899,20 @@
+@@ -912,20 +912,20 @@
  across OpenVPN's platform space.
  
  .B netmask
@@ -653,7 +653,7 @@ Index: openvpn-2.1.0/openvpn.8
  otherwise 0.
  
  The default can be specified by leaving an option blank or setting
-@@ -929,11 +929,11 @@
+@@ -942,11 +942,11 @@
  .B vpn_gateway
  -- The remote VPN endpoint address
  (derived either from
@@ -668,7 +668,7 @@ Index: openvpn-2.1.0/openvpn.8
  is specified).
  
  .B net_gateway
-@@ -942,22 +942,22 @@
+@@ -955,22 +955,22 @@
  
  .B remote_host
  -- The
@@ -696,7 +696,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  If
  .B dhcp
-@@ -966,14 +966,14 @@
+@@ -979,14 +979,14 @@
  negotiation with the OpenVPN server-side LAN.
  .\"*********************************************************
  .TP
@@ -714,7 +714,7 @@ Index: openvpn-2.1.0/openvpn.8
  Delay
  .B n
  seconds (default=0) after connection
-@@ -981,16 +981,16 @@
+@@ -994,16 +994,16 @@
  .B n
  is 0, routes will be added immediately upon connection
  establishment.  If
@@ -736,7 +736,7 @@ Index: openvpn-2.1.0/openvpn.8
  execution.)
  
  This option is designed to be useful in scenarios where DHCP is
-@@ -999,18 +999,18 @@
+@@ -1012,18 +1012,18 @@
  time to complete before routes are added.
  
  On Windows,
@@ -758,7 +758,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  See the "Environmental Variables" section below for
  additional parameters passed as environmental variables.
-@@ -1020,17 +1020,17 @@
+@@ -1033,17 +1033,17 @@
  can be a shell command with multiple arguments.
  .\"*********************************************************
  .TP
@@ -781,7 +781,7 @@ Index: openvpn-2.1.0/openvpn.8
  accept options pushed by server EXCEPT for routes.
  
  When used on the client, this option effectively bars the
-@@ -1039,16 +1039,16 @@
+@@ -1052,16 +1052,16 @@
  to set the TCP/IP properties of the client's TUN/TAP interface.
  .\"*********************************************************
  .TP
@@ -803,7 +803,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Experimental) Automatically execute routing commands to cause all outgoing IP traffic
  to be redirected over the VPN.
  
-@@ -1056,7 +1056,7 @@
+@@ -1069,7 +1069,7 @@
  
  .B (1)
  Create a static route for the
@@ -812,7 +812,7 @@ Index: openvpn-2.1.0/openvpn.8
  address which forwards to the pre-existing default gateway.
  This is done so that
  .B (3)
-@@ -1067,11 +1067,11 @@
+@@ -1080,11 +1080,11 @@
  
  .B (3)
  Set the new default gateway to be the VPN endpoint address (derived either from
@@ -827,7 +827,7 @@ Index: openvpn-2.1.0/openvpn.8
  is specified).
  
  When the tunnel is torn down, all of the above steps are reversed so
-@@ -1079,7 +1079,7 @@
+@@ -1092,7 +1092,7 @@
  
  Option flags:
  
@@ -836,7 +836,7 @@ Index: openvpn-2.1.0/openvpn.8
  Add the
  .B local
  flag if both OpenVPN servers are directly connected via a common subnet,
-@@ -1089,19 +1089,19 @@
+@@ -1102,19 +1102,19 @@
  .B 1
  above to be omitted.
  
@@ -859,7 +859,7 @@ Index: openvpn-2.1.0/openvpn.8
  Add a direct route to the DNS server(s) (if they are non-local) which
  bypasses the tunnel
  (Available on Windows clients, may not be available
-@@ -1110,13 +1110,13 @@
+@@ -1123,13 +1123,13 @@
  Using the def1 flag is highly recommended.
  .\"*********************************************************
  .TP
@@ -875,7 +875,7 @@ Index: openvpn-2.1.0/openvpn.8
  Take the TUN device MTU to be
  .B n
  and derive the link MTU
-@@ -1132,17 +1132,17 @@
+@@ -1145,17 +1145,17 @@
  hang during periods of active usage.
  
  It's best to use the
@@ -897,7 +897,7 @@ Index: openvpn-2.1.0/openvpn.8
  size on read.  This parameter defaults to 0, which is sufficient for
  most TUN devices.  TAP devices may introduce additional overhead in excess
  of the MTU size, and a setting of 32 is the default when TAP devices are used.
-@@ -1150,34 +1150,34 @@
+@@ -1163,34 +1163,34 @@
  so there is no transmission overhead associated with using a larger value.
  .\"*********************************************************
  .TP
@@ -940,7 +940,7 @@ Index: openvpn-2.1.0/openvpn.8
  Enable internal datagram fragmentation so
  that no UDP datagrams are sent which
  are larger than
-@@ -1187,24 +1187,24 @@
+@@ -1200,24 +1200,24 @@
  The
  .B max
  parameter is interpreted in the same way as the
@@ -971,7 +971,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  It should also be noted that this option is not meant to replace
  UDP fragmentation at the IP stack level.  It is only meant as a
-@@ -1217,7 +1217,7 @@
+@@ -1230,7 +1230,7 @@
  as tunneling a UDP multicast stream which requires fragmentation.
  .\"*********************************************************
  .TP
@@ -980,7 +980,7 @@ Index: openvpn-2.1.0/openvpn.8
  Announce to TCP sessions running over the tunnel that they should limit
  their send packet sizes such that after OpenVPN has encapsulated them,
  the resulting UDP packet size that OpenVPN sends to its peer will not
-@@ -1228,33 +1228,33 @@
+@@ -1241,33 +1241,33 @@
  The
  .B max
  parameter is interpreted in the same way as the
@@ -1023,7 +1023,7 @@ Index: openvpn-2.1.0/openvpn.8
  are designed to work around cases where Path MTU discovery
  is broken on the network path between OpenVPN peers.
  
-@@ -1263,35 +1263,35 @@
+@@ -1276,35 +1276,35 @@
  during active usage.
  
  If
@@ -1067,7 +1067,7 @@ Index: openvpn-2.1.0/openvpn.8
  Apply the given flags to the OpenVPN transport socket.
  Currently, only
  .B TCP_NODELAY
-@@ -1308,12 +1308,12 @@
+@@ -1321,12 +1321,12 @@
  on both client and server for maximum effect.
  .\"*********************************************************
  .TP
@@ -1082,7 +1082,7 @@ Index: openvpn-2.1.0/openvpn.8
  Limit bandwidth of outgoing tunnel data to
  .B n
  bytes per second on the TCP/UDP port.
-@@ -1349,7 +1349,7 @@
+@@ -1362,7 +1362,7 @@
  to be between 100 bytes/sec and 100 Mbytes/sec.
  .\"*********************************************************
  .TP
@@ -1091,7 +1091,7 @@ Index: openvpn-2.1.0/openvpn.8
  Causes OpenVPN to exit after
  .B n
  seconds of inactivity on the TUN/TAP device.  The time length
-@@ -1363,18 +1363,18 @@
+@@ -1376,18 +1376,18 @@
  .B bytes.
  .\"*********************************************************
  .TP
@@ -1114,7 +1114,7 @@ Index: openvpn-2.1.0/openvpn.8
  is specified), the ping packet
  will be cryptographically secure.
  
-@@ -1387,33 +1387,33 @@
+@@ -1400,33 +1400,33 @@
  
  (2) To provide a basis for the remote to test the existence
  of its peer using the
@@ -1155,7 +1155,7 @@ Index: openvpn-2.1.0/openvpn.8
  but trigger a
  .B SIGUSR1
  restart after
-@@ -1432,13 +1432,13 @@
+@@ -1445,13 +1445,13 @@
  
  If the peer cannot be reached, a restart will be triggered, causing
  the hostname used with
@@ -1172,7 +1172,7 @@ Index: openvpn-2.1.0/openvpn.8
  or any other type of internally generated signal will always be
  applied to
  individual client instance objects, never to whole server itself.
-@@ -1447,14 +1447,14 @@
+@@ -1460,14 +1460,14 @@
  of the client instance object instead.
  
  In client mode, the
@@ -1190,7 +1190,7 @@ Index: openvpn-2.1.0/openvpn.8
  on the client.
  
  See the signals section below for more information
-@@ -1464,27 +1464,27 @@
+@@ -1477,27 +1477,27 @@
  Note that the behavior of
  .B SIGUSR1
  can be modified by the
@@ -1226,7 +1226,7 @@ Index: openvpn-2.1.0/openvpn.8
  expands as follows:
  
  .nf
-@@ -1503,24 +1503,24 @@
+@@ -1516,24 +1516,24 @@
  .fi
  .\"*********************************************************
  .TP
@@ -1257,7 +1257,7 @@ Index: openvpn-2.1.0/openvpn.8
  restarts.
  
  .B SIGUSR1
-@@ -1530,14 +1530,14 @@
+@@ -1543,14 +1543,14 @@
  reset options.
  .\"*********************************************************
  .TP
@@ -1275,7 +1275,7 @@ Index: openvpn-2.1.0/openvpn.8
  to allow restarts triggered by the
  .B SIGUSR1
  signal.
-@@ -1550,29 +1550,29 @@
+@@ -1563,29 +1563,29 @@
  resets, so they don't need to be re-read.
  .\"*********************************************************
  .TP
@@ -1311,7 +1311,7 @@ Index: openvpn-2.1.0/openvpn.8
  option).
  
  Using this option ensures that key material and tunnel
-@@ -1584,33 +1584,33 @@
+@@ -1597,33 +1597,33 @@
  recover previously used
  ephemeral keys, which are used for a period of time
  governed by the
@@ -1351,7 +1351,7 @@ Index: openvpn-2.1.0/openvpn.8
  execute as:
  
  .B cmd tap_dev tap_mtu link_mtu ifconfig_local_ip ifconfig_netmask [ init | restart ]
-@@ -1635,62 +1635,62 @@
+@@ -1648,62 +1648,62 @@
  will be
  .I init.
  If the
@@ -1430,7 +1430,7 @@ Index: openvpn-2.1.0/openvpn.8
  to allow connection initiation to be sensed in the absence
  of tunnel data, since UDP is a "connectionless" protocol.
  
-@@ -1699,50 +1699,50 @@
+@@ -1712,50 +1712,50 @@
  i.e. the receipt of the first authenticated packet from the peer.
  .\"*********************************************************
  .TP
@@ -1496,7 +1496,7 @@ Index: openvpn-2.1.0/openvpn.8
  Relax config file syntax checking so that unknown directives
  will trigger a warning but not a fatal error,
  on the assumption that a given unknown directive might be valid
-@@ -1755,7 +1755,7 @@
+@@ -1768,7 +1768,7 @@
  older software versions.
  .\"*********************************************************
  .TP
@@ -1505,7 +1505,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set a custom environmental variable
  .B OPENVPN_name=value
  to pass to script.
-@@ -1766,7 +1766,7 @@
+@@ -1779,7 +1779,7 @@
  from a malicious or compromised server.
  .\"*********************************************************
  .TP
@@ -1514,7 +1514,7 @@ Index: openvpn-2.1.0/openvpn.8
  This directive offers policy-level control over OpenVPN's usage of external programs
  and scripts.  Lower
  .B level
-@@ -1799,25 +1799,25 @@
+@@ -1812,25 +1812,25 @@
  line is subject to shell expansion).
  
  The
@@ -1546,7 +1546,7 @@ Index: openvpn-2.1.0/openvpn.8
  Change the user ID of the OpenVPN process to
  .B user
  after initialization, dropping privileges in the process.
-@@ -1839,7 +1839,7 @@
+@@ -1852,7 +1852,7 @@
  signal
  (for example in response
  to a DHCP reset), you should make use of one or more of the
@@ -1555,7 +1555,7 @@ Index: openvpn-2.1.0/openvpn.8
  options to ensure that OpenVPN doesn't need to execute any privileged
  operations in order to restart (such as re-reading key files
  or running
-@@ -1847,16 +1847,16 @@
+@@ -1860,16 +1860,16 @@
  on the TUN device).
  .\"*********************************************************
  .TP
@@ -1575,7 +1575,7 @@ Index: openvpn-2.1.0/openvpn.8
  Change directory to
  .B dir
  prior to reading any files such as
-@@ -1868,16 +1868,16 @@
+@@ -1881,16 +1881,16 @@
  
  This option is useful when you are running
  OpenVPN in 
@@ -1595,7 +1595,7 @@ Index: openvpn-2.1.0/openvpn.8
  essentially redefines
  .B dir
  as being the top
-@@ -1896,22 +1896,22 @@
+@@ -1909,22 +1909,22 @@
  are executed after the chroot operation.
  .\"*********************************************************
  .TP
@@ -1622,7 +1622,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  Since the setcon operation is delayed until after
  initialization, OpenVPN can be restricted to just
-@@ -1923,13 +1923,13 @@
+@@ -1936,13 +1936,13 @@
  Like with chroot, complications can result when scripts
  or restarts are executed after the setcon operation,
  which is why you should really consider using the
@@ -1639,7 +1639,7 @@ Index: openvpn-2.1.0/openvpn.8
  Become a daemon after all initialization functions are completed.
  This option will cause all message and error output to
  be sent to the syslog file (such as /var/log/messages),
-@@ -1938,10 +1938,10 @@
+@@ -1951,10 +1951,10 @@
  which will go to /dev/null unless otherwise redirected.
  The syslog redirection occurs immediately at the point
  that
@@ -1652,7 +1652,7 @@ Index: openvpn-2.1.0/openvpn.8
  options is present, it will supercede syslog
  redirection.
  
-@@ -1957,7 +1957,7 @@
+@@ -1970,7 +1970,7 @@
  defaults to "openvpn".
  
  When OpenVPN is run with the
@@ -1661,7 +1661,7 @@ Index: openvpn-2.1.0/openvpn.8
  option, it will try to delay daemonization until the majority of initialization
  functions which are capable of generating fatal errors are complete.  This means
  that initialization scripts can test the return status of the
-@@ -1967,20 +1967,20 @@
+@@ -1980,20 +1980,20 @@
  In OpenVPN, the vast majority of errors which occur after initialization are non-fatal.
  .\"*********************************************************
  .TP
@@ -1686,7 +1686,7 @@ Index: openvpn-2.1.0/openvpn.8
  Use this option when OpenVPN is being run from the inetd or
  .BR xinetd(8)
  server.
-@@ -1991,7 +1991,7 @@
+@@ -2004,7 +2004,7 @@
  config file.  The
  .B nowait
  mode can only be used with
@@ -1695,7 +1695,7 @@ Index: openvpn-2.1.0/openvpn.8
  The default is
  .B wait.
  The
-@@ -2003,16 +2003,16 @@
+@@ -2016,16 +2016,16 @@
  .I http://openvpn.net/faq.html#oneport
  
  This option precludes the use of
@@ -1716,7 +1716,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  Also note that in
  .B wait
-@@ -2022,7 +2022,7 @@
+@@ -2035,7 +2035,7 @@
  .I http://openvpn.net/1xhowto.html
  .\"*********************************************************
  .TP
@@ -1725,7 +1725,7 @@ Index: openvpn-2.1.0/openvpn.8
  Output logging messages to
  .B file,
  including output to stdout/stderr which
-@@ -2033,44 +2033,44 @@
+@@ -2046,44 +2046,44 @@
  This option takes effect
  immediately when it is parsed in the command line
  and will supercede syslog output if
@@ -1778,7 +1778,7 @@ Index: openvpn-2.1.0/openvpn.8
  Change process priority after initialization
  (
  .B n
-@@ -2079,14 +2079,14 @@
+@@ -2092,14 +2092,14 @@
  less than zero is higher priority).
  .\"*********************************************************
  .\".TP
@@ -1796,7 +1796,7 @@ Index: openvpn-2.1.0/openvpn.8
  .\"specified).
  .\"
  .\"Using a TLS thread offloads the CPU-intensive process of SSL/TLS-based
-@@ -2096,12 +2096,12 @@
+@@ -2109,12 +2109,12 @@
  .\"The parameter
  .\".B n
  .\"is interpreted exactly as with the
@@ -1811,7 +1811,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Experimental) Optimize TUN/TAP/UDP I/O writes by avoiding
  a call to poll/epoll/select prior to the write operation.  The purpose
  of such a call would normally be to block until the device
-@@ -2112,13 +2112,13 @@
+@@ -2125,13 +2125,13 @@
  by 5% to 10%.
  
  This option can only be used on non-Windows systems, when
@@ -1828,7 +1828,7 @@ Index: openvpn-2.1.0/openvpn.8
  Configure a multi-homed UDP server.  This option can be used when
  OpenVPN has been configured to listen on all interfaces, and will
  attempt to bind client sessions to the interface on which packets
-@@ -2127,13 +2127,13 @@
+@@ -2140,13 +2140,13 @@
  UDP servers and currently is only implemented on Linux.
  
  Note: clients connecting to a
@@ -1845,7 +1845,7 @@ Index: openvpn-2.1.0/openvpn.8
  Echo
  .B parms
  to log output.
-@@ -2142,7 +2142,7 @@
+@@ -2155,7 +2155,7 @@
  which is receiving the OpenVPN log output.
  .\"*********************************************************
  .TP
@@ -1854,7 +1854,7 @@ Index: openvpn-2.1.0/openvpn.8
  Control whether internally or externally
  generated SIGUSR1 signals are remapped to
  SIGHUP (restart without persisting state) or
-@@ -2153,20 +2153,20 @@
+@@ -2166,20 +2166,20 @@
  occurs.
  .\"*********************************************************
  .TP
@@ -1879,7 +1879,7 @@ Index: openvpn-2.1.0/openvpn.8
  Output
  .B R
  and
-@@ -2174,12 +2174,12 @@
+@@ -2187,12 +2187,12 @@
  characters to the console for each packet read and write, uppercase is
  used for TCP/UDP packets and lowercase is used for TUN/TAP packets.
  .br
@@ -1894,7 +1894,7 @@ Index: openvpn-2.1.0/openvpn.8
  Write operational status to
  .B file
  every
-@@ -2191,20 +2191,20 @@
+@@ -2204,20 +2204,20 @@
  signal.
  .\"*********************************************************
  .TP
@@ -1918,7 +1918,7 @@ Index: openvpn-2.1.0/openvpn.8
  Use fast LZO compression -- may add up to 1 byte per
  packet for incompressible data.
  .B mode
-@@ -2215,16 +2215,16 @@
+@@ -2228,16 +2228,16 @@
  
  First, make sure the client-side config file enables selective
  compression by having at least one
@@ -1938,7 +1938,7 @@ Index: openvpn-2.1.0/openvpn.8
  file, specify the compression setting for the client,
  for example:
  
-@@ -2243,12 +2243,12 @@
+@@ -2256,12 +2256,12 @@
  side of the link, the second sets the client side.
  .\"*********************************************************
  .TP
@@ -1954,7 +1954,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  Adaptive compression tries to optimize the case where you have
  compression enabled, but you are sending predominantly uncompressible
-@@ -2260,7 +2260,7 @@
+@@ -2273,7 +2273,7 @@
  compression for a period of time until the next re-sample test.
  .\"*********************************************************
  .TP
@@ -1963,7 +1963,7 @@ Index: openvpn-2.1.0/openvpn.8
  Enable a TCP server on
  .B IP:port
  to handle daemon management functions.
-@@ -2279,9 +2279,9 @@
+@@ -2292,9 +2292,9 @@
  .B port
  to 'unix'.  While the default behavior is to create a unix domain socket
  that may be connected to by any process, the
@@ -1975,7 +1975,7 @@ Index: openvpn-2.1.0/openvpn.8
  directives can be used to restrict access.
  
  The management interface provides a special mode where the TCP
-@@ -2310,24 +2310,24 @@
+@@ -2323,24 +2323,24 @@
  server to local clients. 
  .\"*********************************************************
  .TP
@@ -2005,7 +2005,7 @@ Index: openvpn-2.1.0/openvpn.8
  Start OpenVPN in a hibernating state, until a client
  of the management interface explicitly starts it
  with the
-@@ -2335,45 +2335,45 @@
+@@ -2348,45 +2348,45 @@
  command.
  .\"*********************************************************
  .TP
@@ -2058,7 +2058,7 @@ Index: openvpn-2.1.0/openvpn.8
  Load plug-in module from the file
  .B module-pathname,
  passing
-@@ -2409,7 +2409,7 @@
+@@ -2422,7 +2422,7 @@
  .SS Server Mode
  Starting with OpenVPN 2.0, a multi-client TCP/UDP server mode
  is supported, and can be enabled with the
@@ -2067,7 +2067,7 @@ Index: openvpn-2.1.0/openvpn.8
  option.  In server mode, OpenVPN will listen on a single
  port for incoming client connections.  All client
  connections will be routed through a single tun or tap
-@@ -2419,7 +2419,7 @@
+@@ -2432,7 +2432,7 @@
  be used in this mode.
  .\"*********************************************************
  .TP
@@ -2076,7 +2076,7 @@ Index: openvpn-2.1.0/openvpn.8
  A helper directive designed to simplify the configuration
  of OpenVPN's server mode.  This directive will set up an
  OpenVPN server which will allocate addresses to clients
-@@ -2429,7 +2429,7 @@
+@@ -2442,7 +2442,7 @@
  TUN/TAP interface.
  
  For example,
@@ -2085,7 +2085,7 @@ Index: openvpn-2.1.0/openvpn.8
  expands as follows:
  
  .nf
-@@ -2459,23 +2459,23 @@
+@@ -2472,23 +2472,23 @@
  .fi
  
  Don't use
@@ -2115,7 +2115,7 @@ Index: openvpn-2.1.0/openvpn.8
  is used without any parameters, it will enable a DHCP-proxy
  mode, where connecting OpenVPN clients will receive an IP
  address for their TAP adapter from the DHCP server running
-@@ -2503,7 +2503,7 @@
+@@ -2516,7 +2516,7 @@
  and
  .B netmask
  parameters to
@@ -2124,7 +2124,7 @@ Index: openvpn-2.1.0/openvpn.8
  can be set to either the IP/netmask of the
  bridge interface, or the IP/netmask of the
  default gateway/router on the bridged
-@@ -2535,7 +2535,7 @@
+@@ -2548,7 +2548,7 @@
  .fi
  
  In another example,
@@ -2133,7 +2133,7 @@ Index: openvpn-2.1.0/openvpn.8
  (without parameters) expands as follows:
  
  .nf
-@@ -2550,7 +2550,7 @@
+@@ -2563,7 +2563,7 @@
  .fi
  
  Or
@@ -2142,7 +2142,7 @@ Index: openvpn-2.1.0/openvpn.8
  expands as follows:
  
  .nf
-@@ -2563,13 +2563,13 @@
+@@ -2576,13 +2576,13 @@
  .fi
  .\"*********************************************************
  .TP
@@ -2158,7 +2158,7 @@ Index: openvpn-2.1.0/openvpn.8
  in its config file.  The set of options which can be
  pushed is limited by both feasibility and security.
  Some options such as those which would execute scripts
-@@ -2580,44 +2580,44 @@
+@@ -2593,44 +2593,44 @@
  them before the connection to the server can be initiated.
  
  This is a partial list of options which can currently be pushed:
@@ -2219,7 +2219,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set aside a pool of subnets to be
  dynamically allocated to connecting clients, similar
  to a DHCP server.  For tun-style
-@@ -2630,7 +2630,7 @@
+@@ -2643,7 +2643,7 @@
  
  .\"*********************************************************
  .TP
@@ -2228,7 +2228,7 @@ Index: openvpn-2.1.0/openvpn.8
  Persist/unpersist ifconfig-pool
  data to
  .B file,
-@@ -2645,7 +2645,7 @@
+@@ -2658,7 +2658,7 @@
  Maintaining a long-term
  association is good for clients because it allows them
  to effectively use the
@@ -2237,7 +2237,7 @@ Index: openvpn-2.1.0/openvpn.8
  option.
  
  .B file
-@@ -2666,32 +2666,32 @@
+@@ -2679,32 +2679,32 @@
  a common name and IP address.  They do not guarantee that the given common
  name will always receive the given IP address.  If you want guaranteed
  assignment, use
@@ -2277,7 +2277,7 @@ Index: openvpn-2.1.0/openvpn.8
  directive which you want to execute on the client machine to
  configure the remote end of the tunnel.  Note that the parameters
  .B local
-@@ -2704,13 +2704,13 @@
+@@ -2717,13 +2717,13 @@
  This option must be associated with a specific client instance,
  which means that it must be specified either in a client
  instance config file using
@@ -2294,7 +2294,7 @@ Index: openvpn-2.1.0/openvpn.8
  directive in the main OpenVPN config file which encloses
  .B local,
  so that the kernel will know to route it
-@@ -2720,23 +2720,23 @@
+@@ -2733,23 +2733,23 @@
  follows:
  
  .B 1
@@ -2325,7 +2325,7 @@ Index: openvpn-2.1.0/openvpn.8
  Generate an internal route to a specific
  client. The
  .B netmask
-@@ -2747,36 +2747,36 @@
+@@ -2760,36 +2760,36 @@
  of where the client is connecting from.  Remember
  that you must also add the route to the system
  routing table as well (such as by using the
@@ -2372,7 +2372,7 @@ Index: openvpn-2.1.0/openvpn.8
  to effect this.  In order for all clients to see
  A's subnet, OpenVPN must push this route to all clients
  EXCEPT for A, since the subnet is already owned by A.
-@@ -2785,11 +2785,11 @@
+@@ -2798,11 +2798,11 @@
  if it matches one of the client's iroutes.
  .\"*********************************************************
  .TP
@@ -2386,7 +2386,7 @@ Index: openvpn-2.1.0/openvpn.8
  flag tells OpenVPN to internally route client-to-client
  traffic rather than pushing all client-originating traffic
  to the TUN/TAP interface.
-@@ -2801,13 +2801,13 @@
+@@ -2814,13 +2814,13 @@
  custom, per-client rules.
  .\"*********************************************************
  .TP
@@ -2402,7 +2402,7 @@ Index: openvpn-2.1.0/openvpn.8
  Run
  .B script
  on client connection.  The script is passed the common name
-@@ -2823,7 +2823,7 @@
+@@ -2836,7 +2836,7 @@
  it should write it to the file named by $1.
  
  See the
@@ -2411,7 +2411,7 @@ Index: openvpn-2.1.0/openvpn.8
  option below for options which
  can be legally used in a dynamically generated config file.
  
-@@ -2835,18 +2835,18 @@
+@@ -2848,18 +2848,18 @@
  to be disconnected.
  .\"*********************************************************
  .TP
@@ -2434,7 +2434,7 @@ Index: openvpn-2.1.0/openvpn.8
  script or plugins are cascaded, and at least one client-connect
  function succeeded, then ALL of the client-disconnect functions for
  scripts and plugins will be called on client instance object deletion,
-@@ -2855,7 +2855,7 @@
+@@ -2868,7 +2868,7 @@
  .B 
  .\"*********************************************************
  .TP
@@ -2443,7 +2443,7 @@ Index: openvpn-2.1.0/openvpn.8
  Specify a directory
  .B dir
  for custom client config files.  After
-@@ -2869,9 +2869,9 @@
+@@ -2882,9 +2882,9 @@
  
  This file can specify a fixed IP address for a given
  client using
@@ -2455,7 +2455,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  One of the useful properties of this option is that it
  allows client configuration files to be conveniently
-@@ -2880,28 +2880,28 @@
+@@ -2893,28 +2893,28 @@
  
  The following
  options are legal in a client-specific context:
@@ -2491,7 +2491,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set the size of the real address hash table to
  .B r
  and the virtual address table to
-@@ -2909,13 +2909,13 @@
+@@ -2922,13 +2922,13 @@
  By default, both tables are sized at 256 buckets.
  .\"*********************************************************
  .TP
@@ -2507,7 +2507,7 @@ Index: openvpn-2.1.0/openvpn.8
  Maximum number of output packets queued before TCP (default=64).
  
  When OpenVPN is tunneling data from a TUN/TAP device to a
-@@ -2927,7 +2927,7 @@
+@@ -2940,7 +2940,7 @@
  at this client.
  .\"*********************************************************
  .TP
@@ -2516,7 +2516,7 @@ Index: openvpn-2.1.0/openvpn.8
  This macro sets the TCP_NODELAY socket flag on the server
  as well as pushes it to connecting clients.  The TCP_NODELAY
  flag disables the Nagle algorithm on TCP sockets causing
-@@ -2950,13 +2950,13 @@
+@@ -2963,13 +2963,13 @@
  .fi
  .\"*********************************************************
  .TP
@@ -2532,7 +2532,7 @@ Index: openvpn-2.1.0/openvpn.8
  Allow a maximum of
  .B n
  internal routes per client (default=256).
-@@ -2966,9 +2966,9 @@
+@@ -2979,9 +2979,9 @@
  forcing the server to deplete
  virtual memory as its internal routing table expands.
  This directive can be used in a
@@ -2544,7 +2544,7 @@ Index: openvpn-2.1.0/openvpn.8
  script to override the global value for a particular client.
  
  Note that this
-@@ -2976,7 +2976,7 @@
+@@ -2989,7 +2989,7 @@
  kernel routing table.
  .\"*********************************************************
  .TP
@@ -2553,7 +2553,7 @@ Index: openvpn-2.1.0/openvpn.8
  Allow a maximum of
  .B n
  new connections per
-@@ -2990,12 +2990,12 @@
+@@ -3003,12 +3003,12 @@
  
  For the best protection against DoS attacks in server mode,
  use
@@ -2569,7 +2569,7 @@ Index: openvpn-2.1.0/openvpn.8
  Run script or shell command
  .B cmd
  to validate client virtual addresses or routes.
-@@ -3003,19 +3003,19 @@
+@@ -3016,19 +3016,19 @@
  .B cmd
  will be executed with 3 parameters:
  
@@ -2593,7 +2593,7 @@ Index: openvpn-2.1.0/openvpn.8
  The common name on the certificate associated with the
  client linked to this address.  Only present for "add"
  or "update" operations, not "delete".
-@@ -3035,7 +3035,7 @@
+@@ -3048,7 +3048,7 @@
  rather than the low level client virtual addresses.
  .\"*********************************************************
  .TP
@@ -2602,7 +2602,7 @@ Index: openvpn-2.1.0/openvpn.8
  Require the client to provide a username/password (possibly
  in addition to a client certificate) for authentication.
  
-@@ -3066,10 +3066,10 @@
+@@ -3079,10 +3079,10 @@
  and the file will be automatically deleted by OpenVPN after
  the script returns.  The location of the temporary file is
  controlled by the
@@ -2615,7 +2615,7 @@ Index: openvpn-2.1.0/openvpn.8
  to a volatile storage medium such as
  .B /dev/shm
  (if available) to prevent the username/password file from touching the hard drive.
-@@ -3101,7 +3101,7 @@
+@@ -3114,7 +3114,7 @@
  in the OpenVPN source distribution.
  .\"*********************************************************
  .TP
@@ -2624,7 +2624,7 @@ Index: openvpn-2.1.0/openvpn.8
  Clients that connect with options that are incompatible
  with those of the server will be disconnected.
  
-@@ -3111,16 +3111,16 @@
+@@ -3124,16 +3124,16 @@
  no-replay, no-iv, tls-auth, key-method, tls-server, and tls-client.
  
  This option requires that
@@ -2645,7 +2645,7 @@ Index: openvpn-2.1.0/openvpn.8
  is specified (or an authentication plugin module), the
  OpenVPN server daemon will require connecting clients to specify a
  username and password.  This option makes the submission of a username/password
-@@ -3133,35 +3133,35 @@
+@@ -3146,35 +3146,35 @@
  to detect this condition and respond accordingly.
  .\"*********************************************************
  .TP
@@ -2688,7 +2688,7 @@ Index: openvpn-2.1.0/openvpn.8
  Allow Common Name, X509 Subject, and username strings to include
  any printable character including space, but excluding control
  characters such as tab, newline, and carriage-return.
-@@ -3182,7 +3182,7 @@
+@@ -3195,7 +3195,7 @@
  know what you are doing!
  .\"*********************************************************
  .TP
@@ -2697,7 +2697,7 @@ Index: openvpn-2.1.0/openvpn.8
  When run in TCP server mode, share the OpenVPN port with
  another application, such as an HTTPS server.  If OpenVPN
  senses a connection to its port which is using a non-OpenVPN
-@@ -3197,13 +3197,13 @@
+@@ -3210,13 +3210,13 @@
  .SS Client Mode
  Use client mode when connecting to an OpenVPN server
  which has
@@ -2714,7 +2714,7 @@ Index: openvpn-2.1.0/openvpn.8
  A helper directive designed to simplify the configuration
  of OpenVPN's client mode.  This directive is equivalent to:
  
-@@ -3217,33 +3217,33 @@
+@@ -3230,33 +3230,33 @@
  .fi
  .\"*********************************************************
  .TP
@@ -2756,7 +2756,7 @@ Index: openvpn-2.1.0/openvpn.8
  by defining ENABLE_PASSWORD_SAVE in config-win32.h).
  
  If
-@@ -3252,12 +3252,12 @@
+@@ -3265,12 +3265,12 @@
  console.
  
  The server configuration must specify an
@@ -2771,7 +2771,7 @@ Index: openvpn-2.1.0/openvpn.8
  Controls how OpenVPN responds to username/password verification
  errors such as the client-side response to an AUTH_FAILED message from the server
  or verification failure of the private key password.
-@@ -3268,9 +3268,9 @@
+@@ -3281,9 +3281,9 @@
  
  An AUTH_FAILED message is generated by the server if the client
  fails
@@ -2783,7 +2783,7 @@ Index: openvpn-2.1.0/openvpn.8
  script returns an error status when the client
  tries to connect.
  
-@@ -3282,26 +3282,26 @@
+@@ -3295,26 +3295,26 @@
  .br
  .B nointeract --
  Client will retry the connection without requerying for an
@@ -2814,7 +2814,7 @@ Index: openvpn-2.1.0/openvpn.8
  In UDP client mode or point-to-point mode, send server/peer an exit notification
  if tunnel is restarted or OpenVPN process is exited.  In client mode, on
  exit/restart, this
-@@ -3316,12 +3316,12 @@
+@@ -3329,12 +3329,12 @@
  (must be compatible between peers).
  .\"*********************************************************
  .TP
@@ -2829,7 +2829,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  The optional
  .B direction
-@@ -3352,7 +3352,7 @@
+@@ -3365,7 +3365,7 @@
  .B direction
  parameter, will also support 2048 bit key file generation
  using the
@@ -2838,7 +2838,7 @@ Index: openvpn-2.1.0/openvpn.8
  option.
  
  Static key encryption mode has certain advantages,
-@@ -3382,7 +3382,7 @@
+@@ -3395,7 +3395,7 @@
  but random-looking data.
  .\"*********************************************************
  .TP
@@ -2847,7 +2847,7 @@ Index: openvpn-2.1.0/openvpn.8
  Authenticate packets with HMAC using message
  digest algorithm
  .B alg.
-@@ -3397,7 +3397,7 @@
+@@ -3410,7 +3410,7 @@
  
  In static-key encryption mode, the HMAC key
  is included in the key file generated by
@@ -2856,7 +2856,7 @@ Index: openvpn-2.1.0/openvpn.8
  In TLS mode, the HMAC key is dynamically generated and shared
  between peers via the TLS control channel.  If OpenVPN receives a packet with
  a bad HMAC it will drop the packet.
-@@ -3410,7 +3410,7 @@
+@@ -3423,7 +3423,7 @@
  .I http://www.cs.ucsd.edu/users/mihir/papers/hmac.html
  .\"*********************************************************
  .TP
@@ -2865,7 +2865,7 @@ Index: openvpn-2.1.0/openvpn.8
  Encrypt packets with cipher algorithm
  .B alg.
  The default is
-@@ -3425,7 +3425,7 @@
+@@ -3438,7 +3438,7 @@
  
  To see other ciphers that are available with
  OpenVPN, use the
@@ -2874,7 +2874,7 @@ Index: openvpn-2.1.0/openvpn.8
  option.
  
  OpenVPN supports the CBC, CFB, and OFB cipher modes,
-@@ -3437,10 +3437,10 @@
+@@ -3450,10 +3450,10 @@
  to disable encryption.
  .\"*********************************************************
  .TP
@@ -2887,7 +2887,7 @@ Index: openvpn-2.1.0/openvpn.8
  option (see below) shows all available OpenSSL ciphers,
  their default key sizes, and whether the key size can
  be changed.  Use care in changing a cipher's default
-@@ -3450,7 +3450,7 @@
+@@ -3463,7 +3463,7 @@
  security, or may even reduce security.
  .\"*********************************************************
  .TP
@@ -2896,7 +2896,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Advanced) For PRNG (Pseudo-random number generator),
  use digest algorithm
  .B alg
-@@ -3465,19 +3465,19 @@
+@@ -3478,19 +3478,19 @@
  instead for all of OpenVPN's pseudo-random number needs.
  .\"*********************************************************
  .TP
@@ -2919,7 +2919,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Advanced) Disable OpenVPN's protection against replay attacks.
  Don't use this option unless you are prepared to make
  a tradeoff of greater efficiency in exchange for less
-@@ -3521,7 +3521,7 @@
+@@ -3534,7 +3534,7 @@
  by IPSec.
  .\"*********************************************************
  .TP
@@ -2928,7 +2928,7 @@ Index: openvpn-2.1.0/openvpn.8
  Use a replay protection sliding-window of size
  .B n
  and a time window of
-@@ -3536,9 +3536,9 @@
+@@ -3549,9 +3549,9 @@
  
  This option is only relevant in UDP mode, i.e.
  when either
@@ -2940,7 +2940,7 @@ Index: openvpn-2.1.0/openvpn.8
  option is specified.
  
  When OpenVPN tunnels IP packets over UDP, there is the possibility that
-@@ -3550,7 +3550,7 @@
+@@ -3563,7 +3563,7 @@
  
  .B (a)
  The packet cannot be a replay (unless
@@ -2949,7 +2949,7 @@ Index: openvpn-2.1.0/openvpn.8
  is specified, which disables replay protection altogether).
  
  .B (b)
-@@ -3572,7 +3572,7 @@
+@@ -3585,7 +3585,7 @@
  Satellite links in particular often require this.
  
  If you run OpenVPN at
@@ -2958,7 +2958,7 @@ Index: openvpn-2.1.0/openvpn.8
  you will see the message "Replay-window backtrack occurred [x]"
  every time the maximum sequence number backtrack seen thus far
  increases.  This can be used to calibrate
-@@ -3608,7 +3608,7 @@
+@@ -3621,7 +3621,7 @@
  is easily fixed by simply using TCP as the VPN transport layer.
  .\"*********************************************************
  .TP
@@ -2967,7 +2967,7 @@ Index: openvpn-2.1.0/openvpn.8
  Silence the output of replay warnings, which are a common
  false alarm on WiFi networks.  This option preserves
  the security of the replay protection code without
-@@ -3616,7 +3616,7 @@
+@@ -3629,7 +3629,7 @@
  packets.
  .\"*********************************************************
  .TP
@@ -2976,7 +2976,7 @@ Index: openvpn-2.1.0/openvpn.8
  Persist replay-protection state across sessions using
  .B file
  to save and reload the state.
-@@ -3624,7 +3624,7 @@
+@@ -3637,7 +3637,7 @@
  This option will strengthen protection against replay attacks,
  especially when you are using OpenVPN in a dynamic context (such
  as with
@@ -2985,7 +2985,7 @@ Index: openvpn-2.1.0/openvpn.8
  when OpenVPN sessions are frequently started and stopped. 
  
  This option will keep a disk copy of the current replay protection
-@@ -3635,12 +3635,12 @@
+@@ -3648,12 +3648,12 @@
  
  This option only makes sense when replay protection is enabled
  (the default) and you are using either
@@ -3001,7 +3001,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Advanced) Disable OpenVPN's use of IV (cipher initialization vector).
  Don't use this option unless you are prepared to make
  a tradeoff of greater efficiency in exchange for less
-@@ -3661,24 +3661,24 @@
+@@ -3674,24 +3674,24 @@
  datagram replay protection as the IV.
  .\"*********************************************************
  .TP
@@ -3032,7 +3032,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  This option is very useful to test OpenVPN after it has been ported to
  a new platform, or to isolate problems in the compiler, OpenSSL
-@@ -3702,17 +3702,17 @@
+@@ -3715,17 +3715,17 @@
  
  To use TLS mode, each peer that runs OpenVPN should have its own local
  certificate/key pair (
@@ -3054,7 +3054,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  If that check on both peers succeeds, then the TLS negotiation
  will succeed, both OpenVPN
-@@ -3729,18 +3729,18 @@
+@@ -3742,18 +3742,18 @@
  .I http://openvpn.net/easyrsa.html
  .\"*********************************************************
  .TP
@@ -3076,7 +3076,7 @@ Index: openvpn-2.1.0/openvpn.8
  Certificate authority (CA) file in .pem format, also referred to as the
  .I root
  certificate.  This file can have multiple
-@@ -3762,10 +3762,10 @@
+@@ -3775,10 +3775,10 @@
  they are distributed with OpenVPN, they are totally insecure.
  .\"*********************************************************
  .TP
@@ -3089,7 +3089,7 @@ Index: openvpn-2.1.0/openvpn.8
  only). Use
  
  .B openssl dhparam -out dh1024.pem 1024
-@@ -3775,15 +3775,15 @@
+@@ -3788,15 +3788,15 @@
  may be considered public.
  .\"*********************************************************
  .TP
@@ -3109,7 +3109,7 @@ Index: openvpn-2.1.0/openvpn.8
  certificate authority file.
  You can easily make your own certificate authority (see above) or pay money
  to use a commercial service such as thawte.com (in which case you will be
-@@ -3808,7 +3808,7 @@
+@@ -3821,7 +3821,7 @@
  command reads the location of the certificate authority key from its
  configuration file such as
  .B /usr/share/ssl/openssl.cnf
@@ -3118,7 +3118,7 @@ Index: openvpn-2.1.0/openvpn.8
  that for certificate authority functions, you must set up the files
  .B index.txt
  (may be empty) and
-@@ -3819,61 +3819,61 @@
+@@ -3832,61 +3832,61 @@
  ).
  .\"*********************************************************
  .TP
@@ -3194,7 +3194,7 @@ Index: openvpn-2.1.0/openvpn.8
  Specify which method to use in order to perform private key operations.
  A different mode can be specified for each provider.
  Mode is encoded as hex number, and can be a mask one of the following:
-@@ -3895,14 +3895,14 @@
+@@ -3908,14 +3908,14 @@
  .br
  .\"*********************************************************
  .TP
@@ -3212,7 +3212,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  This makes
  it possible to use any smart card, supported by Windows, but also any
-@@ -3928,7 +3928,7 @@
+@@ -3941,7 +3941,7 @@
  
  .\"*********************************************************
  .TP
@@ -3221,7 +3221,7 @@ Index: openvpn-2.1.0/openvpn.8
  Use data channel key negotiation method
  .B m.
  The key method must match on both sides of the connection.
-@@ -3956,16 +3956,16 @@
+@@ -3969,16 +3969,16 @@
  of the connection producing certificates and verifying the certificate
  (or other authentication info provided) of
  the other side.  The
@@ -3241,7 +3241,7 @@ Index: openvpn-2.1.0/openvpn.8
  A list
  .B l
  of allowable TLS ciphers delimited by a colon (":").
-@@ -3975,11 +3975,11 @@
+@@ -3988,11 +3988,11 @@
  to force two peers to negotiate to the lowest level
  of security they both support.
  Use
@@ -3255,7 +3255,7 @@ Index: openvpn-2.1.0/openvpn.8
  Packet retransmit timeout on TLS control channel
  if no acknowledgment from remote within
  .B n
-@@ -3996,7 +3996,7 @@
+@@ -4009,7 +4009,7 @@
  such as TCP expect this role to be left to them.
  .\"*********************************************************
  .TP
@@ -3264,7 +3264,7 @@ Index: openvpn-2.1.0/openvpn.8
  Renegotiate data channel key after
  .B n
  bytes sent or received (disabled by default).
-@@ -4006,13 +4006,13 @@
+@@ -4019,13 +4019,13 @@
  if any of these three criteria are met by either peer.
  .\"*********************************************************
  .TP
@@ -3280,7 +3280,7 @@ Index: openvpn-2.1.0/openvpn.8
  Renegotiate data channel key after
  .B n
  seconds (default=3600).
-@@ -4023,16 +4023,16 @@
+@@ -4036,16 +4036,16 @@
  Also, keep in mind that this option can be used on both the client and server,
  and whichever uses the lower value will be the one to trigger the renegotiation.
  A common mistake is to set
@@ -3301,7 +3301,7 @@ Index: openvpn-2.1.0/openvpn.8
  .B n
  seconds
  of handshake initiation by any peer (default = 60 seconds).
-@@ -4040,47 +4040,47 @@
+@@ -4053,47 +4053,47 @@
  we will attempt to reset our connection with our peer and try again.
  Even in the event of handshake failure we will still use
  our expiring key for up to
@@ -3360,7 +3360,7 @@ Index: openvpn-2.1.0/openvpn.8
  enables a kind of "HMAC firewall" on OpenVPN's TCP/UDP port,
  where TLS control channel packets
  bearing an incorrect HMAC signature can be dropped immediately without
-@@ -4091,7 +4091,7 @@
+@@ -4104,7 +4104,7 @@
  
  .B (1)
  An OpenVPN static key file generated by
@@ -3369,7 +3369,7 @@ Index: openvpn-2.1.0/openvpn.8
  (required if
  .B direction
  parameter is used).
-@@ -4109,19 +4109,19 @@
+@@ -4122,19 +4122,19 @@
  a static key file, format (2) will be used.
  
  See the
@@ -3394,7 +3394,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  The rationale for
  this feature is as follows.  TLS requires a multi-packet exchange
-@@ -4148,7 +4148,7 @@
+@@ -4161,7 +4161,7 @@
  minimize the amount of resources a potential, but as yet unauthenticated,
  client is able to consume.
  
@@ -3403,7 +3403,7 @@ Index: openvpn-2.1.0/openvpn.8
  does this by signing every TLS control channel packet with an HMAC signature,
  including packets which are sent before the TLS level has had a chance
  to authenticate the peer.
-@@ -4156,20 +4156,20 @@
+@@ -4169,20 +4169,20 @@
  the correct signature can be dropped immediately upon reception,
  before they have a chance to consume additional system resources
  such as by initiating a TLS handshake.
@@ -3428,7 +3428,7 @@ Index: openvpn-2.1.0/openvpn.8
  Get certificate password from console or
  .B file
  before we daemonize.
-@@ -4178,7 +4178,7 @@
+@@ -4191,7 +4191,7 @@
  security conscious, it is possible to protect your private key with
  a password.  Of course this means that every time the OpenVPN
  daemon is started you must be there to type the password.  The
@@ -3437,7 +3437,7 @@ Index: openvpn-2.1.0/openvpn.8
  option allows you to start OpenVPN from the command line.  It will
  query you for a password before it daemonizes.  To protect a private
  key with a password you should omit the
-@@ -4195,15 +4195,15 @@
+@@ -4208,15 +4208,15 @@
  to a certain extent invalidates the extra security provided by
  using an encrypted key (Note: OpenVPN
  will only read passwords from a file if it has been built
@@ -3457,7 +3457,7 @@ Index: openvpn-2.1.0/openvpn.8
  username/passwords in virtual memory.
  
  If specified, this directive will cause OpenVPN to immediately
-@@ -4213,19 +4213,19 @@
+@@ -4226,19 +4226,19 @@
  OpenVPN session.
  
  This directive does not affect the
@@ -3481,7 +3481,7 @@ Index: openvpn-2.1.0/openvpn.8
  test).
  
  .B cmd
-@@ -4258,7 +4258,7 @@
+@@ -4271,7 +4271,7 @@
  to build a command line which will be passed to the script.
  .\"*********************************************************
  .TP
@@ -3490,7 +3490,7 @@ Index: openvpn-2.1.0/openvpn.8
  Accept connections only from a host with X509 name
  or common name equal to
  .B name.
-@@ -4268,24 +4268,24 @@
+@@ -4288,24 +4288,24 @@
  Name can also be a common name prefix, for example if you
  want a client to only accept connections to "Server-1",
  "Server-2", etc., you can simply use
@@ -3521,7 +3521,7 @@ Index: openvpn-2.1.0/openvpn.8
  Require that peer certificate was signed with an explicit
  .B nsCertType
  designation of "client" or "server".
-@@ -4300,19 +4300,19 @@
+@@ -4320,19 +4320,19 @@
  
  If the server certificate's nsCertType field is set
  to "server", then the clients can verify this with
@@ -3545,7 +3545,7 @@ Index: openvpn-2.1.0/openvpn.8
  Require that peer certificate was signed with an explicit
  .B key usage.
  
-@@ -4323,7 +4323,7 @@
+@@ -4343,7 +4343,7 @@
  usage can be specified.
  .\"*********************************************************
  .TP
@@ -3554,7 +3554,7 @@ Index: openvpn-2.1.0/openvpn.8
  Require that peer certificate was signed with an explicit
  .B extended key usage.
  
-@@ -4334,7 +4334,7 @@
+@@ -4354,7 +4354,7 @@
  OpenSSL symbolic representation.
  .\"*********************************************************
  .TP
@@ -3563,7 +3563,7 @@ Index: openvpn-2.1.0/openvpn.8
  Require that peer certificate was signed with an explicit
  .B key usage
  and
-@@ -4345,18 +4345,18 @@
+@@ -4365,18 +4365,18 @@
  the host they connect to is a designated server.
  
  The
@@ -3586,7 +3586,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  The key usage is digitalSignature and ( keyEncipherment or keyAgreement ).
  
-@@ -4365,12 +4365,12 @@
+@@ -4385,12 +4385,12 @@
  attempts to connect to another client by impersonating the server.
  The attack is easily prevented by having clients verify
  the server certificate using any one of
@@ -3602,7 +3602,7 @@ Index: openvpn-2.1.0/openvpn.8
  Check peer certificate against the file
  .B crl
  in PEM format.
-@@ -4390,28 +4390,28 @@
+@@ -4410,28 +4410,28 @@
  .SS SSL Library information:
  .\"*********************************************************
  .TP
@@ -3637,7 +3637,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Standalone)
  Show currently available hardware-based crypto acceleration
  engines supported by the OpenSSL library.
-@@ -4420,18 +4420,18 @@
+@@ -4440,18 +4440,18 @@
  Used only for non-TLS static key encryption mode.
  .\"*********************************************************
  .TP
@@ -3659,7 +3659,7 @@ Index: openvpn-2.1.0/openvpn.8
  Write key to
  .B file.
  .\"*********************************************************
-@@ -4440,7 +4440,7 @@
+@@ -4460,7 +4460,7 @@
  of OpenVPN which can be used to create and delete persistent tunnels.
  .\"*********************************************************
  .TP
@@ -3668,7 +3668,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Standalone)
  Create a persistent tunnel on platforms which support them such
  as Linux.  Normally TUN/TAP tunnels exist only for
-@@ -4451,9 +4451,9 @@
+@@ -4471,9 +4471,9 @@
  
  One of the advantages of persistent tunnels is that they eliminate the
  need for separate
@@ -3680,7 +3680,7 @@ Index: openvpn-2.1.0/openvpn.8
  scripts to run the appropriate
  .BR ifconfig (8)
  and
-@@ -4465,40 +4465,40 @@
+@@ -4485,40 +4485,40 @@
  will not be reset if the OpenVPN peer restarts.  This can be useful to
  provide uninterrupted connectivity through the tunnel in the event of a DHCP
  reset of the peer's public IP address (see the
@@ -3729,7 +3729,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set the Windows system directory pathname to use when looking for system
  executables such as
  .B route.exe
-@@ -4514,14 +4514,14 @@
+@@ -4534,14 +4534,14 @@
  environmental variable.
  .\"*********************************************************
  .TP
@@ -3747,7 +3747,7 @@ Index: openvpn-2.1.0/openvpn.8
  
  .B manual --
  Don't set the IP address or netmask automatically.
-@@ -4540,13 +4540,13 @@
+@@ -4560,13 +4560,13 @@
  adapter must be set to "Obtain an IP address automatically," and
  (2) OpenVPN needs to claim an IP address in the subnet for use
  as the virtual DHCP server address.  By default in
@@ -3763,7 +3763,7 @@ Index: openvpn-2.1.0/openvpn.8
  mode, OpenVPN will cause the DHCP server to masquerade as if it were
  coming from the remote endpoint.  The optional offset parameter is
  an integer which is > -256 and < 256 and which defaults to 0.
-@@ -4568,13 +4568,13 @@
+@@ -4588,13 +4588,13 @@
  being lost when the system goes to sleep.  The default
  lease time is one year.
  
@@ -3779,7 +3779,7 @@ Index: openvpn-2.1.0/openvpn.8
  Automatically set the IP address and netmask using the
  Windows IP Helper API.  This approach
  does not have ideal semantics, though testing has indicated
-@@ -4583,7 +4583,7 @@
+@@ -4603,7 +4603,7 @@
  adapter in their default state, i.e. "Obtain an IP address
  automatically."
  
@@ -3788,7 +3788,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Default) Try
  .B dynamic
  method initially and fail over to
-@@ -4613,55 +4613,55 @@
+@@ -4633,55 +4633,55 @@
  to a DHCP configuration.
  .\"*********************************************************
  .TP
@@ -3857,7 +3857,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set NetBIOS over TCP/IP Node type.  Possible options:
  .B 1
  = b-node (broadcasts),
-@@ -4674,7 +4674,7 @@
+@@ -4694,7 +4694,7 @@
  .B 8
  = h-node (query name server, then broadcast).
  
@@ -3866,7 +3866,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set NetBIOS over TCP/IP Scope. A NetBIOS Scope ID provides an extended
  naming service for the NetBIOS over TCP/IP (Known as NBT) module. The
  primary purpose of a NetBIOS scope ID is to isolate NetBIOS traffic on
-@@ -4686,19 +4686,19 @@
+@@ -4706,19 +4706,19 @@
  scope IDs. The Scope ID becomes a part of the NetBIOS name, making the name unique.
  (This description of NetBIOS scopes courtesy of NeonSurge@abyss.com)
  
@@ -3890,7 +3890,7 @@ Index: openvpn-2.1.0/openvpn.8
  Cause OpenVPN to sleep for
  .B n
  seconds immediately after the TAP-Win32 adapter state
-@@ -4706,21 +4706,21 @@
+@@ -4726,21 +4726,21 @@
  
  This option is intended to be used to troubleshoot problems
  with the
@@ -3916,7 +3916,7 @@ Index: openvpn-2.1.0/openvpn.8
  Ask Windows to renew the TAP adapter lease on startup.
  This option is normally unnecessary, as Windows automatically
  triggers a DHCP renegotiation on the TAP adapter when it
-@@ -4729,21 +4729,21 @@
+@@ -4749,28 +4749,28 @@
  flag.
  .\"*********************************************************
  .TP
@@ -3927,6 +3927,14 @@ Index: openvpn-2.1.0/openvpn.8
 -.B --dhcp-renew
 +.B \-\-dhcp-renew
  above.
+ .\"*********************************************************
+ .TP
+-.B --register-dns
++.B \-\-register-dns
+ Run net stop dnscache, net start dnscache, ipconfig /flushdns
+ and ipconfig /registerdns on connection initiation.
+ This is known to kick Windows into
+ recognizing pushed DNS servers.
  .\"*********************************************************
  .TP
 -.B --pause-exit
@@ -3942,7 +3950,7 @@ Index: openvpn-2.1.0/openvpn.8
  Should be used when OpenVPN is being automatically executed by another
  program in such
  a context that no interaction with the user via display or keyboard
-@@ -4766,26 +4766,26 @@
+@@ -4793,26 +4793,26 @@
  causing all such OpenVPN processes to exit.
  
  When executing an OpenVPN process using the
@@ -3975,7 +3983,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Standalone)
  Set
  .B TAP-adapter
-@@ -4800,10 +4800,10 @@
+@@ -4827,10 +4827,10 @@
  This directive can only be used by an administrator.
  .\"*********************************************************
  .TP
@@ -3988,7 +3996,7 @@ Index: openvpn-2.1.0/openvpn.8
  emulation.  Since the TAP-Win32 driver
  exports an ethernet interface to Windows, and since TUN devices are
  point-to-point in nature, it is necessary for the TAP-Win32 driver
-@@ -4813,7 +4813,7 @@
+@@ -4840,7 +4840,7 @@
  must be the middle two addresses of a /30 subnet (netmask 255.255.255.252).
  .\"*********************************************************
  .TP
@@ -3997,7 +4005,7 @@ Index: openvpn-2.1.0/openvpn.8
  (Standalone)
  Show OpenVPN's view of the system routing table and network
  adapter list.
-@@ -4821,12 +4821,12 @@
+@@ -4848,12 +4848,12 @@
  .SS PKCS#11 Standalone Options:
  .\"*********************************************************
  .TP
@@ -4012,7 +4020,7 @@ Index: openvpn-2.1.0/openvpn.8
  option can be used BEFORE this option to produce debugging information.
  .\"*********************************************************
  .SH SCRIPTING AND ENVIRONMENTAL VARIABLES
-@@ -4836,52 +4836,52 @@
+@@ -4863,52 +4863,52 @@
  .SS Script Order of Execution
  .\"*********************************************************
  .TP
@@ -4079,7 +4087,7 @@ Index: openvpn-2.1.0/openvpn.8
  mode on new client connections, when the client is
  still untrusted.
  .\"*********************************************************
-@@ -4905,7 +4905,7 @@
+@@ -4932,7 +4932,7 @@
  
  .B A:
  Yes, by using the
@@ -4088,7 +4096,7 @@ Index: openvpn-2.1.0/openvpn.8
  option, however this should be considered an advanced option.
  
  Here is a brief rundown of OpenVPN's current string types and the 
-@@ -4921,17 +4921,17 @@
+@@ -4948,17 +4948,17 @@
  Alphanumeric, underbar ('_'), dash ('-'), dot ('.'), and at                
  ('@').
  
@@ -4109,7 +4117,7 @@ Index: openvpn-2.1.0/openvpn.8
  Alphanumeric, underbar ('_'), dash ('-'), and dot ('.') except for "." or 
  ".." as standalone strings.  As of 2.0.1-rc6, the at ('@') character has
  been added as well for compatibility with the common name character class.
-@@ -4961,45 +4961,45 @@
+@@ -4988,45 +4988,45 @@
  .B bytes_received
  Total number of bytes received from client during VPN session.
  Set prior to execution of the
@@ -4163,7 +4171,7 @@ Index: openvpn-2.1.0/openvpn.8
  directives are specified, or "0" otherwise.
  Set on program initiation and reset on SIGHUP.
  .\"*********************************************************
-@@ -5008,30 +5008,30 @@
+@@ -5035,30 +5035,30 @@
  The actual name of the TUN/TAP device, including
  a unit number if it exists.
  Set prior to
@@ -4201,7 +4209,7 @@ Index: openvpn-2.1.0/openvpn.8
  is used.
  Set prior to OpenVPN calling the
  .I ifconfig
-@@ -5039,13 +5039,13 @@
+@@ -5066,13 +5066,13 @@
  .I netsh
  (windows version of ifconfig) commands which
  normally occurs prior to
@@ -4217,7 +4225,7 @@ Index: openvpn-2.1.0/openvpn.8
  option (first parameter).
  Set prior to OpenVPN calling the
  .I ifconfig
-@@ -5053,15 +5053,15 @@
+@@ -5080,15 +5080,15 @@
  .I netsh
  (windows version of ifconfig) commands which
  normally occurs prior to
@@ -4236,7 +4244,7 @@ Index: openvpn-2.1.0/openvpn.8
  is used.
  Set prior to OpenVPN calling the
  .I ifconfig
-@@ -5069,16 +5069,16 @@
+@@ -5096,16 +5096,16 @@
  .I netsh
  (windows version of ifconfig) commands which
  normally occurs prior to
@@ -4256,7 +4264,7 @@ Index: openvpn-2.1.0/openvpn.8
  is being used.
  Set prior to OpenVPN calling the
  .I ifconfig
-@@ -5086,61 +5086,61 @@
+@@ -5113,61 +5113,61 @@
  .I netsh
  (windows version of ifconfig) commands which
  normally occurs prior to
@@ -4333,7 +4341,7 @@ Index: openvpn-2.1.0/openvpn.8
  scripts.
  .\"*********************************************************
  .TP
-@@ -5148,31 +5148,31 @@
+@@ -5175,31 +5175,31 @@
  The maximum packet size (not including the IP header)
  of tunnel data in UDP tunnel transport mode.
  Set prior to
@@ -4371,7 +4379,7 @@ Index: openvpn-2.1.0/openvpn.8
  script execution only when the
  .B via-env
  modifier is specified, and deleted from the environment
-@@ -5181,23 +5181,23 @@
+@@ -5208,23 +5208,23 @@
  .TP
  .B proto
  The
@@ -4399,7 +4407,7 @@ Index: openvpn-2.1.0/openvpn.8
  Set on program initiation and reset on SIGHUP.
  .\"*********************************************************
  .TP
-@@ -5205,29 +5205,29 @@
+@@ -5232,29 +5232,29 @@
  The pre-existing default IP gateway in the system routing
  table.
  Set prior to
@@ -4436,7 +4444,7 @@ Index: openvpn-2.1.0/openvpn.8
  script execution.
  
  .B parm
-@@ -5246,7 +5246,7 @@
+@@ -5273,7 +5273,7 @@
  Set to "init" or "restart" prior to up/down script execution.
  For more information, see
  documentation for
@@ -4445,7 +4453,7 @@ Index: openvpn-2.1.0/openvpn.8
  .\"*********************************************************
  .TP
  .B script_type
-@@ -5262,15 +5262,15 @@
+@@ -5289,15 +5289,15 @@
  The reason for exit or restart.  Can be one of
  .B sigusr1, sighup, sigterm, sigint, inactive
  (controlled by
@@ -4464,7 +4472,7 @@ Index: openvpn-2.1.0/openvpn.8
  option),
  .B connection-reset
  (triggered on TCP connection reset),
-@@ -5284,7 +5284,7 @@
+@@ -5311,7 +5311,7 @@
  Client connection timestamp, formatted as a human-readable
  time string.
  Set prior to execution of the
@@ -4473,7 +4481,7 @@ Index: openvpn-2.1.0/openvpn.8
  script.
  .\"*********************************************************
  .TP
-@@ -5292,7 +5292,7 @@
+@@ -5319,7 +5319,7 @@
  The duration (in seconds) of the client session which is now
  disconnecting.
  Set prior to execution of the
@@ -4482,7 +4490,7 @@ Index: openvpn-2.1.0/openvpn.8
  script.
  .\"*********************************************************
  .TP
-@@ -5300,7 +5300,7 @@
+@@ -5327,7 +5327,7 @@
  Client connection timestamp, formatted as a unix integer
  date/time value.
  Set prior to execution of the
@@ -4491,7 +4499,7 @@ Index: openvpn-2.1.0/openvpn.8
  script.
  .\"*********************************************************
  .TP
-@@ -5310,7 +5310,7 @@
+@@ -5337,7 +5337,7 @@
  .B n
  is the verification level.  Only set for TLS connections.  Set prior
  to execution of
@@ -4500,7 +4508,7 @@ Index: openvpn-2.1.0/openvpn.8
  script.
  .\"*********************************************************
  .TP
-@@ -5320,34 +5320,34 @@
+@@ -5347,34 +5347,34 @@
  .B n
  is the verification level.  Only set for TLS connections.  Set prior
  to execution of
@@ -4542,7 +4550,7 @@ Index: openvpn-2.1.0/openvpn.8
  scripts.
  .\"*********************************************************
  .TP
-@@ -5356,12 +5356,12 @@
+@@ -5383,12 +5383,12 @@
  yet.  Sometimes used to
  .B nmap
  the connecting host in a
@@ -4558,7 +4566,7 @@ Index: openvpn-2.1.0/openvpn.8
  scripts.
  .\"*********************************************************
  .TP
-@@ -5369,16 +5369,16 @@
+@@ -5396,16 +5396,16 @@
  Actual port number of connecting client or peer which has not been authenticated
  yet.
  Set prior to execution of
@@ -4578,7 +4586,7 @@ Index: openvpn-2.1.0/openvpn.8
  script execution only when the
  .B via-env
  modifier is specified.
-@@ -5390,7 +5390,7 @@
+@@ -5417,7 +5417,7 @@
  .B n
  is the verification level.  Only set for TLS connections.  Set prior
  to execution of
@@ -4587,7 +4595,7 @@ Index: openvpn-2.1.0/openvpn.8
  script.  This variable is similar to
  .B tls_id_{n}
  except the component X509 subject fields are broken out, and
-@@ -5434,30 +5434,30 @@
+@@ -5461,30 +5461,30 @@
  except don't re-read configuration file, and possibly don't close and reopen TUN/TAP
  device, re-read key files, preserve local IP address/port, or preserve most recently authenticated
  remote IP address/port based on
@@ -4624,7 +4632,7 @@ Index: openvpn-2.1.0/openvpn.8
  is used, or stdout otherwise).
  .\"*********************************************************
  .TP
-@@ -5512,7 +5512,7 @@
+@@ -5539,7 +5539,7 @@
  the two machines, they should be set to forward UDP port 1194
  in both directions.  If you do not have control over the firewalls
  between the two machines, you may still be able to use OpenVPN by adding
@@ -4633,7 +4641,7 @@ Index: openvpn-2.1.0/openvpn.8
  to each of the
  .B openvpn
  commands used below in the examples (this will cause each peer to send out
-@@ -5581,11 +5581,11 @@
+@@ -5608,11 +5608,11 @@
  .LP
  On may:
  .IP
@@ -4647,7 +4655,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  Now verify the tunnel is working by pinging across the tunnel.
  .LP
-@@ -5598,17 +5598,17 @@
+@@ -5625,17 +5625,17 @@
  .B ping 10.4.0.1
  .LP
  The
@@ -4668,7 +4676,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  This command will build a random key file called
  .B key
-@@ -5622,11 +5622,11 @@
+@@ -5649,11 +5649,11 @@
  .LP
  On may:
  .IP
@@ -4682,7 +4690,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  Now verify the tunnel is working by pinging across the tunnel.
  .LP
-@@ -5648,10 +5648,10 @@
+@@ -5675,10 +5675,10 @@
  
  First, build a separate certificate/key pair
  for both may and june (see above where
@@ -4695,7 +4703,7 @@ Index: openvpn-2.1.0/openvpn.8
  is discussed for more info).  You can also use the
  included test files client.crt, client.key,
  server.crt, server.key and ca.crt.
-@@ -5664,11 +5664,11 @@
+@@ -5691,11 +5691,11 @@
  .LP
  On may:
  .IP
@@ -4709,7 +4717,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  Now verify the tunnel is working by pinging across the tunnel.
  .LP
-@@ -5681,16 +5681,16 @@
+@@ -5708,16 +5708,16 @@
  .B ping 10.4.0.1
  .LP
  Notice the
@@ -4729,7 +4737,7 @@ Index: openvpn-2.1.0/openvpn.8
  option to use OpenVPN's default key renegotiation interval of one hour.
  .\"*********************************************************
  .SS Routing:
-@@ -5726,7 +5726,7 @@
+@@ -5753,7 +5753,7 @@
  
  In a production environment, you could put the route command(s)
  in a shell script and execute with the
@@ -4738,7 +4746,7 @@ Index: openvpn-2.1.0/openvpn.8
  option.
  .\"*********************************************************
  .SH FIREWALLS
-@@ -5734,7 +5734,7 @@
+@@ -5761,7 +5761,7 @@
  You should add an entry to your firewall rules to allow incoming OpenVPN
  packets.  On Linux 2.4+:
  .IP
@@ -4747,7 +4755,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  This will allow incoming packets on UDP port 1194 (OpenVPN's default UDP port)
  from an OpenVPN peer at 1.2.3.4.
-@@ -5745,7 +5745,7 @@
+@@ -5772,7 +5772,7 @@
  is a much more secure method of verifying the authenticity of
  a packet source.  In that case:
  .IP
@@ -4756,7 +4764,7 @@ Index: openvpn-2.1.0/openvpn.8
  .LP
  would be adequate and would not render the host inflexible with
  respect to its peer having a dynamic IP address.
-@@ -5754,7 +5754,7 @@
+@@ -5781,7 +5781,7 @@
  not need to add any static rules to the firewall list if you are
  using a stateful firewall that knows how to track UDP connections.
  If you specify
