@@ -1323,6 +1323,7 @@ Optional Features:
   --disable-http          Disable HTTP proxy support
   --disable-fragment      Disable internal fragmentation support (--fragment)
   --disable-multihome     Disable multi-homed UDP server support (--multihome)
+  --disable-ipv6          Disable UDP/IPv6 support
   --disable-port-share    Disable TCP server port-share support (--port-share)
   --disable-debug         Disable debugging support (disable gremlin and verb 7+ messages)
   --enable-small          Enable smaller executable size (disable OCC, usage message, and verb 4 parm list)
@@ -2549,6 +2550,15 @@ if test "${enable_multihome+set}" = set; then
   enableval=$enable_multihome; MULTIHOME="$enableval"
 else
   MULTIHOME="yes"
+
+fi
+
+
+# Check whether --enable-ipv6 was given.
+if test "${enable_ipv6+set}" = set; then
+  enableval=$enable_ipv6; PF_INET6="$enableval"
+else
+  PF_INET6="yes"
 
 fi
 
@@ -9814,6 +9824,73 @@ _ACEOF
 fi
 
 LDFLAGS="$OLDLDFLAGS"
+
+if test "$PF_INET6" = "yes"; then
+  { echo "$as_me:$LINENO: checking for struct sockaddr_in6 for IPv6 support..." >&5
+echo "$as_me: checking for struct sockaddr_in6 for IPv6 support..." >&6;}
+  { echo "$as_me:$LINENO: checking for struct sockaddr_in6" >&5
+echo $ECHO_N "checking for struct sockaddr_in6... $ECHO_C" >&6; }
+if test "${ac_cv_type_struct_sockaddr_in6+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include "syshead.h"
+
+typedef struct sockaddr_in6 ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_type_struct_sockaddr_in6=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_struct_sockaddr_in6=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type_struct_sockaddr_in6" >&5
+echo "${ECHO_T}$ac_cv_type_struct_sockaddr_in6" >&6; }
+if test $ac_cv_type_struct_sockaddr_in6 = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_PF_INET6 1
+_ACEOF
+
+fi
+
+fi
 
 
 if test "$MEMCHECK" = "valgrind"; then
