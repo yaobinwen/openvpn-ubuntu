@@ -1,3 +1,10 @@
+openvpn (2.1.3-2) unstable; urgency=low
+
+  * Applied upstream patch to solve random routes added when using
+    'remote_host'. (Closes: #600166)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 21 Oct 2010 12:21:33 +0200
+
 openvpn (2.1.3-1) unstable; urgency=low
 
   * New upstream release (Closes: #595684)
