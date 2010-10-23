@@ -1,8 +1,8 @@
 Common subdirectories: openvpn-2.1_rc21/autom4te.cache and openvpn-2.1_rc21-ipv6-0.4.10/autom4te.cache
 Index: openvpn-2.1.3/buffer.c
 ===================================================================
---- openvpn-2.1.3.orig/buffer.c	2010-07-27 08:14:22.000000000 +0200
-+++ openvpn-2.1.3/buffer.c	2010-09-29 13:11:17.044457898 +0200
+--- openvpn-2.1.3.orig/buffer.c	2010-10-20 16:14:03.081492278 +0200
++++ openvpn-2.1.3/buffer.c	2010-10-20 16:14:10.321675890 +0200
 @@ -215,6 +215,23 @@
    return ret;
  }
@@ -29,8 +29,8 @@ Index: openvpn-2.1.3/buffer.c
   * that don't guarantee null termination for size > 0.
 Index: openvpn-2.1.3/buffer.h
 ===================================================================
---- openvpn-2.1.3.orig/buffer.h	2010-07-27 07:51:03.000000000 +0200
-+++ openvpn-2.1.3/buffer.h	2010-09-29 13:11:17.044457898 +0200
+--- openvpn-2.1.3.orig/buffer.h	2010-10-20 16:14:03.111493037 +0200
++++ openvpn-2.1.3/buffer.h	2010-10-20 16:14:10.321675890 +0200
 @@ -278,6 +278,11 @@
      ;
  
@@ -45,8 +45,8 @@ Index: openvpn-2.1.3/buffer.h
  int openvpn_snprintf(char *str, size_t size, const char *format, ...)
 Index: openvpn-2.1.3/config.h.in
 ===================================================================
---- openvpn-2.1.3.orig/config.h.in	2010-08-27 18:10:00.000000000 +0200
-+++ openvpn-2.1.3/config.h.in	2010-09-29 13:11:17.044457898 +0200
+--- openvpn-2.1.3.orig/config.h.in	2010-10-20 16:14:03.151494053 +0200
++++ openvpn-2.1.3/config.h.in	2010-10-20 16:14:10.321675890 +0200
 @@ -529,6 +529,9 @@
  /* Use LZO compression library */
  #undef USE_LZO
@@ -59,8 +59,8 @@ Index: openvpn-2.1.3/config.h.in
  
 Index: openvpn-2.1.3/configure
 ===================================================================
---- openvpn-2.1.3.orig/configure	2010-08-27 18:10:00.000000000 +0200
-+++ openvpn-2.1.3/configure	2010-09-29 13:11:17.052458286 +0200
+--- openvpn-2.1.3.orig/configure	2010-10-20 16:14:03.311498110 +0200
++++ openvpn-2.1.3/configure	2010-10-20 16:14:10.341676398 +0200
 @@ -1323,6 +1323,7 @@
    --disable-http          Disable HTTP proxy support
    --disable-fragment      Disable internal fragmentation support (--fragment)
@@ -161,8 +161,8 @@ Index: openvpn-2.1.3/configure
     { echo "$as_me:$LINENO: checking for valgrind tool and Header files..." >&5
 Index: openvpn-2.1.3/init.c
 ===================================================================
---- openvpn-2.1.3.orig/init.c	2010-09-29 13:11:02.373457337 +0200
-+++ openvpn-2.1.3/init.c	2010-09-29 13:11:17.060477391 +0200
+--- openvpn-2.1.3.orig/init.c	2010-10-20 16:14:10.191672594 +0200
++++ openvpn-2.1.3/init.c	2010-10-20 16:14:10.341676398 +0200
 @@ -96,7 +96,7 @@
     */
    if (options->pull
@@ -271,8 +271,8 @@ Index: openvpn-2.1.3/init.c
  
 Index: openvpn-2.1.3/manage.c
 ===================================================================
---- openvpn-2.1.3.orig/manage.c	2010-06-01 08:45:23.000000000 +0200
-+++ openvpn-2.1.3/manage.c	2010-09-29 13:11:17.064477829 +0200
+--- openvpn-2.1.3.orig/manage.c	2010-10-20 16:14:02.831485938 +0200
++++ openvpn-2.1.3/manage.c	2010-10-20 16:14:10.351676652 +0200
 @@ -1957,9 +1957,9 @@
  	  /*
  	   * Initialize socket address
@@ -306,8 +306,8 @@ Index: openvpn-2.1.3/manage.c
  
 Index: openvpn-2.1.3/mroute.c
 ===================================================================
---- openvpn-2.1.3.orig/mroute.c	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/mroute.c	2010-09-29 13:11:17.068477360 +0200
+--- openvpn-2.1.3.orig/mroute.c	2010-10-20 16:14:03.251496590 +0200
++++ openvpn-2.1.3/mroute.c	2010-10-20 16:14:10.351676652 +0200
 @@ -226,25 +226,47 @@
  				      const struct openvpn_sockaddr *osaddr,
  				      bool use_port)
@@ -400,8 +400,8 @@ Index: openvpn-2.1.3/mroute.c
  	  buf_printf (&out, "UNKNOWN"); 
 Index: openvpn-2.1.3/mtcp.c
 ===================================================================
---- openvpn-2.1.3.orig/mtcp.c	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/mtcp.c	2010-09-29 13:11:17.072477588 +0200
+--- openvpn-2.1.3.orig/mtcp.c	2010-10-20 16:14:02.701482639 +0200
++++ openvpn-2.1.3/mtcp.c	2010-10-20 16:14:10.351676652 +0200
 @@ -153,6 +153,11 @@
    ASSERT (mi->context.c2.link_socket);
    ASSERT (mi->context.c2.link_socket->info.lsa);
@@ -416,8 +416,8 @@ Index: openvpn-2.1.3/mtcp.c
        msg (D_MULTI_ERRORS, "MULTI TCP: TCP client address is undefined");
 Index: openvpn-2.1.3/multi.c
 ===================================================================
---- openvpn-2.1.3.orig/multi.c	2010-07-27 07:55:16.000000000 +0200
-+++ openvpn-2.1.3/multi.c	2010-09-29 13:11:17.076498211 +0200
+--- openvpn-2.1.3.orig/multi.c	2010-10-20 16:14:02.951488980 +0200
++++ openvpn-2.1.3/multi.c	2010-10-20 16:14:10.351676652 +0200
 @@ -1066,8 +1066,8 @@
    struct mroute_addr addr;
  
@@ -479,8 +479,8 @@ Index: openvpn-2.1.3/multi.c
  #else
 Index: openvpn-2.1.3/occ.c
 ===================================================================
---- openvpn-2.1.3.orig/occ.c	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/occ.c	2010-09-29 13:11:17.076498211 +0200
+--- openvpn-2.1.3.orig/occ.c	2010-10-20 16:14:02.921488220 +0200
++++ openvpn-2.1.3/occ.c	2010-10-20 16:14:10.361676905 +0200
 @@ -369,7 +369,7 @@
  	       c->c2.max_send_size_remote,
  	       c->c2.max_recv_size_local);
@@ -492,8 +492,8 @@ Index: openvpn-2.1.3/occ.c
  		  || c->c2.max_recv_size_local < c->c2.max_send_size_remote))
 Index: openvpn-2.1.3/options.c
 ===================================================================
---- openvpn-2.1.3.orig/options.c	2010-09-29 13:11:11.213462341 +0200
-+++ openvpn-2.1.3/options.c	2010-09-29 13:11:17.080458491 +0200
+--- openvpn-2.1.3.orig/options.c	2010-10-20 16:14:10.281674877 +0200
++++ openvpn-2.1.3/options.c	2010-10-20 16:14:10.361676905 +0200
 @@ -73,6 +73,12 @@
  #ifdef ENABLE_PKCS11
    " [PKCS11]"
@@ -683,8 +683,8 @@ Index: openvpn-2.1.3/options.c
  
 Index: openvpn-2.1.3/ps.c
 ===================================================================
---- openvpn-2.1.3.orig/ps.c	2010-08-27 18:08:48.000000000 +0200
-+++ openvpn-2.1.3/ps.c	2010-09-29 13:11:17.084459349 +0200
+--- openvpn-2.1.3.orig/ps.c	2010-10-20 16:14:02.731483401 +0200
++++ openvpn-2.1.3/ps.c	2010-10-20 16:14:10.371677158 +0200
 @@ -332,9 +332,9 @@
  	       const int port)
  {
@@ -701,7 +701,7 @@ Index: openvpn-2.1.3/ps.c
 Index: openvpn-2.1.3/README.ipv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/README.ipv6	2010-09-29 13:11:17.084459349 +0200
++++ openvpn-2.1.3/README.ipv6	2010-10-20 16:14:10.371677158 +0200
 @@ -0,0 +1,79 @@
 +[ Last updated: 11-Nov-2009. ]
 +
@@ -784,8 +784,8 @@ Index: openvpn-2.1.3/README.ipv6
 +:......     plus other scattered free software bits in the wild ...:
 Index: openvpn-2.1.3/route.c
 ===================================================================
---- openvpn-2.1.3.orig/route.c	2010-07-12 03:54:09.000000000 +0200
-+++ openvpn-2.1.3/route.c	2010-09-29 13:11:17.084459349 +0200
+--- openvpn-2.1.3.orig/route.c	2010-10-20 16:14:02.881487205 +0200
++++ openvpn-2.1.3/route.c	2010-10-20 16:14:10.371677158 +0200
 @@ -599,13 +599,23 @@
  	  if (!local)
  	    {
@@ -819,8 +819,8 @@ Index: openvpn-2.1.3/route.c
  	  /* route DHCP/DNS server traffic through original default gateway */
 Index: openvpn-2.1.3/socket.c
 ===================================================================
---- openvpn-2.1.3.orig/socket.c	2010-09-29 13:11:08.149458043 +0200
-+++ openvpn-2.1.3/socket.c	2010-09-29 13:14:34.437460019 +0200
+--- openvpn-2.1.3.orig/socket.c	2010-10-20 16:14:10.231673607 +0200
++++ openvpn-2.1.3/socket.c	2010-10-20 16:19:47.680210718 +0200
 @@ -37,23 +37,28 @@
  #include "memdbg.h"
  
@@ -1059,7 +1059,7 @@ Index: openvpn-2.1.3/socket.c
  /*
   * We do our own inet_aton because the glibc function
   * isn't very good about error checking.
-@@ -411,20 +611,53 @@
+@@ -411,20 +611,54 @@
  	       bool *changed,
  	       const unsigned int sockflags)
  {
@@ -1119,12 +1119,13 @@ Index: openvpn-2.1.3/socket.c
 +      break;
 +#endif
 +    default:
++      if (host && addr)
 +        ASSERT(0);
 +  }
  }
  
  static int
-@@ -617,6 +850,44 @@
+@@ -617,6 +851,44 @@
    return sd;
  }
  
@@ -1169,7 +1170,7 @@ Index: openvpn-2.1.3/socket.c
  static void
  create_socket (struct link_socket *sock)
  {
-@@ -624,6 +895,7 @@
+@@ -624,6 +896,7 @@
    if (sock->info.proto == PROTO_UDPv4)
      {
        sock->sd = create_socket_udp (sock->sockflags);
@@ -1177,7 +1178,7 @@ Index: openvpn-2.1.3/socket.c
  
  #ifdef ENABLE_SOCKS
        if (sock->socks_proxy)
-@@ -635,6 +907,18 @@
+@@ -635,6 +908,18 @@
      {
        sock->sd = create_socket_tcp ();
      }
@@ -1196,7 +1197,7 @@ Index: openvpn-2.1.3/socket.c
    else
      {
        ASSERT (0);
-@@ -672,7 +956,12 @@
+@@ -672,7 +957,12 @@
  		  struct link_socket_actual *act,
  		  const bool nowait)
  {
@@ -1210,7 +1211,7 @@ Index: openvpn-2.1.3/socket.c
    socket_descriptor_t new_sd = SOCKET_UNDEFINED;
  
    CLEAR (*act);
-@@ -680,7 +969,7 @@
+@@ -680,7 +970,7 @@
  #ifdef HAVE_GETPEERNAME
    if (nowait)
      {
@@ -1219,7 +1220,7 @@ Index: openvpn-2.1.3/socket.c
  
        if (!socket_defined (new_sd))
  	msg (D_LINK_ERRORS | M_ERRNO_SOCK, "TCP: getpeername() failed");
-@@ -693,7 +982,7 @@
+@@ -693,7 +983,7 @@
  #endif
    else
      {
@@ -1228,7 +1229,7 @@ Index: openvpn-2.1.3/socket.c
      }
  
  #if 0 /* For debugging only, test the effect of accept() failures */
-@@ -709,7 +998,8 @@
+@@ -709,7 +999,8 @@
      {
        msg (D_LINK_ERRORS | M_ERRNO_SOCK, "TCP: accept(%d) failed", sd);
      }
@@ -1238,7 +1239,7 @@ Index: openvpn-2.1.3/socket.c
      {
        msg (D_LINK_ERRORS, "TCP: Received strange incoming connection with unknown address length=%d", remote_len);
        openvpn_close_socket (new_sd);
-@@ -810,7 +1100,7 @@
+@@ -810,7 +1101,7 @@
  {
    struct gc_arena gc = gc_new ();
  
@@ -1247,7 +1248,7 @@ Index: openvpn-2.1.3/socket.c
      {
        const int errnum = openvpn_errno_socket ();
        msg (M_FATAL, "%s: Socket bind failed on local address %s: %s",
-@@ -831,7 +1121,7 @@
+@@ -831,7 +1122,7 @@
  
  #ifdef CONNECT_NONBLOCK
    set_nonblock (sd);
@@ -1256,7 +1257,7 @@ Index: openvpn-2.1.3/socket.c
    if (status)
      status = openvpn_errno_socket ();
    if (status == EINPROGRESS)
-@@ -889,7 +1179,7 @@
+@@ -889,7 +1180,7 @@
  	}
      }
  #else
@@ -1265,7 +1266,7 @@ Index: openvpn-2.1.3/socket.c
    if (status)
      status = openvpn_errno_socket ();
  #endif
-@@ -967,7 +1257,20 @@
+@@ -967,7 +1258,20 @@
        if (*signal_received)
  	goto done;
  
@@ -1287,7 +1288,7 @@ Index: openvpn-2.1.3/socket.c
        if (bind_local)
          socket_bind (*sd, local, "TCP Client");
        update_remote (remote_dynamic, remote, remote_changed, sockflags);
-@@ -1032,15 +1335,54 @@
+@@ -1032,15 +1336,54 @@
    /* resolve local address if undefined */
    if (!addr_defined (&sock->info.lsa->local))
      {
@@ -1348,7 +1349,7 @@ Index: openvpn-2.1.3/socket.c
      }
    
    /* bind to local address/port */
-@@ -1063,14 +1405,32 @@
+@@ -1063,14 +1406,32 @@
  		volatile int *signal_received)
  {
    struct gc_arena gc = gc_new ();
@@ -1383,7 +1384,7 @@ Index: openvpn-2.1.3/socket.c
  
  	  if (sock->remote_host)
  	    {
-@@ -1113,13 +1473,31 @@
+@@ -1113,13 +1474,31 @@
  		  ASSERT (0);
  		}
  
@@ -1422,7 +1423,7 @@ Index: openvpn-2.1.3/socket.c
  	      dmsg (D_SOCKET_DEBUG, "RESOLVE_REMOTE flags=0x%04x phase=%d rrs=%d sig=%d status=%d",
  		   flags,
  		   phase,
-@@ -1139,8 +1517,19 @@
+@@ -1139,8 +1518,19 @@
  		  goto done;
  		}
  	    }
@@ -1444,7 +1445,7 @@ Index: openvpn-2.1.3/socket.c
  	}
    
        /* should we re-use previous active remote address? */
-@@ -1257,7 +1646,11 @@
+@@ -1257,7 +1647,11 @@
    if (mode == LS_MODE_TCP_ACCEPT_FROM)
      {
        ASSERT (accept_from);
@@ -1457,7 +1458,7 @@ Index: openvpn-2.1.3/socket.c
        ASSERT (!sock->inetd);
        sock->sd = accept_from->sd;
      }
-@@ -1389,7 +1782,11 @@
+@@ -1389,7 +1783,11 @@
  	goto done;
  
        /* TCP client/server */
@@ -1470,7 +1471,7 @@ Index: openvpn-2.1.3/socket.c
  	{
  	  switch (sock->mode)
  	    {
-@@ -1424,7 +1821,11 @@
+@@ -1424,7 +1822,11 @@
  	      ASSERT (0);
  	    }
  	}
@@ -1483,7 +1484,7 @@ Index: openvpn-2.1.3/socket.c
  	{
  
  #ifdef GENERAL_PROXY_SUPPORT
-@@ -1511,8 +1912,8 @@
+@@ -1511,8 +1913,8 @@
  	  sock->remote_port = sock->proxy_dest_port;
  	  sock->did_resolve_remote = false;
  
@@ -1494,7 +1495,7 @@ Index: openvpn-2.1.3/socket.c
  
  	  resolve_remote (sock, 1, NULL, signal_received);
  
-@@ -1527,7 +1928,7 @@
+@@ -1527,7 +1929,7 @@
        if (remote_changed)
  	{
  	  msg (M_INFO, "TCP/UDP: Dynamic remote address changed during TCP connection establishment");
@@ -1503,7 +1504,7 @@ Index: openvpn-2.1.3/socket.c
  	}
      }
  
-@@ -1709,13 +2110,20 @@
+@@ -1709,13 +2111,20 @@
  {
    struct gc_arena gc = gc_new ();
  
@@ -1530,7 +1531,7 @@ Index: openvpn-2.1.3/socket.c
    gc_free (&gc);
  }
  
-@@ -1730,10 +2138,25 @@
+@@ -1730,10 +2139,25 @@
  {
    const struct link_socket_addr *lsa = info->lsa;
  
@@ -1558,7 +1559,7 @@ Index: openvpn-2.1.3/socket.c
    else
      return 0;
  }
-@@ -1960,28 +2383,61 @@
+@@ -1960,28 +2384,61 @@
  		   const unsigned int flags,
  		   struct gc_arena *gc)
  {
@@ -1635,7 +1636,7 @@ Index: openvpn-2.1.3/socket.c
  }
  
  const char *
-@@ -2001,12 +2457,41 @@
+@@ -2001,12 +2458,41 @@
        struct buffer out = alloc_buf_gc (128, gc);
        buf_printf (&out, "%s", print_sockaddr_ex (&act->dest, separator, flags, gc));
  #if ENABLE_IP_PKTINFO
@@ -1682,7 +1683,7 @@ Index: openvpn-2.1.3/socket.c
  	}
  #endif
        return BSTR (&out);
-@@ -2043,20 +2528,39 @@
+@@ -2043,20 +2529,39 @@
  {
    char name_buf[256];
  
@@ -1732,7 +1733,7 @@ Index: openvpn-2.1.3/socket.c
  }
  
  void
-@@ -2066,7 +2570,8 @@
+@@ -2066,7 +2571,8 @@
      {
        struct openvpn_sockaddr si;
        CLEAR (si);
@@ -1742,7 +1743,7 @@ Index: openvpn-2.1.3/socket.c
        setenv_sockaddr (es, name_prefix, &si, flags);
      }
  }
-@@ -2087,16 +2592,63 @@
+@@ -2087,16 +2593,63 @@
  struct proto_names {
    const char *short_form;
    const char *display_form;
@@ -1811,7 +1812,7 @@ Index: openvpn-2.1.3/socket.c
  int
  ascii2proto (const char* proto_name)
  {
-@@ -2136,6 +2688,45 @@
+@@ -2136,6 +2689,45 @@
    return BSTR (&out);
  }
  
@@ -1857,7 +1858,7 @@ Index: openvpn-2.1.3/socket.c
  /*
   * Given a local proto, return local proto
   * if !remote, or compatible remote proto
-@@ -2150,10 +2741,15 @@
+@@ -2150,10 +2742,15 @@
    ASSERT (proto >= 0 && proto < PROTO_N);
    if (remote)
      {
@@ -1877,7 +1878,7 @@ Index: openvpn-2.1.3/socket.c
      }
    return proto;
  }
-@@ -2212,10 +2808,24 @@
+@@ -2212,10 +2809,24 @@
  #if ENABLE_IP_PKTINFO
  
  #pragma pack(1) /* needed to keep structure size consistent for 32 vs. 64-bit architectures */
@@ -1904,7 +1905,7 @@ Index: openvpn-2.1.3/socket.c
  };
  #pragma pack()
  
-@@ -2226,18 +2836,18 @@
+@@ -2226,18 +2837,18 @@
  				    struct link_socket_actual *from)
  {
    struct iovec iov;
@@ -1927,7 +1928,7 @@ Index: openvpn-2.1.3/socket.c
    buf->len = recvmsg (sock->sd, &mesg, 0);
    if (buf->len >= 0)
      {
-@@ -2248,12 +2858,24 @@
+@@ -2248,12 +2859,24 @@
  	  && CMSG_NXTHDR (&mesg, cmsg) == NULL
  	  && cmsg->cmsg_level == SOL_IP 
  	  && cmsg->cmsg_type == IP_PKTINFO
@@ -1955,7 +1956,7 @@ Index: openvpn-2.1.3/socket.c
      }
    return fromlen;
  }
-@@ -2265,18 +2887,20 @@
+@@ -2265,18 +2888,20 @@
  			    int maxsize,
  			    struct link_socket_actual *from)
  {
@@ -1982,7 +1983,7 @@ Index: openvpn-2.1.3/socket.c
    return buf->len;
  }
  
-@@ -2313,26 +2937,54 @@
+@@ -2313,26 +2938,54 @@
    struct iovec iov;
    struct msghdr mesg;
    struct cmsghdr *cmsg;
@@ -2052,7 +2053,7 @@ Index: openvpn-2.1.3/socket.c
    return sendmsg (sock->sd, &mesg, 0);
  }
  
-@@ -2353,11 +3005,11 @@
+@@ -2353,11 +3006,11 @@
        int status;
  
        /* reset buf to its initial state */
@@ -2066,7 +2067,7 @@ Index: openvpn-2.1.3/socket.c
  	{
  	  stream_buf_get_next (&sock->stream_buf, &sock->reads.buf);
  	}
-@@ -2377,10 +3029,15 @@
+@@ -2377,10 +3030,15 @@
        ASSERT (ResetEvent (sock->reads.overlapped.hEvent));
        sock->reads.flags = 0;
  
@@ -2084,7 +2085,7 @@ Index: openvpn-2.1.3/socket.c
  	  status = WSARecvFrom(
  			       sock->sd,
  			       wsabuf,
-@@ -2392,7 +3049,7 @@
+@@ -2392,7 +3050,7 @@
  			       &sock->reads.overlapped,
  			       NULL);
  	}
@@ -2093,7 +2094,7 @@ Index: openvpn-2.1.3/socket.c
  	{
  	  sock->reads.addr_defined = false;
  	  status = WSARecv(
-@@ -2412,8 +3069,14 @@
+@@ -2412,8 +3070,14 @@
  
        if (!status) /* operation completed immediately? */
  	{
@@ -2108,7 +2109,7 @@ Index: openvpn-2.1.3/socket.c
  
  	  sock->reads.iostate = IOSTATE_IMMEDIATE_RETURN;
  
-@@ -2472,12 +3135,22 @@
+@@ -2472,12 +3136,22 @@
        ASSERT (ResetEvent (sock->writes.overlapped.hEvent));
        sock->writes.flags = 0;
  
@@ -2134,7 +2135,7 @@ Index: openvpn-2.1.3/socket.c
  
  	  status = WSASendTo(
  			       sock->sd,
-@@ -2490,7 +3163,7 @@
+@@ -2490,7 +3164,7 @@
  			       &sock->writes.overlapped,
  			       NULL);
  	}
@@ -2143,7 +2144,7 @@ Index: openvpn-2.1.3/socket.c
  	{
  	  /* destination address for TCP writes was established on connection initiation */
  	  sock->writes.addr_defined = false;
-@@ -2629,13 +3302,44 @@
+@@ -2629,13 +3303,44 @@
    if (from)
      {
        if (ret >= 0 && io->addr_defined)
@@ -2192,8 +2193,8 @@ Index: openvpn-2.1.3/socket.c
    if (buf)
 Index: openvpn-2.1.3/socket.h
 ===================================================================
---- openvpn-2.1.3.orig/socket.h	2010-07-12 03:54:09.000000000 +0200
-+++ openvpn-2.1.3/socket.h	2010-09-29 13:11:17.096458849 +0200
+--- openvpn-2.1.3.orig/socket.h	2010-10-20 16:14:02.791484922 +0200
++++ openvpn-2.1.3/socket.h	2010-10-20 16:14:10.381677412 +0200
 @@ -70,7 +70,13 @@
  struct openvpn_sockaddr
  {
@@ -2572,8 +2573,8 @@ Index: openvpn-2.1.3/socket.h
      }
 Index: openvpn-2.1.3/socks.c
 ===================================================================
---- openvpn-2.1.3.orig/socks.c	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/socks.c	2010-09-29 13:11:17.096458849 +0200
+--- openvpn-2.1.3.orig/socks.c	2010-10-20 16:14:03.181494814 +0200
++++ openvpn-2.1.3/socks.c	2010-10-20 16:14:10.381677412 +0200
 @@ -174,9 +174,9 @@
  
    if (addr != NULL)
@@ -2622,8 +2623,8 @@ Index: openvpn-2.1.3/socks.c
  }
 Index: openvpn-2.1.3/syshead.h
 ===================================================================
---- openvpn-2.1.3.orig/syshead.h	2010-07-27 00:06:51.000000000 +0200
-+++ openvpn-2.1.3/syshead.h	2010-09-29 13:11:17.096458849 +0200
+--- openvpn-2.1.3.orig/syshead.h	2010-10-20 16:14:02.661481626 +0200
++++ openvpn-2.1.3/syshead.h	2010-10-20 16:14:10.381677412 +0200
 @@ -28,6 +28,10 @@
  /*
   * Only include if not during configure
@@ -2648,7 +2649,7 @@ Index: openvpn-2.1.3/syshead.h
 Index: openvpn-2.1.3/TODO.ipv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/TODO.ipv6	2010-09-29 13:11:17.096458849 +0200
++++ openvpn-2.1.3/TODO.ipv6	2010-10-20 16:14:10.381677412 +0200
 @@ -0,0 +1,30 @@
 +[ Last updated: 11-Nov-2009. ]
 +
@@ -2682,8 +2683,8 @@ Index: openvpn-2.1.3/TODO.ipv6
 +    support in this patch 
 Index: openvpn-2.1.3/tun.c
 ===================================================================
---- openvpn-2.1.3.orig/tun.c	2010-07-27 23:44:33.000000000 +0200
-+++ openvpn-2.1.3/tun.c	2010-09-29 13:11:17.100458729 +0200
+--- openvpn-2.1.3.orig/tun.c	2010-10-20 16:14:03.281497349 +0200
++++ openvpn-2.1.3/tun.c	2010-10-20 16:14:10.391677666 +0200
 @@ -1605,7 +1605,9 @@
  	  strerror(errno));
        }
@@ -2696,8 +2697,8 @@ Index: openvpn-2.1.3/tun.c
  	msg (M_WARN | M_ERRNO, "Can't set interface info: %s",
 Index: openvpn-2.1.3/win32.h
 ===================================================================
---- openvpn-2.1.3.orig/win32.h	2010-07-27 23:44:34.000000000 +0200
-+++ openvpn-2.1.3/win32.h	2010-09-29 13:11:17.104462311 +0200
+--- openvpn-2.1.3.orig/win32.h	2010-10-20 16:14:02.761484162 +0200
++++ openvpn-2.1.3/win32.h	2010-10-20 16:14:10.391677666 +0200
 @@ -195,7 +195,10 @@
    DWORD flags;
    int status;

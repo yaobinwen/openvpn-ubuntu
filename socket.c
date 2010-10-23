@@ -656,6 +656,7 @@ update_remote (const char* host,
       break;
 #endif
     default:
+      if (host && addr)
         ASSERT(0);
   }
 }
