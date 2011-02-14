@@ -32,7 +32,7 @@ up)
 				IF_DNS_NAMESERVERS="$IF_DNS_NAMESERVERS $part3"
 			fi
 			if [ "$part2" == "DOMAIN" ] ; then
-				IF_DNS_SEARCH="$part3"
+				IF_DNS_SEARCH="$IF_DNS_SEARCH $part3"
 			fi
 		fi
 	done
