@@ -7,6 +7,9 @@
  *
  *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
+ *  Additions for eurephia plugin done by:
+ *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2009
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
  *  as published by the Free Software Foundation.
@@ -79,6 +82,7 @@ const char title_string[] =
 #ifdef USE_PF_INET6
   " [PF_INET6]"
 #endif
+  " [eurephia]"
   " built on " __DATE__
 ;
 
