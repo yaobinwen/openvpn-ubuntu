@@ -89,6 +89,27 @@ steps need to be taken:
     in the same file
 
 
+If you'd like to use a bridged setup (utilizing a tap device) Debian provides
+some helper tools in the bridge-utils package to help you setting up your
+bridge via /etc/network/interfaces.
+
+An easy example, creating a bridge interface 'br0' from 'eth0' and 'tap0',
+can look like this:
+
+      auto lo br0 eth1
+      allow-hotplug eth0
+
+      iface br0 inet static
+      address 192.168.1.1
+      network 192.168.1.0
+      netmask 255.255.255.0
+      broadcast 192.168.1.255
+      bridge_ports eth0 tap0
+      pre-up openvpn --mktun --dev tap0
+
+It's recommended to read the manpage - man 5 bridge-utils-interfaces - aswell.
+
+
 #####################################
 # Compatibility notes on 2.x vs 1.x #
 #####################################
