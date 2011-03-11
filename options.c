@@ -3553,6 +3553,15 @@ msglevel_forward_compatible (struct options *options, const int msglevel)
 }
 
 static void
+warn_multiple_script (const char *script, const char *type) {
+      if (script) {
+	msg (M_WARN, "Multiple --%s scripts defined.  "
+	     "The previously configured script is overridden.", type);
+      }
+}
+
+
+static void
 add_option (struct options *options,
 	    char *p[],
 	    const char *file,
@@ -3952,6 +3961,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->ipchange, "ipchange");
       options->ipchange = string_substitute (p[1], ',', ' ', &options->gc);
     }
   else if (streq (p[0], "float"))
@@ -3998,6 +4008,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->up_script, "up");
       options->up_script = p[1];
     }
   else if (streq (p[0], "down") && p[1])
@@ -4005,6 +4016,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->down_script, "down");
       options->down_script = p[1];
     }
   else if (streq (p[0], "down-pre"))
@@ -4064,7 +4076,7 @@ add_option (struct options *options,
 		    {
 		      if (options->inetd != -1)
 			{
-			  msg (msglevel, opterr);
+			  msg (msglevel, "%s", opterr);
 			  goto err;
 			}
 		      else
@@ -4074,7 +4086,7 @@ add_option (struct options *options,
 		    {
 		      if (options->inetd != -1)
 			{
-			  msg (msglevel, opterr);
+			  msg (msglevel, "%s", opterr);
 			  goto err;
 			}
 		      else
@@ -4084,7 +4096,7 @@ add_option (struct options *options,
 		    {
 		      if (name != NULL)
 			{
-			  msg (msglevel, opterr);
+			  msg (msglevel, "%s", opterr);
 			  goto err;
 			}
 		      name = p[z];
@@ -4320,7 +4332,7 @@ add_option (struct options *options,
 
       VERIFY_PERMISSION (OPT_P_GENERAL|OPT_P_CONNECTION);
       port = atoi (p[1]);
-      if (!legal_ipv4_port (port))
+      if ((port != 0) && !legal_ipv4_port (port))
 	{
 	  msg (msglevel, "Bad local port number: %s", p[1]);
 	  goto err;
@@ -4673,6 +4685,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->route_script, "route-up");
       options->route_script = p[1];
     }
   else if (streq (p[0], "route-noexec"))
@@ -5002,6 +5015,7 @@ add_option (struct options *options,
 	  msg (msglevel, "--auth-user-pass-verify requires a second parameter ('via-env' or 'via-file')");
 	  goto err;
 	}
+      warn_multiple_script (options->auth_user_pass_verify_script, "auth-user-pass-verify");
       options->auth_user_pass_verify_script = p[1];
     }
   else if (streq (p[0], "client-connect") && p[1])
@@ -5009,6 +5023,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->client_connect_script, "client-connect");
       options->client_connect_script = p[1];
     }
   else if (streq (p[0], "client-disconnect") && p[1])
@@ -5016,6 +5031,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->client_disconnect_script, "client-disconnect");
       options->client_disconnect_script = p[1];
     }
   else if (streq (p[0], "learn-address") && p[1])
@@ -5023,6 +5039,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->learn_address_script, "learn-address");
       options->learn_address_script = p[1];
     }
   else if (streq (p[0], "tmp-dir") && p[1])
@@ -5796,6 +5813,7 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_SCRIPT);
       if (!no_more_than_n_args (msglevel, p, 2, NM_QUOTE_HINT))
 	goto err;
+      warn_multiple_script (options->tls_verify, "tls-verify");
       options->tls_verify = string_substitute (p[1], ',', ' ', &options->gc);
     }
   else if (streq (p[0], "tls-remote") && p[1])
