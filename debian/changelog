@@ -1,3 +1,12 @@
+openvpn (2.1.3-4) unstable; urgency=low
+
+  * Updated JuanJo's IPv6 patch. Now really fixes use from xinetd.
+    Thanks JuanJo & Christian Weinberger for testing it (Closes: #574164)
+  * Removed debian_openssl_vulnkeys.patch since we're Etch + 2 now.
+    (Closes: #484105, #487994)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 22 Mar 2011 10:04:21 +0100
+
 openvpn (2.1.3-3) unstable; urgency=low
 
   * Updated JuanJo's IPv6 patch.
