@@ -3,11 +3,11 @@ Section: net
 Priority: optional
 Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 7), libssl-dev (>> 0.9.8g-9), liblzo2-dev, libpam0g-dev, quilt, libpkcs11-helper1-dev
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, libssl0.9.8 (>= 0.9.8g-9), openssl-blacklist (>= 0.4), openvpn-blacklist, net-tools
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, net-tools
 Suggests: openssl, resolvconf
 Description: virtual private network daemon
  OpenVPN is an application to securely tunnel IP networks over a

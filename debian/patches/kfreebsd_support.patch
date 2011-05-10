@@ -1,0 +1,26 @@
+Index: openvpn-2.2.0/route.c
+===================================================================
+--- openvpn-2.2.0.orig/route.c	2011-05-10 16:50:20.556000843 +0200
++++ openvpn-2.2.0/route.c	2011-05-10 16:50:39.620001820 +0200
+@@ -1194,7 +1194,7 @@
+   argv_msg (D_ROUTE, &argv);
+   status = openvpn_execve_check (&argv, es, 0, "ERROR: Solaris route add command failed");
+ 
+-#elif defined(TARGET_FREEBSD)
++#elif defined(TARGET_FREEBSD)||defined(__FreeBSD_kernel__)
+ 
+   argv_printf (&argv, "%s add",
+ 		ROUTE_PATH);
+Index: openvpn-2.2.0/tun.c
+===================================================================
+--- openvpn-2.2.0.orig/tun.c	2011-05-10 16:50:15.724001460 +0200
++++ openvpn-2.2.0/tun.c	2011-05-10 16:50:39.624001747 +0200
+@@ -1069,7 +1069,7 @@
+ 	  add_route_connected_v6_net(tt, es);
+ 	}
+ 
+-#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
++#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)||defined(__FreeBSD_kernel__)
+ 
+       /* example: ifconfig tun2 10.2.0.2 10.2.0.1 mtu 1450 netmask 255.255.255.255 up */
+       if (tun)

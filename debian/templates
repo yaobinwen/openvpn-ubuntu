@@ -15,18 +15,3 @@ _Description: Create the TUN/TAP device?
  needed by OpenVPN will be created.
  .
  You should not choose this option if you're using devfs.
-
-Template: openvpn/vulnerable_prng
-Type: note
-_Description: Vulnerable random number generator
- A weakness has been discovered in the random number generator used by OpenSSL
- on Ubuntu and Debian systems.  As a result of this weakness, certain
- encryption keys are generated much more frequently than they should be, such
- that an attacker could guess the key through a brute-force attack given minimal
- knowledge of the system.
- .
- Any keys created on a vulnerable system may be affected by this problem. The
- 'openssl-vulnkey' command may be used as a partial test for RSA keys with
- certain bit sizes, and the 'openvpn-vulnkey' for OpenVPN shared secret keys.
- Users are urged to verify their keys or simply regenerate any server or client
- certificates and keys in use on the system.

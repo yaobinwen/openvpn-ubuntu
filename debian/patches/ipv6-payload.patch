@@ -1,8 +1,8 @@
-Index: openvpn-2.1.3/ChangeLog.IPv6
+Index: openvpn-2.2.0/ChangeLog.IPv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/ChangeLog.IPv6	2011-03-22 10:18:17.975943002 +0100
-@@ -0,0 +1,317 @@
++++ openvpn-2.2.0/ChangeLog.IPv6	2011-05-10 17:06:44.356002136 +0200
+@@ -0,0 +1,394 @@
 +Do 31. Dez 15:32:40 CET 2009 Gert Doering
 +
 +  * Basic IPv6 p2mp functionality implemented
@@ -320,10 +320,87 @@ Index: openvpn-2.1.3/ChangeLog.IPv6
 +    is older than 9.7, log warning and disable IPv6 (won't work anyway).
 +
 +  * release as patch 20100307-1
-Index: openvpn-2.1.3/README.IPv6
++
++Sat Jul 10 14:37:52 CEST 2010
++
++  * TEST SUCCESS: point-to-point tun mode with --ifconfig-ipv6 between
++                  Solaris10/sparc and Linux (Michal Ludvig)
++    (using the whiteboard tun driver on Solaris, otherwise "no IPv6")
++
++Sun Aug  8 12:30:44 CEST 2010
++
++  * route.c: split NetBSD and OpenBSD parts of add_route_ipv6() and
++             delete_route_ipv6(), implement OpenBSD variant
++             (needs "-prefixlen nn" while NetBSD uses "/nn")
++
++  * tun.c: implement IPv6 ifconfig for OpenBSD
++
++  * tun.c: destroy tunX interface at tun_close() on OpenBSD (cleanup)
++
++  * TEST SUCCESS: OpenBSD 4.7: client-tun/net30, v4+v6
++
++Thu Sep  2 21:18:32 CEST 2010
++
++  * tun.c: the TAP binary in 2.2-beta3 has the IPv6 related changes, but
++    the version number is 9.8 now -> check for 9.8, not 9.7
++
++Wed Sep 22 22:20:37 CEST 2010
++
++  * tun.c: bugfix for Linux/iproute2/"topology subnet".  Works :-)
++
++  * TEST SUCCESS: Linux/ifconfig: client-tun/net30+subnet, v4+v6
++
++  * TEST SUCCESS: Linux/iproute2: client-tun/net30+subnet, v4+v6
++
++  * options.c: tag as 20100922-1 so "allmerged" users can see IPv6 change
++
++Fri Sep 24 17:57:41 CEST 2010
++
++  * TEST SUCCESS: Linux/<both>: client-tap, v4+v6, ping6 on connected addr
++
++  * TEST FAIL: Linux/<both>: client-tap, v6, route6 (gateway missing)
++
++Do 21. Okt 19:36:49 CEST 2010
++
++  * t_client.sh.in: cherrypick commit f25fe91a40aa3f and 6f1e61b41be52 
++    (proper exit codes to signal "SKIP" if we do not want to run)
++
++So 16. Jan 17:25:23 CET 2011
++
++  * tun.c, route.c: cherrypick 121755c2cb4891f and f0eac1a5979096c67
++    (TAP driver and "topology subnet" support for Solaris)
++
++  * tun.c: add IPv6 configuration for TAP interfaces (<device>:1 inet6)
++
++  * tun.c: on close_tun on Solaris, unplumb IPv6 TUN or TAP interfaces
++
++  * TEST SUCCESS: OpenSolaris: client-tun, v4+v6
++    TEST SUCCESS: OpenSolaris: client-tap, v4+v6, ping6 on connected addr
++    TEST FAIL: OpenSolaris: client-tap, v6, route6 (gateway missing)
++
++So 24. Apr 16:51:45 CEST 2011
++
++  * rebase to "beta2.2" branch (at 2.2RC2 tag)
++
++  * mroute.c: remove mroute_helper_lock/_unlock() calls for IPv6
++  * socket.c: remove locking with L_INET_NTOA mutex
++      (all the threading stuff got removed by David Sommerseth for 2.2)
++
++  * mroute.c: remove duplicate mroute_helper_add_iroute6() and
++              mroute_helper_del_iroute6() - "git rebase" artefact
++
++  * ChangeLog.IPv6 and TODO.IPv6: add to commit
++
++  * options.c: tag as 20110424-2 (2.2RC2)
++
++  * TEST SUCCESS: Linux/ifconfig: client-tun/net30+subnet, v4+v6
++
++  * TEST SUCCESS: Linux/iproute2: client-tun/net30+subnet, v4+v6
++
+Index: openvpn-2.2.0/README.IPv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/README.IPv6	2011-03-22 10:18:17.975943002 +0100
++++ openvpn-2.2.0/README.IPv6	2011-05-10 17:06:44.356002136 +0200
 @@ -0,0 +1,8 @@
 +This is an experimentally patched version of OpenVPN 2.1 with IPv6
 +payload support.
@@ -333,15 +410,15 @@ Index: openvpn-2.1.3/README.IPv6
 +  http://www.greenie.net/ipv6/openvpn.html
 +
 +Gert Doering, 31.12.2009
-Index: openvpn-2.1.3/TODO.IPv6
+Index: openvpn-2.2.0/TODO.IPv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/TODO.IPv6	2011-03-22 10:18:17.979943002 +0100
-@@ -0,0 +1,100 @@
++++ openvpn-2.2.0/TODO.IPv6	2011-05-10 17:06:44.356002136 +0200
+@@ -0,0 +1,149 @@
 +known issues for IPv6 payload support in OpenVPN
 +-----------------------------------------------
 +
-+1.) "--topology subnet" doesn't work together with IPv6 payload
++1.) "--topology subnet" doesn't work together with IPv6 payload on FreeBSD
 +    (verified for FreeBSD server, Linux/ifconfig client, problems 
 +    with ICMP6 neighbor solicitations from BSD not being answered by Linux)
 +
@@ -376,6 +453,11 @@ Index: openvpn-2.1.3/TODO.IPv6
 +    * semi-fixed for NetBSD, 28.2.10, always do tun0 destroy / tun0 create
 +      before actual ifconfig -- tunnel still lingers after OpenVPN quits
 +
++4b.) verify this - on FreeBSD, tun0 is auto-destroyed if created by
++     opening /dev/tun (and lingers if created by "ifconfig tun0 create")
++
++     -> use for persistant tunnels on not-linux?
++
 +5.) add new option "ifconfig-ipv6-push"
 +    (per-client static IPv6 assignment, -> radiusplugin, etc)
 +
@@ -391,6 +473,13 @@ Index: openvpn-2.1.3/TODO.IPv6
 +
 +8.) full IPv6 support for TAP interfaces 
 +    (main issue should be routes+gateway - and testing :-) )
++
++    test 2010/09/24: TAP itself works on linux/ifconfig+iproute2, but 
++    route-via-tap doesn't work at all (route points to "tap0" which fails)
++
++17:51:14.075412 fe:ab:6e:c5:53:71 > 33:33:ff:00:00:01, ethertype IPv6 (0x86dd), length 86: 2001:608:4:a053::1:0 > ff02::1:ff00:1: ICMP6, neighbor solicitation, who has 2001:608:4:a001::1, length 32
++
++    how is iroute-via-tap supposed to work??
 +
 +9.) verify that iroute-ipv6 and route-ipv6 interact in the same way as
 +    documented for iroute/route:
@@ -438,10 +527,47 @@ Index: openvpn-2.1.3/TODO.IPv6
 +	- revert ifconfig/open_tun order to "normal" (separate commit!!!)
 +	  (openvpn-devel, Subject: OpenBSD)
 +	- test
-Index: openvpn-2.1.3/forward.c
++
++17.) client-option (Elwood)
++	- ignore-v6-push-options yes/no
++	- ignore-v6-route-push  ("as for IPv4 routes")
++
++18.) fail-save?  "what if 'ip -6 addr add' fails" -> fail, or fallback to v4?
++	(-> recomment setting "ignore-v6-push-options yes")
++
++19.) safety check: if connecting over IPv6 (v6 transport) and the pushed
++     route-ipv6 network encompasses the server IPv6 address, make sure 
++     we at least log a warning (until we can fiddle with external routing
++     to make this work correctly).
++
++20.) show "route add" / "route delete" commands for IPv6 in log file
++     (we show the "ifconfig" commands, so why not the routes?)
++
++     2010-08-07: this is a null-feature - it's already there, but with
++                 different debug level (M_INFO vs. D_ROUTE) so user 
++                 didn't notice
++
++21.) enable ipv6-only server operations
++      - decouple ipv6 pool handling from ipv4 pool
++      - make sure Rest of OpenVPN doesn't assume "there will always be IPv4"
++
++22.) implement --learn-address for IPv6
++
++23.) FreeBSD 8 seems to require explicit setting of the "ifconfig" IPv6
++     route, while FreeBSD 6+7 don't --> more testing, and code fix
++
++     workaround for the time being: just add
++
++	server-ipv6 2001:608:4:a051::/64
++	route-ipv6 2001:608:4:a051::/64
++
++    to the config
++
++    (problem + workaround applies both to tun and tap style devices)
+Index: openvpn-2.2.0/forward.c
 ===================================================================
---- openvpn-2.1.3.orig/forward.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/forward.c	2011-03-22 10:18:17.982943002 +0100
+--- openvpn-2.2.0.orig/forward.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/forward.c	2011-05-10 17:06:44.356002136 +0200
 @@ -262,7 +262,8 @@
  static void
  check_add_routes_action (struct context *c, const bool errors)
@@ -452,10 +578,10 @@ Index: openvpn-2.1.3/forward.c
    update_time ();
    event_timeout_clear (&c->c2.route_wakeup);
    event_timeout_clear (&c->c2.route_wakeup_expire);
-Index: openvpn-2.1.3/helper.c
+Index: openvpn-2.2.0/helper.c
 ===================================================================
---- openvpn-2.1.3.orig/helper.c	2010-04-28 18:25:38.000000000 +0200
-+++ openvpn-2.1.3/helper.c	2011-03-22 10:18:17.983943002 +0100
+--- openvpn-2.2.0.orig/helper.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/helper.c	2011-05-10 17:06:44.356002136 +0200
 @@ -142,6 +142,55 @@
  
  #if P2MP
@@ -512,11 +638,11 @@ Index: openvpn-2.1.3/helper.c
    /*
     *
     * HELPER DIRECTIVE:
-Index: openvpn-2.1.3/init.c
+Index: openvpn-2.2.0/init.c
 ===================================================================
---- openvpn-2.1.3.orig/init.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/init.c	2011-03-22 10:18:17.985943002 +0100
-@@ -844,7 +844,7 @@
+--- openvpn-2.2.0.orig/init.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/init.c	2011-05-10 17:06:44.356002136 +0200
+@@ -843,7 +843,7 @@
  	msg (M_FATAL|M_OPTERR,
  	     "options --mktun or --rmtun should only be used together with --dev");
        tuncfg (options->dev, options->dev_type, options->dev_node,
@@ -525,7 +651,7 @@ Index: openvpn-2.1.3/init.c
  	      options->username, options->groupname, &options->tuntap_options);
        if (options->persist_mode && options->lladdr)
          set_lladdr(options->dev, options->lladdr, NULL);
-@@ -1067,6 +1067,8 @@
+@@ -1066,6 +1066,8 @@
  {
    if (c->options.routes && !c->c1.route_list)
      c->c1.route_list = new_route_list (c->options.max_routes, &c->gc);
@@ -534,7 +660,7 @@ Index: openvpn-2.1.3/init.c
  }
  
  
-@@ -1109,6 +1111,45 @@
+@@ -1108,6 +1110,45 @@
      }
  }
  
@@ -580,7 +706,7 @@ Index: openvpn-2.1.3/init.c
  /*
   * Called after all initialization has been completed.
   */
-@@ -1178,12 +1219,13 @@
+@@ -1177,12 +1218,13 @@
  void
  do_route (const struct options *options,
  	  struct route_list *route_list,
@@ -596,7 +722,7 @@ Index: openvpn-2.1.3/init.c
  
    if (plugin_defined (plugins, OPENVPN_PLUGIN_ROUTE_UP))
      {
-@@ -1240,11 +1282,16 @@
+@@ -1239,11 +1281,16 @@
  			   c->options.topology,
  			   c->options.ifconfig_local,
  			   c->options.ifconfig_remote_netmask,
@@ -613,7 +739,7 @@ Index: openvpn-2.1.3/init.c
    init_tun_post (c->c1.tuntap,
  		 &c->c2.frame,
  		 &c->options.tuntap_options);
-@@ -1276,6 +1323,8 @@
+@@ -1275,6 +1322,8 @@
        /* parse and resolve the route option list */
        if (c->options.routes && c->c1.route_list && c->c2.link_socket)
  	do_init_route_list (&c->options, c->c1.route_list, &c->c2.link_socket->info, false, c->c2.es);
@@ -622,7 +748,7 @@ Index: openvpn-2.1.3/init.c
  
        /* do ifconfig */
        if (!c->options.ifconfig_noexec
-@@ -1292,7 +1341,7 @@
+@@ -1291,7 +1340,7 @@
  
        /* open the tun device */
        open_tun (c->options.dev, c->options.dev_type, c->options.dev_node,
@@ -631,7 +757,7 @@ Index: openvpn-2.1.3/init.c
  
        /* set the hardware address */
        if (c->options.lladdr)
-@@ -1321,7 +1370,8 @@
+@@ -1320,7 +1369,8 @@
  
        /* possibly add routes */
        if (!c->options.route_delay_defined)
@@ -641,7 +767,7 @@ Index: openvpn-2.1.3/init.c
  
        /*
         * Did tun/tap driver give us an MTU?
-@@ -1395,8 +1445,9 @@
+@@ -1394,8 +1444,9 @@
  #endif
  
  	  /* delete any routes we added */
@@ -653,10 +779,10 @@ Index: openvpn-2.1.3/init.c
  
  	  /* actually close tun/tap device based on --down-pre flag */
  	  if (!c->options.down_pre)
-Index: openvpn-2.1.3/init.h
+Index: openvpn-2.2.0/init.h
 ===================================================================
---- openvpn-2.1.3.orig/init.h	2010-04-28 18:25:38.000000000 +0200
-+++ openvpn-2.1.3/init.h	2011-03-22 10:18:17.987943002 +0100
+--- openvpn-2.2.0.orig/init.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/init.h	2011-05-10 17:06:44.356002136 +0200
 @@ -63,6 +63,7 @@
  
  void do_route (const struct options *options,
@@ -665,23 +791,25 @@ Index: openvpn-2.1.3/init.h
  	       const struct tuntap *tt,
  	       const struct plugin_list *plugins,
  	       struct env_set *es);
-Index: openvpn-2.1.3/misc.c
+Index: openvpn-2.2.0/misc.c
 ===================================================================
---- openvpn-2.1.3.orig/misc.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/misc.c	2011-03-22 10:18:17.990943002 +0100
-@@ -1016,7 +1016,7 @@
+--- openvpn-2.2.0.orig/misc.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/misc.c	2011-05-10 17:06:44.356002136 +0200
+@@ -1001,7 +1001,9 @@
  	{
  	  const char *str = construct_name_value (name_tmp, val_tmp, &gc);
  	  env_set_add (es, str);
 -	  /*msg (M_INFO, "SETENV_ES '%s'", str);*/
-+	  msg (M_INFO, "SETENV_ES '%s'", str);/**/
++#if DEBUG_VERBOSE_SETENV
++	  msg (M_INFO, "SETENV_ES '%s'", str);
++#endif
  	}
        else
  	env_set_del (es, name_tmp);
-Index: openvpn-2.1.3/mroute.c
+Index: openvpn-2.2.0/mroute.c
 ===================================================================
---- openvpn-2.1.3.orig/mroute.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/mroute.c	2011-03-22 10:18:17.992943002 +0100
+--- openvpn-2.2.0.orig/mroute.c	2011-05-10 17:05:52.000000000 +0200
++++ openvpn-2.2.0/mroute.c	2011-05-10 17:06:44.360002121 +0200
 @@ -88,12 +88,33 @@
      }
  }
@@ -790,11 +918,46 @@ Index: openvpn-2.1.3/mroute.c
  }
  
  /*
-@@ -443,6 +505,44 @@
+@@ -359,17 +421,24 @@
+ 	  }
+ 	  break;
+ 	case MR_ADDR_IPV6:
+-	  buf_printf (&out, "IPV6"); 
+-	  break;
+-	default:
+-	  buf_printf (&out, "UNKNOWN"); 
+-	  break;
+-	}
+-      return BSTR (&out);
+-    }
+-  else
+-    return "[NULL]";
+-}
++	  {
++	    buf_printf (&out, "%s",
++		  print_in6_addr( *(struct in6_addr*)&maddr.addr, 0, gc)); 
++	    if (maddr.type & MR_WITH_NETBITS)
++	      {
++		buf_printf (&out, "/%d", maddr.netbits);
++	      }
++	    }
++	    break;
++	  default:
++	    buf_printf (&out, "UNKNOWN"); 
++	    break;
++	  }
++	return BSTR (&out);
++      }
++    else
++      return "[NULL]";
++  }
+ 
+ /*
+  * mroute_helper's main job is keeping track of
+@@ -439,6 +508,40 @@
  	mroute_helper_regenerate (mh);
-       mroute_helper_unlock (mh);
      }
-+}
+ }
 +
 +/* this is a bit inelegant, we really should have a helper to that 
 + * is only passed the netbits value, and not the whole struct iroute *
@@ -808,12 +971,10 @@ Index: openvpn-2.1.3/mroute.c
 +  if (ir6->netbits >= 0)
 +    {
 +      ASSERT (ir6->netbits < MR_HELPER_NET_LEN);
-+      mroute_helper_lock (mh);
 +      ++mh->cache_generation;
 +      ++mh->net_len_refcount[ir6->netbits];
 +      if (mh->net_len_refcount[ir6->netbits] == 1)
 +	mroute_helper_regenerate (mh);
-+      mroute_helper_unlock (mh);
 +    }
 +}
 +
@@ -824,21 +985,20 @@ Index: openvpn-2.1.3/mroute.c
 +  if (ir6->netbits >= 0)
 +    {
 +      ASSERT (ir6->netbits < MR_HELPER_NET_LEN);
-+      mroute_helper_lock (mh);
 +      ++mh->cache_generation;
 +      --mh->net_len_refcount[ir6->netbits];
 +      ASSERT (mh->net_len_refcount[ir6->netbits] >= 0);
 +      if (!mh->net_len_refcount[ir6->netbits])
 +	mroute_helper_regenerate (mh);
-+      mroute_helper_unlock (mh);
 +    }
- }
++}
  
  void
-Index: openvpn-2.1.3/mroute.h
+ mroute_helper_free (struct mroute_helper *mh)
+Index: openvpn-2.2.0/mroute.h
 ===================================================================
---- openvpn-2.1.3.orig/mroute.h	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/mroute.h	2011-03-22 10:18:17.992943002 +0100
+--- openvpn-2.2.0.orig/mroute.h	2011-05-10 17:05:52.000000000 +0200
++++ openvpn-2.2.0/mroute.h	2011-05-10 17:06:44.360002121 +0200
 @@ -85,7 +85,7 @@
  /*
   * Number of bits in an address.  Should be raised for IPv6.
@@ -848,7 +1008,7 @@ Index: openvpn-2.1.3/mroute.h
  
  /*
   * Used to help maintain CIDR routing table.
-@@ -128,6 +128,8 @@
+@@ -127,6 +127,8 @@
  void mroute_helper_free (struct mroute_helper *mh);
  void mroute_helper_add_iroute (struct mroute_helper *mh, const struct iroute *ir);
  void mroute_helper_del_iroute (struct mroute_helper *mh, const struct iroute *ir);
@@ -857,10 +1017,10 @@ Index: openvpn-2.1.3/mroute.h
  
  /*
   * Given a raw packet in buf, return the src and dest
-Index: openvpn-2.1.3/multi.c
+Index: openvpn-2.2.0/multi.c
 ===================================================================
---- openvpn-2.1.3.orig/multi.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/multi.c	2011-03-22 10:18:17.994943002 +0100
+--- openvpn-2.2.0.orig/multi.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/multi.c	2011-05-10 17:06:44.360002121 +0200
 @@ -316,25 +316,18 @@
     */
    if (t->options.ifconfig_pool_defined)
@@ -914,7 +1074,7 @@ Index: openvpn-2.1.3/multi.c
      }
  }
  
-@@ -1086,6 +1083,37 @@
+@@ -1078,6 +1075,37 @@
    }
  }
  
@@ -952,7 +1112,7 @@ Index: openvpn-2.1.3/multi.c
  /*
   * A new client has connected, add routes (server -> client)
   * to internal routing table.
-@@ -1096,6 +1124,7 @@
+@@ -1088,6 +1116,7 @@
  {
    struct gc_arena gc = gc_new ();
    const struct iroute *ir;
@@ -960,7 +1120,7 @@ Index: openvpn-2.1.3/multi.c
    if (TUNNEL_TYPE (mi->context.c1.tuntap) == DEV_TYPE_TUN)
      {
        mi->did_iroutes = true;
-@@ -1115,6 +1144,22 @@
+@@ -1107,6 +1136,22 @@
        
  	  multi_learn_in_addr_t (m, mi, ir->network, ir->netbits, false);
  	}
@@ -983,7 +1143,7 @@ Index: openvpn-2.1.3/multi.c
      }
    gc_free (&gc);
  }
-@@ -1200,21 +1245,37 @@
+@@ -1192,21 +1237,37 @@
        mi->context.c2.push_ifconfig_defined = true;
        mi->context.c2.push_ifconfig_local = mi->context.options.push_ifconfig_local;
        mi->context.c2.push_ifconfig_remote_netmask = mi->context.options.push_ifconfig_remote_netmask;
@@ -1022,7 +1182,7 @@ Index: openvpn-2.1.3/multi.c
  	  /* set push_ifconfig_remote_netmask from pool ifconfig address(es) */
  	  mi->context.c2.push_ifconfig_local = remote;
  	  if (tunnel_type == DEV_TYPE_TAP || (tunnel_type == DEV_TYPE_TUN && tunnel_topology == TOP_SUBNET))
-@@ -1236,12 +1297,46 @@
+@@ -1228,12 +1289,46 @@
  	  else
  	    msg (D_MULTI_ERRORS, "MULTI: no --ifconfig-pool netmask parameter is available to push to %s",
  		 multi_instance_string (mi, false, &gc));
@@ -1069,7 +1229,7 @@ Index: openvpn-2.1.3/multi.c
    gc_free (&gc);
  }
  
-@@ -1280,6 +1375,11 @@
+@@ -1272,6 +1367,11 @@
  			    SA_SET_IF_NONZERO);
  	}
      }
@@ -1081,7 +1241,7 @@ Index: openvpn-2.1.3/multi.c
  }
  
  /*
-@@ -1669,6 +1769,15 @@
+@@ -1661,6 +1761,15 @@
  		       print_in_addr_t (mi->context.c2.push_ifconfig_local, 0, &gc));
  		}
  
@@ -1097,11 +1257,11 @@ Index: openvpn-2.1.3/multi.c
  	      /* add routes locally, pointing to new client, if
  		 --iroute options have been specified */
  	      multi_add_iroutes (m, mi);
-Index: openvpn-2.1.3/openvpn.8
+Index: openvpn-2.2.0/openvpn.8
 ===================================================================
---- openvpn-2.1.3.orig/openvpn.8	2011-03-22 10:16:01.000000000 +0100
-+++ openvpn-2.1.3/openvpn.8	2011-03-22 10:18:17.997943002 +0100
-@@ -769,6 +769,8 @@
+--- openvpn-2.2.0.orig/openvpn.8	2011-05-10 17:06:06.000000000 +0200
++++ openvpn-2.2.0/openvpn.8	2011-05-10 17:06:44.360002121 +0200
+@@ -789,6 +789,8 @@
  .B \-\-dev tunX.
  A warning will be displayed
  if no specific IPv6 TUN support for your OS has been compiled into OpenVPN.
@@ -1110,7 +1270,7 @@ Index: openvpn-2.1.3/openvpn.8
  .\"*********************************************************
  .TP
  .B \-\-dev-node node
-@@ -4856,6 +4858,57 @@
+@@ -4936,6 +4938,57 @@
  .B \-\-verb
  option can be used BEFORE this option to produce debugging information.
  .\"*********************************************************
@@ -1119,7 +1279,7 @@ Index: openvpn-2.1.3/openvpn.8
 +The following options exist to support IPv6 tunneling in peer-to-peer
 +and client-server mode.  As of now, this is just very basic
 +documentation of the IPv6-related options. More documentation can be
-+found on http://greenie.muc.de/ipv6/openvpn.html.
++found on http://www.greenie.net/ipv6/openvpn.html.
 +.TP
 +.B --ifconfig-ipv6 ipv6addr/bits ipv6remote
 +configure IPv6 address
@@ -1168,10 +1328,10 @@ Index: openvpn-2.1.3/openvpn.8
  .SH SCRIPTING AND ENVIRONMENTAL VARIABLES
  OpenVPN exports a series
  of environmental variables for use by user-defined scripts.
-Index: openvpn-2.1.3/openvpn.h
+Index: openvpn-2.2.0/openvpn.h
 ===================================================================
---- openvpn-2.1.3.orig/openvpn.h	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/openvpn.h	2011-03-22 10:18:18.000943002 +0100
+--- openvpn-2.2.0.orig/openvpn.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/openvpn.h	2011-05-10 17:06:44.360002121 +0200
 @@ -165,6 +165,9 @@
    /* list of --route directives */
    struct route_list *route_list;
@@ -1194,19 +1354,19 @@ Index: openvpn-2.1.3/openvpn.h
    /* client authentication state, CAS_SUCCEEDED must be 0 */
  # define CAS_SUCCEEDED 0
  # define CAS_PENDING   1
-Index: openvpn-2.1.3/options.c
+Index: openvpn-2.2.0/options.c
 ===================================================================
---- openvpn-2.1.3.orig/options.c	2011-03-22 10:15:59.000000000 +0100
-+++ openvpn-2.1.3/options.c	2011-03-22 10:18:18.003943002 +0100
-@@ -83,6 +83,7 @@
+--- openvpn-2.2.0.orig/options.c	2011-05-10 17:05:57.000000000 +0200
++++ openvpn-2.2.0/options.c	2011-05-10 17:07:53.032011405 +0200
+@@ -85,6 +85,7 @@
+ #ifdef USE_PF_INET6
    " [PF_INET6]"
  #endif
-   " [eurephia]"
-+  " [IPv6 payload 20100307-1]"
++  " [IPv6 payload 20110424-2 (2.2RC2)]"
    " built on " __DATE__
  ;
  
-@@ -174,6 +175,8 @@
+@@ -180,6 +181,8 @@
    "                  addresses outside of the subnets used by either peer.\n"
    "                  TAP: configure device to use IP address l as a local\n"
    "                  endpoint and rn as a subnet mask.\n"
@@ -1215,7 +1375,7 @@ Index: openvpn-2.1.3/options.c
    "--ifconfig-noexec : Don't actually execute ifconfig/netsh command, instead\n"
    "                    pass --ifconfig parms by environment to scripts.\n"
    "--ifconfig-nowarn : Don't warn if the --ifconfig option on this side of the\n"
-@@ -184,6 +187,10 @@
+@@ -190,6 +193,10 @@
    "                  netmask default: 255.255.255.255\n"
    "                  gateway default: taken from --route-gateway or --ifconfig\n"
    "                  Specify default by leaving blank or setting to \"nil\".\n"
@@ -1226,7 +1386,7 @@ Index: openvpn-2.1.3/options.c
    "--max-routes n :  Specify the maximum number of routes that may be defined\n"
    "                  or pulled from a server.\n"
    "--route-gateway gw|'dhcp' : Specify a default gateway for use with --route.\n"
-@@ -379,6 +386,7 @@
+@@ -378,6 +385,7 @@
    "\n"
    "Multi-Client Server options (when --mode server is used):\n"
    "--server network netmask : Helper option to easily configure server mode.\n"
@@ -1234,7 +1394,7 @@ Index: openvpn-2.1.3/options.c
    "--server-bridge [IP netmask pool-start-IP pool-end-IP] : Helper option to\n"
    "                    easily configure ethernet bridging server mode.\n"
    "--push \"option\" : Push a config file option back to the peer for remote\n"
-@@ -392,10 +400,16 @@
+@@ -391,10 +399,16 @@
    "--ifconfig-pool-persist file [seconds] : Persist/unpersist ifconfig-pool\n"
    "                  data to file, at seconds intervals (default=600).\n"
    "                  If seconds=0, file will be treated as read-only.\n"
@@ -1251,7 +1411,7 @@ Index: openvpn-2.1.3/options.c
    "                  Sets up internal routes only.\n"
    "                  Only valid in a client-specific config file.\n"
    "--disable       : Client is disabled.\n"
-@@ -860,6 +874,78 @@
+@@ -879,6 +893,78 @@
    return ret;
  }
  
@@ -1330,7 +1490,7 @@ Index: openvpn-2.1.3/options.c
  static char *
  string_substitute (const char *src, int from, int to, struct gc_arena *gc)
  {
-@@ -981,6 +1067,8 @@
+@@ -997,6 +1083,8 @@
  #if P2MP_SERVER
    msg (D_SHOW_PARMS, "  server_network = %s", print_in_addr_t (o->server_network, 0, &gc));
    msg (D_SHOW_PARMS, "  server_netmask = %s", print_in_addr_t (o->server_netmask, 0, &gc));
@@ -1339,7 +1499,7 @@ Index: openvpn-2.1.3/options.c
    msg (D_SHOW_PARMS, "  server_bridge_ip = %s", print_in_addr_t (o->server_bridge_ip, 0, &gc));
    msg (D_SHOW_PARMS, "  server_bridge_netmask = %s", print_in_addr_t (o->server_bridge_netmask, 0, &gc));
    msg (D_SHOW_PARMS, "  server_bridge_pool_start = %s", print_in_addr_t (o->server_bridge_pool_start, 0, &gc));
-@@ -1001,6 +1089,9 @@
+@@ -1017,6 +1105,9 @@
    msg (D_SHOW_PARMS, "  ifconfig_pool_netmask = %s", print_in_addr_t (o->ifconfig_pool_netmask, 0, &gc));
    SHOW_STR (ifconfig_pool_persist_filename);
    SHOW_INT (ifconfig_pool_persist_refresh_freq);
@@ -1349,7 +1509,7 @@ Index: openvpn-2.1.3/options.c
    SHOW_INT (n_bcast_buf);
    SHOW_INT (tcp_queue_limit);
    SHOW_INT (real_hash_size);
-@@ -1014,6 +1105,9 @@
+@@ -1030,6 +1121,9 @@
    SHOW_BOOL (push_ifconfig_defined);
    msg (D_SHOW_PARMS, "  push_ifconfig_local = %s", print_in_addr_t (o->push_ifconfig_local, 0, &gc));
    msg (D_SHOW_PARMS, "  push_ifconfig_remote_netmask = %s", print_in_addr_t (o->push_ifconfig_remote_netmask, 0, &gc));
@@ -1359,7 +1519,7 @@ Index: openvpn-2.1.3/options.c
    SHOW_BOOL (enable_c2c);
    SHOW_BOOL (duplicate_cn);
    SHOW_INT (cf_max);
-@@ -1068,6 +1162,25 @@
+@@ -1084,6 +1178,25 @@
    o->iroutes = ir;
  }
  
@@ -1385,7 +1545,7 @@ Index: openvpn-2.1.3/options.c
  #endif /* P2MP_SERVER */
  #endif /* P2MP */
  
-@@ -1105,6 +1218,13 @@
+@@ -1121,6 +1234,13 @@
      options->routes = new_route_option_list (options->max_routes, &options->gc);
  }
  
@@ -1399,7 +1559,7 @@ Index: openvpn-2.1.3/options.c
  #ifdef ENABLE_DEBUG
  static void
  show_connection_entry (const struct connection_entry *o)
-@@ -1195,6 +1315,9 @@
+@@ -1211,6 +1331,9 @@
    SHOW_STR (ifconfig_remote_netmask);
    SHOW_BOOL (ifconfig_noexec);
    SHOW_BOOL (ifconfig_nowarn);
@@ -1409,7 +1569,7 @@ Index: openvpn-2.1.3/options.c
  
  #ifdef HAVE_GETTIMEOFDAY
    SHOW_INT (shaper);
-@@ -1897,8 +2020,10 @@
+@@ -1914,8 +2037,10 @@
        if (options->connection_list)
  	msg (M_USAGE, "<connection> cannot be used with --mode server");
  #endif
@@ -1420,7 +1580,7 @@ Index: openvpn-2.1.3/options.c
        if (options->shaper)
  	msg (M_USAGE, "--shaper cannot be used with --mode server");
        if (options->inetd)
-@@ -1931,6 +2056,11 @@
+@@ -1948,6 +2073,11 @@
  	msg (M_USAGE, "--up-delay cannot be used with --mode server");
        if (!options->ifconfig_pool_defined && options->ifconfig_pool_persist_filename)
  	msg (M_USAGE, "--ifconfig-pool-persist must be used with --ifconfig-pool");
@@ -1432,7 +1592,7 @@ Index: openvpn-2.1.3/options.c
        if (options->auth_user_pass_file)
  	msg (M_USAGE, "--auth-user-pass cannot be used with --mode server (it should be used on the client side only)");
        if (options->ccd_exclusive && !options->client_config_dir)
-@@ -1962,6 +2092,8 @@
+@@ -1979,6 +2109,8 @@
         */
        if (options->ifconfig_pool_defined || options->ifconfig_pool_persist_filename)
  	msg (M_USAGE, "--ifconfig-pool/--ifconfig-pool-persist requires --mode server");
@@ -1441,7 +1601,7 @@ Index: openvpn-2.1.3/options.c
        if (options->real_hash_size != defaults.real_hash_size
  	  || options->virtual_hash_size != defaults.virtual_hash_size)
  	msg (M_USAGE, "--hash-size requires --mode server");
-@@ -2504,6 +2636,8 @@
+@@ -2524,6 +2656,8 @@
  		     o->topology,
  		     o->ifconfig_local,
  		     o->ifconfig_remote_netmask,
@@ -1450,7 +1610,7 @@ Index: openvpn-2.1.3/options.c
  		     (in_addr_t)0,
  		     (in_addr_t)0,
  		     false,
-@@ -3819,6 +3953,30 @@
+@@ -3849,6 +3983,30 @@
  	  goto err;
  	}
      }
@@ -1481,7 +1641,7 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "ifconfig-noexec"))
      {
        VERIFY_PERMISSION (OPT_P_UP);
-@@ -4625,6 +4783,26 @@
+@@ -4649,6 +4807,26 @@
  	}
        add_route_to_option_list (options->routes, p[1], p[2], p[3], p[4]);
      }
@@ -1508,7 +1668,7 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "max-routes") && p[1])
      {
        int max_routes;
-@@ -4836,6 +5014,33 @@
+@@ -4860,6 +5038,33 @@
  	    }
  	}
      }
@@ -1542,7 +1702,7 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "server-bridge") && p[1] && p[2] && p[3] && p[4])
      {
        const int lev = M_WARN;
-@@ -4920,6 +5125,28 @@
+@@ -4944,6 +5149,28 @@
        VERIFY_PERMISSION (OPT_P_GENERAL);
        options->topology = TOP_P2P;
      }
@@ -1571,7 +1731,7 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "hash-size") && p[1] && p[2])
      {
        int real, virtual;
-@@ -5115,6 +5342,11 @@
+@@ -5139,6 +5366,11 @@
  	}
        option_iroute (options, p[1], netmask, msglevel);
      }
@@ -1583,7 +1743,7 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "ifconfig-push") && p[1] && p[2])
      {
        in_addr_t local, remote_netmask;
-@@ -5153,6 +5385,43 @@
+@@ -5177,6 +5409,43 @@
  	  goto err;
  	}
      }
@@ -1627,11 +1787,11 @@ Index: openvpn-2.1.3/options.c
    else if (streq (p[0], "disable"))
      {
        VERIFY_PERMISSION (OPT_P_INSTANCE);
-Index: openvpn-2.1.3/options.h
+Index: openvpn-2.2.0/options.h
 ===================================================================
---- openvpn-2.1.3.orig/options.h	2010-05-31 10:05:13.000000000 +0200
-+++ openvpn-2.1.3/options.h	2011-03-22 10:18:18.007943002 +0100
-@@ -204,6 +204,9 @@
+--- openvpn-2.2.0.orig/options.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/options.h	2011-05-10 17:06:44.368002238 +0200
+@@ -205,6 +205,9 @@
    int topology; /* one of the TOP_x values from proto.h */
    const char *ifconfig_local;
    const char *ifconfig_remote_netmask;
@@ -1641,7 +1801,7 @@ Index: openvpn-2.1.3/options.h
    bool ifconfig_noexec;
    bool ifconfig_nowarn;
  #ifdef HAVE_GETTIMEOFDAY
-@@ -323,6 +326,7 @@
+@@ -326,6 +329,7 @@
    bool route_delay_defined;
    int max_routes;
    struct route_option_list *routes;
@@ -1649,7 +1809,7 @@ Index: openvpn-2.1.3/options.h
    bool route_nopull;
    bool route_gateway_via_dhcp;
    bool allow_pull_fqdn; /* as a client, allow server to push a FQDN for certain parameters */
-@@ -363,6 +367,9 @@
+@@ -361,6 +365,9 @@
    bool server_defined;
    in_addr_t server_network;
    in_addr_t server_netmask;
@@ -1659,7 +1819,7 @@ Index: openvpn-2.1.3/options.h
  
  # define SF_NOPOOL (1<<0)
  # define SF_TCP_NODELAY_HELPER (1<<1)
-@@ -384,6 +391,11 @@
+@@ -382,6 +389,11 @@
    in_addr_t ifconfig_pool_netmask;
    const char *ifconfig_pool_persist_filename;
    int ifconfig_pool_persist_refresh_freq;
@@ -1671,7 +1831,7 @@ Index: openvpn-2.1.3/options.h
    int real_hash_size;
    int virtual_hash_size;
    const char *client_connect_script;
-@@ -396,12 +408,17 @@
+@@ -394,12 +406,17 @@
    int n_bcast_buf;
    int tcp_queue_limit;
    struct iroute *iroutes;
@@ -1689,7 +1849,7 @@ Index: openvpn-2.1.3/options.h
    bool enable_c2c;
    bool duplicate_cn;
    int cf_max;
-@@ -717,6 +734,10 @@
+@@ -722,6 +739,10 @@
  			    unsigned int *option_types_found,
  			    struct env_set *es);
  
@@ -1700,10 +1860,10 @@ Index: openvpn-2.1.3/options.h
  /*
   * inline functions
   */
-Index: openvpn-2.1.3/pool.c
+Index: openvpn-2.2.0/pool.c
 ===================================================================
---- openvpn-2.1.3.orig/pool.c	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/pool.c	2011-03-22 10:18:18.008943002 +0100
+--- openvpn-2.2.0.orig/pool.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/pool.c	2011-05-10 17:06:44.368002238 +0200
 @@ -132,7 +132,10 @@
  }
  
@@ -1852,11 +2012,11 @@ Index: openvpn-2.1.3/pool.c
        if (h < 0)
  	break;
        msg (M_INFO | M_NOPREFIX, "IFCONFIG_POOL TEST pass 3: l=%s r=%s cn=%s",
-Index: openvpn-2.1.3/pool.h
+Index: openvpn-2.2.0/pool.h
 ===================================================================
---- openvpn-2.1.3.orig/pool.h	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/pool.h	2011-03-22 10:18:18.008943002 +0100
-@@ -53,6 +53,9 @@
+--- openvpn-2.2.0.orig/pool.h	2011-05-10 17:05:52.000000000 +0200
++++ openvpn-2.2.0/pool.h	2011-05-10 17:06:44.368002238 +0200
+@@ -52,6 +52,9 @@
    int size;
    int type;
    bool duplicate_cn;
@@ -1866,7 +2026,7 @@ Index: openvpn-2.1.3/pool.h
    struct ifconfig_pool_entry *list;
  };
  
-@@ -64,13 +67,13 @@
+@@ -63,13 +66,13 @@
  
  typedef int ifconfig_pool_handle;
  
@@ -1882,10 +2042,10 @@ Index: openvpn-2.1.3/pool.h
  
  bool ifconfig_pool_release (struct ifconfig_pool* pool, ifconfig_pool_handle hand, const bool hard);
  
-Index: openvpn-2.1.3/proto.h
+Index: openvpn-2.2.0/proto.h
 ===================================================================
---- openvpn-2.1.3.orig/proto.h	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/proto.h	2011-03-22 10:18:18.011943002 +0100
+--- openvpn-2.2.0.orig/proto.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/proto.h	2011-05-10 17:06:44.368002238 +0200
 @@ -108,6 +108,21 @@
  };
  
@@ -1908,11 +2068,11 @@ Index: openvpn-2.1.3/proto.h
   * UDP header
   */
  struct openvpn_udphdr {
-Index: openvpn-2.1.3/push.c
+Index: openvpn-2.2.0/push.c
 ===================================================================
---- openvpn-2.1.3.orig/push.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/push.c	2011-03-22 10:20:12.268943052 +0100
-@@ -179,8 +179,26 @@
+--- openvpn-2.2.0.orig/push.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/push.c	2011-05-10 17:06:44.368002238 +0200
+@@ -189,8 +189,26 @@
    const int safe_cap = BCAP (&buf) - extra;
    bool push_sent = false;
  
@@ -1939,10 +2099,10 @@ Index: openvpn-2.1.3/push.c
    while (e)
      {
        if (e->enable)
-Index: openvpn-2.1.3/route.c
+Index: openvpn-2.2.0/route.c
 ===================================================================
---- openvpn-2.1.3.orig/route.c	2011-03-22 10:16:03.000000000 +0100
-+++ openvpn-2.1.3/route.c	2011-03-22 10:18:18.016943002 +0100
+--- openvpn-2.2.0.orig/route.c	2011-05-10 17:06:07.000000000 +0200
++++ openvpn-2.2.0/route.c	2011-05-10 17:06:44.368002238 +0200
 @@ -35,10 +35,12 @@
  #include "socket.h"
  #include "manage.h"
@@ -1956,7 +2116,7 @@ Index: openvpn-2.1.3/route.c
  static void get_bypass_addresses (struct route_bypass *rb, const unsigned int flags);
  
  #ifdef ENABLE_DEBUG
-@@ -88,6 +90,15 @@
+@@ -68,6 +70,15 @@
    return ret;
  }
  
@@ -1972,7 +2132,7 @@ Index: openvpn-2.1.3/route.c
  struct route_option_list *
  clone_route_option_list (const struct route_option_list *src, struct gc_arena *a)
  {
-@@ -115,6 +126,15 @@
+@@ -95,6 +106,15 @@
    return ret;
  }
  
@@ -1988,7 +2148,7 @@ Index: openvpn-2.1.3/route.c
  static const char *
  route_string (const struct route *r, struct gc_arena *gc)
  {
-@@ -331,6 +351,68 @@
+@@ -311,6 +331,68 @@
    return false;
  }
  
@@ -2057,7 +2217,7 @@ Index: openvpn-2.1.3/route.c
  void
  add_route_to_option_list (struct route_option_list *l,
  			  const char *network,
-@@ -351,6 +433,23 @@
+@@ -331,6 +413,23 @@
  }
  
  void
@@ -2081,7 +2241,7 @@ Index: openvpn-2.1.3/route.c
  clear_route_list (struct route_list *rl)
  {
    const int capacity = rl->capacity;
-@@ -360,6 +459,15 @@
+@@ -340,6 +439,15 @@
  }
  
  void
@@ -2097,7 +2257,7 @@ Index: openvpn-2.1.3/route.c
  route_list_add_default_gateway (struct route_list *rl,
  				struct env_set *es,
  				const in_addr_t addr)
-@@ -489,6 +597,72 @@
+@@ -471,6 +579,72 @@
    return ret;
  }
  
@@ -2170,7 +2330,7 @@ Index: openvpn-2.1.3/route.c
  static void
  add_route3 (in_addr_t network,
  	    in_addr_t netmask,
-@@ -734,10 +908,13 @@
+@@ -716,10 +890,13 @@
  }
  
  void
@@ -2187,7 +2347,7 @@ Index: openvpn-2.1.3/route.c
      {
        int i;
  
-@@ -762,12 +939,27 @@
+@@ -744,12 +921,27 @@
  	}
        rl->routes_added = true;
      }
@@ -2217,7 +2377,7 @@ Index: openvpn-2.1.3/route.c
      {
        int i;
        for (i = rl->n - 1; i >= 0; --i)
-@@ -777,9 +969,28 @@
+@@ -759,9 +951,28 @@
  	}
        rl->routes_added = false;
      }
@@ -2248,7 +2408,7 @@ Index: openvpn-2.1.3/route.c
  }
  
  #ifdef ENABLE_DEBUG
-@@ -862,6 +1073,34 @@
+@@ -844,6 +1055,34 @@
      setenv_route (es, &rl->routes[i], i + 1);
  }
  
@@ -2283,7 +2443,7 @@ Index: openvpn-2.1.3/route.c
  void
  add_route (struct route *r, const struct tuntap *tt, unsigned int flags, const struct env_set *es)
  {
-@@ -1057,6 +1296,170 @@
+@@ -1037,6 +1276,176 @@
    gc_free (&gc);
  }
  
@@ -2430,17 +2590,23 @@ Index: openvpn-2.1.3/route.c
 +  argv_msg (D_ROUTE, &argv);
 +  status = openvpn_execve_check (&argv, es, 0, "ERROR: MacOS X route add -inet6 command failed");
 +
-+#elif defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
++#elif defined(TARGET_OPENBSD)
 +
-+  /* GERT-TODO: this needs real-world testing on OpenBSD, but it should work
-+   */
++  argv_printf (&argv, "%s add -inet6 %s -prefixlen %d %s",
++		ROUTE_PATH,
++	        network, r6->netbits, gateway );
++
++  argv_msg (D_ROUTE, &argv);
++  status = openvpn_execve_check (&argv, es, 0, "ERROR: OpenBSD route add -inet6 command failed");
++
++#elif defined(TARGET_NETBSD)
 +
 +  argv_printf (&argv, "%s add -inet6 %s/%d %s",
 +		ROUTE_PATH,
 +	        network, r6->netbits, gateway );
 +
 +  argv_msg (D_ROUTE, &argv);
-+  status = openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD/OpenBSD route add -inet6 command failed");
++  status = openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD route add -inet6 command failed");
 +
 +#else
 +  msg (M_FATAL, "Sorry, but I don't know how to do 'route ipv6' commands on this operating system.  Try putting your routes in a --route-up script");
@@ -2454,7 +2620,7 @@ Index: openvpn-2.1.3/route.c
  static void
  delete_route (const struct route *r, const struct tuntap *tt, unsigned int flags, const struct env_set *es)
  {
-@@ -1193,6 +1596,136 @@
+@@ -1173,6 +1582,142 @@
  #endif
  
    argv_reset (&argv);
@@ -2571,17 +2737,23 @@ Index: openvpn-2.1.3/route.c
 +  argv_msg (D_ROUTE, &argv);
 +  openvpn_execve_check (&argv, es, 0, "ERROR: *BSD route delete -inet6 command failed");
 +
-+#elif defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
++#elif defined(TARGET_OPENBSD)
 +
-+  /* GERT-TODO: this needs real-world testing on OpenBSD, but it should work
-+   */
++  argv_printf (&argv, "%s delete -inet6 %s -prefixlen %d %s",
++		ROUTE_PATH,
++	        network, r6->netbits, gateway );
++
++  argv_msg (D_ROUTE, &argv);
++  openvpn_execve_check (&argv, es, 0, "ERROR: OpenBSD route delete -inet6 command failed");
++
++#elif defined(TARGET_NETBSD)
 +
 +  argv_printf (&argv, "%s delete -inet6 %s/%d %s",
 +		ROUTE_PATH,
 +	        network, r6->netbits, gateway );
 +
 +  argv_msg (D_ROUTE, &argv);
-+  openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD/OpenBSD route delete -inet6 command failed");
++  openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD route delete -inet6 command failed");
 +
 +#else
 +  msg (M_FATAL, "Sorry, but I don't know how to do 'route ipv6' commands on this operating system.  Try putting your routes in a --route-down script");
@@ -2591,10 +2763,10 @@ Index: openvpn-2.1.3/route.c
    gc_free (&gc);
  }
  
-Index: openvpn-2.1.3/route.h
+Index: openvpn-2.2.0/route.h
 ===================================================================
---- openvpn-2.1.3.orig/route.h	2010-05-31 10:06:26.000000000 +0200
-+++ openvpn-2.1.3/route.h	2011-03-22 10:18:18.019943002 +0100
+--- openvpn-2.2.0.orig/route.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/route.h	2011-05-10 17:06:44.372002310 +0200
 @@ -92,6 +92,19 @@
    struct route_option routes[EMPTY_ARRAY_SIZE];
  };
@@ -2715,10 +2887,10 @@ Index: openvpn-2.1.3/route.h
  
  bool is_special_addr (const char *addr_str);
  
-Index: openvpn-2.1.3/socket.c
+Index: openvpn-2.2.0/socket.c
 ===================================================================
---- openvpn-2.1.3.orig/socket.c	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/socket.c	2011-03-22 10:18:18.022943002 +0100
+--- openvpn-2.2.0.orig/socket.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/socket.c	2011-05-10 17:06:44.372002310 +0200
 @@ -543,6 +543,24 @@
    }
  }
@@ -2744,14 +2916,13 @@ Index: openvpn-2.1.3/socket.c
  static bool
  dns_addr_safe (const char *addr)
  {
-@@ -2561,6 +2579,58 @@
+@@ -2578,6 +2596,55 @@
    return BSTR (&out);
  }
  
 +/*
 + * Convert an in6_addr in host byte order
 + * to an ascii representation of an IPv6 address
-+ * (we reuse the L_INET_NTOA mutex, no contention here)
 + */
 +const char *
 +print_in6_addr (struct in6_addr a6, unsigned int flags, struct gc_arena *gc)
@@ -2762,10 +2933,8 @@ Index: openvpn-2.1.3/socket.c
 +  if ( memcmp(&a6, &in6addr_any, sizeof(a6)) != 0 || 
 +       !(flags & IA_EMPTY_IF_UNDEF))
 +    {
-+      mutex_lock_static (L_INET_NTOA);
 +      inet_ntop (AF_INET6, &a6, tmp_out_buf, sizeof(tmp_out_buf)-1);
 +      buf_printf (&out, "%s", tmp_out_buf );
-+      mutex_unlock_static (L_INET_NTOA);
 +    }
 +  return BSTR (&out);
 +}
@@ -2803,7 +2972,7 @@ Index: openvpn-2.1.3/socket.c
  /* set environmental variables for ip/port in *addr */
  void
  setenv_sockaddr (struct env_set *es, const char *name_prefix, const struct openvpn_sockaddr *addr, const bool flags)
-@@ -3035,6 +3105,58 @@
+@@ -3081,6 +3148,58 @@
  
  #ifdef WIN32
  
@@ -2862,11 +3031,11 @@ Index: openvpn-2.1.3/socket.c
  int
  socket_recv_queue (struct link_socket *sock, int maxsize)
  {
-Index: openvpn-2.1.3/socket.h
+Index: openvpn-2.2.0/socket.h
 ===================================================================
---- openvpn-2.1.3.orig/socket.h	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/socket.h	2011-03-22 10:18:18.024943002 +0100
-@@ -363,6 +363,8 @@
+--- openvpn-2.2.0.orig/socket.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/socket.h	2011-05-10 17:06:44.372002310 +0200
+@@ -368,6 +368,8 @@
  #define IA_EMPTY_IF_UNDEF (1<<0)
  #define IA_NET_ORDER      (1<<1)
  const char *print_in_addr_t (in_addr_t addr, unsigned int flags, struct gc_arena *gc);
@@ -2875,7 +3044,7 @@ Index: openvpn-2.1.3/socket.h
  
  #define SA_IP_PORT        (1<<0)
  #define SA_SET_IF_NONZERO (1<<1)
-@@ -422,6 +424,7 @@
+@@ -427,6 +429,7 @@
  bool ip_addr_dotted_quad_safe (const char *dotted_quad);
  bool ip_or_dns_addr_safe (const char *addr, const bool allow_fqdn);
  bool mac_addr_safe (const char *mac_addr);
@@ -2883,368 +3052,10 @@ Index: openvpn-2.1.3/socket.h
  
  socket_descriptor_t create_socket_tcp (void);
  
-Index: openvpn-2.1.3/tap-win32/proto.h
+Index: openvpn-2.2.0/tun.c
 ===================================================================
---- openvpn-2.1.3.orig/tap-win32/proto.h	2010-04-28 18:25:39.000000000 +0200
-+++ openvpn-2.1.3/tap-win32/proto.h	2011-03-22 10:18:18.027943002 +0100
-@@ -29,9 +29,11 @@
- #pragma pack(1)
- 
- #define IP_HEADER_SIZE 20
-+#define IPV6_HEADER_SIZE 40
- 
- typedef unsigned char MACADDR [6];
- typedef unsigned long IPADDR;
-+typedef unsigned char IPV6ADDR [16];
- 
- //-----------------
- // Ethernet address
-@@ -55,6 +57,7 @@
-   MACADDR src;                /* source ether addr	*/
- 
- # define ETH_P_IP   0x0800    /* IPv4 protocol */
-+# define ETH_P_IPV6 0x86DD    /* IPv6 protocol */
- # define ETH_P_ARP  0x0806    /* ARP protocol */
-   USHORT proto;               /* packet type ID field	*/
- } ETH_HEADER, *PETH_HEADER;
-@@ -161,4 +164,61 @@
- #define	TCPOPT_MAXSEG  2
- #define TCPOLEN_MAXSEG 4
- 
-+//------------
-+// IPv6 Header
-+//------------
-+
-+typedef struct {
-+  UCHAR    version_prio;
-+  UCHAR    flow_lbl[3];
-+  USHORT   payload_len;
-+# define IPPROTO_ICMPV6  0x3a  /* ICMP protocol v6 */
-+  UCHAR    nexthdr;
-+  UCHAR    hop_limit;
-+  IPV6ADDR saddr;
-+  IPV6ADDR daddr;
-+} IPV6HDR;
-+
-+//--------------------------------------------
-+// IPCMPv6 NS/NA Packets (RFC4443 and RFC4861)
-+//--------------------------------------------
-+
-+// Neighbor Solictiation - RFC 4861, 4.3
-+// (this is just the ICMPv6 part of the packet)
-+typedef struct {
-+  UCHAR    type;
-+# define ICMPV6_TYPE_NS	135		// neighbour solicitation
-+  UCHAR    code;
-+# define ICMPV6_CODE_0	0		// no specific sub-code for NS/NA
-+  USHORT   checksum;
-+  ULONG    reserved;
-+  IPV6ADDR target_addr;
-+} ICMPV6_NS;
-+
-+// Neighbor Advertisement - RFC 4861, 4.4 + 4.6/4.6.1
-+// (this is just the ICMPv6 payload)
-+typedef struct {
-+  UCHAR    type;
-+# define ICMPV6_TYPE_NA	136		// neighbour advertisement
-+  UCHAR    code;
-+# define ICMPV6_CODE_0	0		// no specific sub-code for NS/NA
-+  USHORT   checksum;
-+  UCHAR    rso_bits;			// Router(0), Solicited(2), Ovrrd(4)
-+  UCHAR	   reserved[3];
-+  IPV6ADDR target_addr;
-+// always include "Target Link-layer Address" option (RFC 4861 4.6.1)
-+  UCHAR    opt_type;
-+#define ICMPV6_OPTION_TLLA 2
-+  UCHAR    opt_length;
-+#define ICMPV6_LENGTH_TLLA 1		// multiplied by 8 -> 1 = 8 bytes
-+  MACADDR  target_macaddr;
-+} ICMPV6_NA;
-+
-+// this is the complete packet with Ethernet and IPv6 headers
-+typedef struct {
-+  ETH_HEADER eth;
-+  IPV6HDR    ipv6;
-+  ICMPV6_NA  icmpv6;
-+} ICMPV6_NA_PKT;
-+
- #pragma pack()
-Index: openvpn-2.1.3/tap-win32/tapdrvr.c
-===================================================================
---- openvpn-2.1.3.orig/tap-win32/tapdrvr.c	2010-04-28 18:25:40.000000000 +0200
-+++ openvpn-2.1.3/tap-win32/tapdrvr.c	2011-03-22 10:18:18.031943002 +0100
-@@ -1430,6 +1430,158 @@
-   return l_Status;
- }
- 
-+// checksum code for ICMPv6 packet, taken from dhcp.c / udp_checksum
-+// see RFC 4443, 2.3, and RFC 2460, 8.1
-+USHORT
-+icmpv6_checksum (const UCHAR *buf,
-+	         const int len_icmpv6,
-+	         const UCHAR *saddr6,
-+	         const UCHAR *daddr6)
-+{
-+  USHORT word16;
-+  ULONG sum = 0;
-+  int i;
-+
-+  // make 16 bit words out of every two adjacent 8 bit words and
-+  // calculate the sum of all 16 bit words
-+  for (i = 0; i < len_icmpv6; i += 2){
-+    word16 = ((buf[i] << 8) & 0xFF00) + ((i + 1 < len_icmpv6) ? (buf[i+1] & 0xFF) : 0);
-+    sum += word16;
-+  }
-+
-+  // add the IPv6 pseudo header which contains the IP source and destination addresses
-+  for (i = 0; i < 16; i += 2){
-+    word16 =((saddr6[i] << 8) & 0xFF00) + (saddr6[i+1] & 0xFF);
-+    sum += word16;
-+  }
-+  for (i = 0; i < 16; i += 2){
-+    word16 =((daddr6[i] << 8) & 0xFF00) + (daddr6[i+1] & 0xFF);
-+    sum += word16;
-+  }
-+
-+  // the next-header number and the length of the ICMPv6 packet
-+  sum += (USHORT) IPPROTO_ICMPV6 + (USHORT) len_icmpv6;
-+
-+  // keep only the last 16 bits of the 32 bit calculated sum and add the carries
-+  while (sum >> 16)
-+    sum = (sum & 0xFFFF) + (sum >> 16);
-+
-+  // Take the one's complement of sum
-+  return ((USHORT) ~sum);
-+}
-+
-+// check IPv6 packet for "is this an IPv6 Neighbor Solicitation that
-+// the tap driver needs to answer?"
-+// see RFC 4861 4.3 for the different cases
-+static IPV6ADDR IPV6_NS_TARGET_MCAST =
-+	{ 0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-+          0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x00, 0x08 };
-+static IPV6ADDR IPV6_NS_TARGET_UNICAST =
-+	{ 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08 };
-+
-+BOOLEAN
-+HandleIPv6NeighborDiscovery( TapAdapterPointer p_Adapter, UCHAR * m_Data )
-+{
-+    const ETH_HEADER * e = (ETH_HEADER *) m_Data;
-+    const IPV6HDR *ipv6 = (IPV6HDR *) (m_Data + sizeof (ETH_HEADER));
-+    const ICMPV6_NS * icmpv6_ns = (ICMPV6_NS *) (m_Data + sizeof (ETH_HEADER) + sizeof (IPV6HDR));
-+    ICMPV6_NA_PKT *na;
-+    USHORT icmpv6_len, icmpv6_csum;
-+
-+    // we don't really care about the destination MAC address here
-+    // - it's either a multicast MAC, or the userland destination MAC
-+    // but since the TAP driver is point-to-point, all packets are "for us"
-+
-+    // IPv6 target address must be ff02::1::ff00:8 (multicast for
-+    // initial NS) or fe80::1 (unicast for recurrent NUD)
-+    if ( memcmp( ipv6->daddr, IPV6_NS_TARGET_MCAST,
-+		 sizeof(IPV6ADDR) ) != 0 &&
-+         memcmp( ipv6->daddr, IPV6_NS_TARGET_UNICAST,
-+		 sizeof(IPV6ADDR) ) != 0 )
-+    {
-+	return FALSE;				// wrong target address
-+    }
-+
-+    // IPv6 Next-Header must be ICMPv6
-+    if ( ipv6->nexthdr != IPPROTO_ICMPV6 )
-+    {
-+	return FALSE;				// wrong next-header
-+    }
-+
-+    // ICMPv6 type+code must be 135/0 for NS
-+    if ( icmpv6_ns->type != ICMPV6_TYPE_NS ||
-+	 icmpv6_ns->code != ICMPV6_CODE_0 )
-+    {
-+	return FALSE;				// wrong ICMPv6 type
-+    }
-+
-+    // ICMPv6 target address must be fe80::8 (magic)
-+    if ( memcmp( icmpv6_ns->target_addr, IPV6_NS_TARGET_UNICAST,
-+	         sizeof(IPV6ADDR) ) != 0 )
-+    {
-+	return FALSE;				// not for us
-+    }
-+
-+    // packet identified, build magic response packet
-+
-+    na = (ICMPV6_NA_PKT *) MemAlloc (sizeof (ICMPV6_NA_PKT), TRUE);
-+    if ( !na ) return FALSE;
-+
-+    //------------------------------------------------
-+    // Initialize Neighbour Advertisement reply packet
-+    //------------------------------------------------
-+
-+    // ethernet header
-+    na->eth.proto = htons(ETH_P_IPV6);
-+    COPY_MAC(na->eth.dest, p_Adapter->m_MAC);
-+    COPY_MAC(na->eth.src, p_Adapter->m_TapToUser.dest);
-+
-+    // IPv6 header
-+    na->ipv6.version_prio = ipv6->version_prio;
-+    NdisMoveMemory( na->ipv6.flow_lbl, ipv6->flow_lbl,
-+		    sizeof(na->ipv6.flow_lbl) );
-+    icmpv6_len = sizeof(ICMPV6_NA_PKT) - sizeof(ETH_HEADER) - sizeof(IPV6HDR);
-+    na->ipv6.payload_len = htons(icmpv6_len);
-+    na->ipv6.nexthdr = IPPROTO_ICMPV6;
-+    na->ipv6.hop_limit = 255;
-+    NdisMoveMemory( na->ipv6.saddr, IPV6_NS_TARGET_UNICAST,
-+		    sizeof(IPV6ADDR) );
-+    NdisMoveMemory( na->ipv6.daddr, ipv6->saddr,
-+		    sizeof(IPV6ADDR) );
-+
-+    // ICMPv6
-+    na->icmpv6.type = ICMPV6_TYPE_NA;
-+    na->icmpv6.code = ICMPV6_CODE_0;
-+    na->icmpv6.checksum = 0;
-+    na->icmpv6.rso_bits = 0x60;		// Solicited + Override
-+    NdisZeroMemory( na->icmpv6.reserved, sizeof(na->icmpv6.reserved) );
-+    NdisMoveMemory( na->icmpv6.target_addr, IPV6_NS_TARGET_UNICAST,
-+		    sizeof(IPV6ADDR) );
-+
-+    // ICMPv6 option "Target Link Layer Address"
-+    na->icmpv6.opt_type = ICMPV6_OPTION_TLLA;
-+    na->icmpv6.opt_length = ICMPV6_LENGTH_TLLA;
-+    COPY_MAC( na->icmpv6.target_macaddr, p_Adapter->m_TapToUser.dest );
-+
-+    // calculate and set checksum
-+    icmpv6_csum = icmpv6_checksum ( (UCHAR*) &(na->icmpv6),
-+				    icmpv6_len,
-+				    na->ipv6.saddr,
-+				    na->ipv6.daddr );
-+    na->icmpv6.checksum = htons( icmpv6_csum );
-+
-+    DUMP_PACKET ("HandleIPv6NeighborDiscovery",
-+		 (unsigned char *) na,
-+		 sizeof (ICMPV6_NA_PKT));
-+
-+    InjectPacketDeferred (p_Adapter, (UCHAR *) na, sizeof (ICMPV6_NA_PKT));
-+
-+    MemFree (na, sizeof (ICMPV6_NA_PKT));
-+
-+    return TRUE;				// all fine
-+}
-+
- //====================================================================
- //                               Adapter Transmission
- //====================================================================
-@@ -1566,7 +1718,10 @@
- 
-     //===============================================
-     // In Point-To-Point mode, check to see whether
--    // packet is ARP or IPv4 (if neither, then drop).
-+    // packet is ARP (handled) or IPv4 (sent to app).
-+    // IPv6 packets are inspected for neighbour discovery
-+    // (to be handled locally), and the rest is forwarded
-+    // all other protocols are dropped
-     //===============================================
-     if (l_Adapter->m_tun)
-       {
-@@ -1611,6 +1766,27 @@
- 
- 	    // Packet looks like IPv4, queue it.
- 	    l_PacketBuffer->m_SizeFlags |= TP_TUN;
-+
-+	  case ETH_P_IPV6:
-+	    // make sure that packet is large
-+	    // enough to be IPv6
-+	    if (l_PacketLength
-+		< ETHERNET_HEADER_SIZE + IPV6_HEADER_SIZE)
-+	      goto no_queue;
-+
-+	    // broadcasts and multicasts are handled specially
-+	    // (to be implemented)
-+
-+	    // neighbor discovery packets to fe80::8 are special
-+	    // OpenVPN sets this next-hop to signal "handled by tapdrv"
-+	    if ( HandleIPv6NeighborDiscovery( l_Adapter,
-+					      l_PacketBuffer->m_Data ))
-+	      {
-+		goto no_queue;
-+	      }
-+
-+	    // Packet looks like IPv6, queue it :-)
-+	    l_PacketBuffer->m_SizeFlags |= TP_TUN;
- 	  }
-       }
- 
-@@ -1902,6 +2078,8 @@
- 		  COPY_MAC (l_Adapter->m_UserToTap.dest, l_Adapter->m_MAC);
- 
- 		  l_Adapter->m_TapToUser.proto = l_Adapter->m_UserToTap.proto = htons (ETH_P_IP);
-+		  l_Adapter->m_UserToTap_IPv6 = l_Adapter->m_UserToTap;
-+		  l_Adapter->m_UserToTap_IPv6.proto = htons(ETH_P_IPV6);
- 
- 		  l_Adapter->m_tun = TRUE;
- 
-@@ -1939,6 +2117,8 @@
- 		  COPY_MAC (l_Adapter->m_UserToTap.dest, l_Adapter->m_MAC);
- 
- 		  l_Adapter->m_TapToUser.proto = l_Adapter->m_UserToTap.proto = htons (ETH_P_IP);
-+		  l_Adapter->m_UserToTap_IPv6 = l_Adapter->m_UserToTap;
-+		  l_Adapter->m_UserToTap_IPv6.proto = htons(ETH_P_IPV6);
- 
- 		  l_Adapter->m_tun = TRUE;
- 
-@@ -2236,10 +2416,18 @@
- 	  {
- 	    __try
- 	      {
-+		ETH_HEADER * p_UserToTap = &l_Adapter->m_UserToTap;
-+
-+		// for IPv6, need to use ethernet header with IPv6 proto
-+		if ( IPH_GET_VER( ((IPHDR*) p_IRP->AssociatedIrp.SystemBuffer)->version_len) == 6 )
-+		  {
-+		    p_UserToTap = &l_Adapter->m_UserToTap_IPv6;
-+		  }
-+
- 		p_IRP->IoStatus.Information = l_IrpSp->Parameters.Write.Length;
- 
- 		DUMP_PACKET2 ("IRP_MJ_WRITE P2P",
--			      &l_Adapter->m_UserToTap,
-+			      p_UserToTap,
- 			      (unsigned char *) p_IRP->AssociatedIrp.SystemBuffer,
- 			      l_IrpSp->Parameters.Write.Length);
- 
-@@ -2258,8 +2446,8 @@
- 		NdisMEthIndicateReceive
- 		  (l_Adapter->m_MiniportAdapterHandle,
- 		   (NDIS_HANDLE) l_Adapter,
--		   (unsigned char *) &l_Adapter->m_UserToTap,
--		   sizeof (l_Adapter->m_UserToTap),
-+		   (unsigned char *) p_UserToTap,
-+		   sizeof (ETH_HEADER),
- 		   (unsigned char *) p_IRP->AssociatedIrp.SystemBuffer,
- 		   l_IrpSp->Parameters.Write.Length,
- 		   l_IrpSp->Parameters.Write.Length);
-@@ -2820,6 +3008,7 @@
-   p_Adapter->m_remoteNetmask = 0;
-   NdisZeroMemory (&p_Adapter->m_TapToUser, sizeof (p_Adapter->m_TapToUser));
-   NdisZeroMemory (&p_Adapter->m_UserToTap, sizeof (p_Adapter->m_UserToTap));
-+  NdisZeroMemory (&p_Adapter->m_UserToTap_IPv6, sizeof (p_Adapter->m_UserToTap_IPv6));
- 
-   // DHCP Masq
-   p_Adapter->m_dhcp_enabled = FALSE;
-Index: openvpn-2.1.3/tap-win32/types.h
-===================================================================
---- openvpn-2.1.3.orig/tap-win32/types.h	2010-04-28 18:25:40.000000000 +0200
-+++ openvpn-2.1.3/tap-win32/types.h	2011-03-22 10:18:18.035943002 +0100
-@@ -143,6 +143,7 @@
-   IPADDR m_remoteNetmask;
-   ETH_HEADER m_TapToUser;
-   ETH_HEADER m_UserToTap;
-+  ETH_HEADER m_UserToTap_IPv6;		// same as UserToTap but proto=ipv6
-   MACADDR m_MAC_Broadcast;
- 
-   // Used for DHCP server masquerade
-Index: openvpn-2.1.3/tun.c
-===================================================================
---- openvpn-2.1.3.orig/tun.c	2011-03-22 10:15:56.723943001 +0100
-+++ openvpn-2.1.3/tun.c	2011-03-22 10:18:18.041943002 +0100
+--- openvpn-2.2.0.orig/tun.c	2011-05-10 17:05:51.980002247 +0200
++++ openvpn-2.2.0/tun.c	2011-05-10 17:06:44.372002310 +0200
 @@ -56,13 +56,14 @@
  			    const in_addr_t ip,
  			    const in_addr_t netmask,
@@ -3258,10 +3069,10 @@ Index: openvpn-2.1.3/tun.c
  #ifdef TARGET_SOLARIS
 -static void solaris_error_close (struct tuntap *tt, const struct env_set *es, const char *actual);
 +static void solaris_error_close (struct tuntap *tt, const struct env_set *es, const char *actual, bool unplumb_inet6);
+ #include <stropts.h>
  #endif
  
- bool
-@@ -128,30 +129,6 @@
+@@ -129,30 +130,6 @@
    return dev;
  }
  
@@ -3292,7 +3103,7 @@ Index: openvpn-2.1.3/tun.c
  
  /* --ifconfig-nowarn disables some options sanity checking */
  static const char ifconfig_warn_how_to_silence[] = "(silence this warning with --ifconfig-nowarn)";
-@@ -422,6 +399,8 @@
+@@ -423,6 +400,8 @@
  	  int topology,          /* one of the TOP_x values */
  	  const char *ifconfig_local_parm,          /* --ifconfig parm 1 */
  	  const char *ifconfig_remote_netmask_parm, /* --ifconfig parm 2 */
@@ -3301,7 +3112,7 @@ Index: openvpn-2.1.3/tun.c
  	  in_addr_t local_public,
  	  in_addr_t remote_public,
  	  const bool strict_warn,
-@@ -536,6 +515,40 @@
+@@ -537,6 +516,40 @@
  
        tt->did_ifconfig_setup = true;
      }
@@ -3342,12 +3153,12 @@ Index: openvpn-2.1.3/tun.c
    gc_free (&gc);
    return tt;
  }
-@@ -558,6 +571,28 @@
+@@ -559,6 +572,28 @@
  #endif
  }
  
 +#if defined(TARGET_WIN32) || \
-+    defined(TARGET_DARWIN) || defined(TARGET_NETBSD)
++    defined(TARGET_DARWIN) || defined(TARGET_NETBSD) || defined(TARGET_OPENBSD)
 +
 +/* some of the platforms will auto-add a "network route" pointing
 + * to the interface on "ifconfig tunX 2001:db8::1/64", others need
@@ -3371,7 +3182,7 @@ Index: openvpn-2.1.3/tun.c
  /* execute the ifconfig command through the shell */
  void
  do_ifconfig (struct tuntap *tt,
-@@ -573,10 +608,15 @@
+@@ -574,10 +609,16 @@
        const char *ifconfig_local = NULL;
        const char *ifconfig_remote_netmask = NULL;
        const char *ifconfig_broadcast = NULL;
@@ -3382,12 +3193,13 @@ Index: openvpn-2.1.3/tun.c
  
        argv_init (&argv);
  
-+      msg( M_INFO, "do_ifconfig, tt->ipv6=%d", tt->ipv6 );
++      msg( M_INFO, "do_ifconfig, tt->ipv6=%d, tt->did_ifconfig_ipv6_setup=%d",
++	           tt->ipv6, tt->did_ifconfig_ipv6_setup );
 +
        /*
         * We only handle TUN/TAP devices here, not --dev null devices.
         */
-@@ -588,6 +628,13 @@
+@@ -589,6 +630,13 @@
        ifconfig_local = print_in_addr_t (tt->local, 0, &gc);
        ifconfig_remote_netmask = print_in_addr_t (tt->remote_netmask, 0, &gc);
  
@@ -3401,26 +3213,28 @@ Index: openvpn-2.1.3/tun.c
        /*
         * If TAP-style device, generate broadcast address.
         */
-@@ -634,6 +681,18 @@
- 				  );
+@@ -647,7 +695,19 @@
  		  argv_msg (M_INFO, &argv);
  		  openvpn_execve_check (&argv, es, S_FATAL, "Linux ip addr add failed");
-+		  if ( do_ipv6 )
-+		    {
-+		      argv_printf( &argv,
-+				  "%s -6 addr add %s/%d dev %s",
-+				  iproute_path,
-+				  ifconfig_ipv6_local,
-+				  tt->netbits_ipv6,
-+				  actual
-+				  );
-+		      argv_msg (M_INFO, &argv);
-+		      openvpn_execve_check (&argv, es, S_FATAL, "Linux ip -6 addr add failed");
-+		    }
- 	} else {
- 		argv_printf (&argv,
- 				  "%s addr add dev %s %s/%d broadcast %s",
-@@ -669,6 +728,18 @@
+ 	}
+-	tt->did_ifconfig = true;
++      if ( do_ipv6 )
++	{
++	  argv_printf( &argv,
++		      "%s -6 addr add %s/%d dev %s",
++		      iproute_path,
++		      ifconfig_ipv6_local,
++		      tt->netbits_ipv6,
++		      actual
++		      );
++	  argv_msg (M_INFO, &argv);
++	  openvpn_execve_check (&argv, es, S_FATAL, "Linux ip -6 addr add failed");
++	}
++      tt->did_ifconfig = true;
+ #else
+       if (tun)
+ 	argv_printf (&argv,
+@@ -670,6 +730,18 @@
  			  );
        argv_msg (M_INFO, &argv);
        openvpn_execve_check (&argv, es, S_FATAL, "Linux ifconfig failed");
@@ -3439,7 +3253,7 @@ Index: openvpn-2.1.3/tun.c
        tt->did_ifconfig = true;
  
  #endif /*CONFIG_FEATURE_IPROUTE*/
-@@ -692,7 +763,7 @@
+@@ -693,7 +765,7 @@
  
  	  argv_msg (M_INFO, &argv);
  	  if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig phase-1 failed"))
@@ -3448,21 +3262,23 @@ Index: openvpn-2.1.3/tun.c
  
  	  argv_printf (&argv,
  			    "%s %s netmask 255.255.255.255",
-@@ -705,7 +776,27 @@
+@@ -725,7 +797,53 @@
  
        argv_msg (M_INFO, &argv);
        if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig phase-2 failed"))
 -	solaris_error_close (tt, es, actual);
 +	solaris_error_close (tt, es, actual, false);
 +
-+      if ( do_ipv6 )			/* GERT-TODO: UNTESTED */
++      if ( do_ipv6 )
 +        {
 + 	  argv_printf (&argv, "%s %s inet6 unplumb",
 +			    IFCONFIG_PATH, actual );
 +	  argv_msg (M_INFO, &argv);
 +	  openvpn_execve_check (&argv, es, 0, NULL);
 +
-+	  argv_printf (&argv,
++	  if ( tt->type == DEV_TYPE_TUN )
++	   {
++	      argv_printf (&argv,
 +			    "%s %s inet6 plumb %s/%d %s up",
 +			    IFCONFIG_PATH,
 +			    actual,
@@ -3470,20 +3286,55 @@ Index: openvpn-2.1.3/tun.c
 +			    tt->netbits_ipv6,
 +			    ifconfig_ipv6_remote
 +			    );
++	    }
++	  else						/* tap mode */
++	    {
++	      /* base IPv6 tap interface needs to be brought up first
++	       */
++	      argv_printf (&argv, "%s %s inet6 plumb up",
++			    IFCONFIG_PATH, actual );
++	      argv_msg (M_INFO, &argv);
++	      if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig IPv6 (prepare) failed"))
++		solaris_error_close (tt, es, actual, true);
++
++	      /* we might need to do "ifconfig %s inet6 auto-dhcp drop"
++	       * after the system has noticed the interface and fired up
++	       * the DHCPv6 client - but this takes quite a while, and the 
++	       * server will ignore the DHCPv6 packets anyway.  So we don't.
++	       */
++
++	      /* static IPv6 addresses need to go to a subinterface (tap0:1)
++	       */
++	      argv_printf (&argv,
++			    "%s %s inet6 addif %s/%d up",
++			    IFCONFIG_PATH, actual,
++			    ifconfig_ipv6_local, tt->netbits_ipv6 );
++	    }
 +	  argv_msg (M_INFO, &argv);
 +	  if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig IPv6 failed"))
 +	    solaris_error_close (tt, es, actual, true);
 +        }
  
-       tt->did_ifconfig = true;
- 
-@@ -753,10 +844,31 @@
+       if (!tun && tt->topology == TOP_SUBNET)
+ 	{
+@@ -787,10 +905,42 @@
  			  );
        argv_msg (M_INFO, &argv);
        openvpn_execve_check (&argv, es, S_FATAL, "OpenBSD ifconfig failed");
 +      if ( do_ipv6 )
 +	{
-+	  msg( M_FATAL, "can't configure IPv6 on OpenBSD yet - unimplemented" );
++	  argv_printf (&argv,
++			  "%s %s inet6 %s/%d",
++			  IFCONFIG_PATH,
++			  actual,
++			  ifconfig_ipv6_local,
++			  tt->netbits_ipv6
++			  );
++	  argv_msg (M_INFO, &argv);
++	  openvpn_execve_check (&argv, es, S_FATAL, "OpenBSD ifconfig inet6 failed");
++
++	  /* and, hooray, we explicitely need to add a route... */
++	  add_route_connected_v6_net(tt, es);
 +	}
        tt->did_ifconfig = true;
  
@@ -3509,7 +3360,7 @@ Index: openvpn-2.1.3/tun.c
        if (tun)
  	argv_printf (&argv,
  			  "%s %s %s %s mtu %d netmask 255.255.255.255 up",
-@@ -783,6 +895,27 @@
+@@ -817,6 +967,27 @@
  			  );
        argv_msg (M_INFO, &argv);
        openvpn_execve_check (&argv, es, S_FATAL, "NetBSD ifconfig failed");
@@ -3525,7 +3376,7 @@ Index: openvpn-2.1.3/tun.c
 +			  tt->netbits_ipv6
 +			  );
 +	  argv_msg (M_INFO, &argv);
-+	  openvpn_execve_check (&argv, es, S_FATAL, "NetBSD ifconfig failed");
++	  openvpn_execve_check (&argv, es, S_FATAL, "NetBSD ifconfig inet6 failed");
 +
 +	  /* and, hooray, we explicitely need to add a route... */
 +	  add_route_connected_v6_net(tt, es);
@@ -3537,7 +3388,7 @@ Index: openvpn-2.1.3/tun.c
        tt->did_ifconfig = true;
  
  #elif defined(TARGET_DARWIN)
-@@ -848,6 +981,22 @@
+@@ -882,6 +1053,22 @@
  	  add_route (&r, tt, 0, es);
  	}
  
@@ -3560,7 +3411,7 @@ Index: openvpn-2.1.3/tun.c
  #elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
  
        /* example: ifconfig tun2 10.2.0.2 10.2.0.1 mtu 1450 netmask 255.255.255.255 up */
-@@ -886,6 +1035,19 @@
+@@ -920,6 +1107,19 @@
            add_route (&r, tt, 0, es);
          }
  
@@ -3580,7 +3431,7 @@ Index: openvpn-2.1.3/tun.c
  #elif defined (WIN32)
        {
  	/*
-@@ -925,6 +1087,34 @@
+@@ -959,6 +1159,34 @@
  	tt->did_ifconfig = true;
        }
  
@@ -3615,7 +3466,7 @@ Index: openvpn-2.1.3/tun.c
  #else
        msg (M_FATAL, "Sorry, but I don't know how to do 'ifconfig' commands on this operating system.  You should ifconfig your TUN/TAP device manually or use an --up script.");
  #endif
-@@ -957,14 +1147,16 @@
+@@ -991,14 +1219,16 @@
  #ifndef WIN32
  static void
  open_tun_generic (const char *dev, const char *dev_type, const char *dev_node,
@@ -3634,7 +3485,7 @@ Index: openvpn-2.1.3/tun.c
  
    if (tt->type == DEV_TYPE_NULL)
      {
-@@ -1060,16 +1252,16 @@
+@@ -1094,16 +1324,16 @@
  #if !PEDANTIC
  
  void
@@ -3657,7 +3508,7 @@ Index: openvpn-2.1.3/tun.c
  
    /*
     * We handle --dev null specially, we do not open /dev/null for this.
-@@ -1181,13 +1373,13 @@
+@@ -1215,13 +1445,13 @@
        close (tt->fd);
        tt->fd = -1;
      }
@@ -3673,7 +3524,7 @@ Index: openvpn-2.1.3/tun.c
  {
    ASSERT (0);
  }
-@@ -1197,9 +1389,9 @@
+@@ -1231,9 +1461,9 @@
  #else
  
  void
@@ -3685,7 +3536,7 @@ Index: openvpn-2.1.3/tun.c
  }
  
  #endif /* HAVE_LINUX_IF_TUN_H */
-@@ -1219,7 +1411,7 @@
+@@ -1253,7 +1483,7 @@
  #endif
  
  void
@@ -3694,7 +3545,7 @@ Index: openvpn-2.1.3/tun.c
  {
    struct tuntap *tt;
  
-@@ -1227,7 +1419,7 @@
+@@ -1261,7 +1491,7 @@
    clear_tuntap (tt);
    tt->type = dev_type_enum (dev, dev_type);
    tt->options = *options;
@@ -3703,28 +3554,47 @@ Index: openvpn-2.1.3/tun.c
    if (ioctl (tt->fd, TUNSETPERSIST, persist_mode) < 0)
      msg (M_ERR, "Cannot ioctl TUNSETPERSIST(%d) %s", persist_mode, dev);
    if (username != NULL)
-@@ -1370,7 +1562,7 @@
+@@ -1404,7 +1634,7 @@
  #endif
  
  void
 -open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, struct tuntap *tt)
 +open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tuntap *tt)
  {
-   int if_fd, muxid, ppa = -1;
-   struct ifreq ifr;
-@@ -1380,7 +1572,10 @@
-   int link_type;
+   int if_fd, ip_muxid, arp_muxid, arp_fd, ppa = -1;
+   struct lifreq ifr;
+@@ -1415,7 +1645,10 @@
    bool is_tun;
+   struct strioctl  strioc_if, strioc_ppa;
  
--  ipv6_support (ipv6, false, tt);
+-  ipv6_support (ipv6, true, tt);
 +  /* improved generic TUN/TAP driver from
 +   * http://www.whiteboard.ne.jp/~admin2/tuntap/
 +   * has IPv6 support
 +   */
+   memset(&ifr, 0x0, sizeof(ifr));
  
    if (tt->type == DEV_TYPE_NULL)
+@@ -1570,6 +1803,18 @@
+ {
+   if (tt)
      {
-@@ -1519,11 +1714,20 @@
++      /* IPv6 interfaces need to be 'manually' de-configured */
++      if ( tt->ipv6 && tt->did_ifconfig_ipv6_setup )
++	{
++	  struct argv argv;
++	  argv_init (&argv);
++	  argv_printf( &argv, "%s %s inet6 unplumb",
++		       IFCONFIG_PATH, tt->actual_name );
++	  argv_msg (M_INFO, &argv);
++	  openvpn_execve_check (&argv, NULL, 0, "Solaris ifconfig inet6 unplumb failed");
++	  argv_reset (&argv);
++	}
++
+       if (tt->ip_fd >= 0)
+ 	{
+           struct lifreq ifr;
+@@ -1622,11 +1867,20 @@
  }
  
  static void
@@ -3746,7 +3616,7 @@ Index: openvpn-2.1.3/tun.c
    argv_printf (&argv,
  		    "%s %s unplumb",
  		    IFCONFIG_PATH,
-@@ -1580,9 +1784,9 @@
+@@ -1683,9 +1937,9 @@
   */
  
  void
@@ -3758,7 +3628,39 @@ Index: openvpn-2.1.3/tun.c
  
    /* Enable multicast on the interface */
    if (tt->fd >= 0)
-@@ -1673,33 +1877,51 @@
+@@ -1708,12 +1962,31 @@
+     }
+ }
+ 
++/* the current way OpenVPN handles tun devices on OpenBSD leads to
++ * lingering tunX interfaces after close -> for a full cleanup, they
++ * need to be explicitely destroyed
++ */
++
+ void
+ close_tun (struct tuntap* tt)
+ {
+   if (tt)
+     {
++      struct gc_arena gc = gc_new ();
++      struct argv argv;
++
++      /* setup command, close tun dev (clears tt->actual_name!), run command
++       */
++
++      argv_init (&argv);
++      argv_printf (&argv, "%s %s destroy",
++                          IFCONFIG_PATH, tt->actual_name);
++
+       close_tun_generic (tt);
++
++      argv_msg (M_INFO, &argv);
++      openvpn_execve_check (&argv, NULL, 0, "OpenBSD 'destroy tun interface' failed (non-critical)");
++
+       free (tt);
+     }
+ }
+@@ -1776,33 +2049,51 @@
  #elif defined(TARGET_NETBSD)
  
  /*
@@ -3821,7 +3723,7 @@ Index: openvpn-2.1.3/tun.c
    if (tt)
      {
        close_tun_generic (tt);
-@@ -1707,18 +1929,78 @@
+@@ -1810,6 +2101,65 @@
      }
  }
  
@@ -3836,9 +3738,9 @@ Index: openvpn-2.1.3/tun.c
 +    return len;
 +}
 +
- int
- write_tun (struct tuntap* tt, uint8_t *buf, int len)
- {
++int
++write_tun (struct tuntap* tt, uint8_t *buf, int len)
++{
 +  if (tt->type == DEV_TYPE_TUN)
 +    {
 +      u_int32_t type;
@@ -3860,12 +3762,12 @@ Index: openvpn-2.1.3/tun.c
 +      return netbsd_modify_read_write_return (writev (tt->fd, iv, 2));
 +    }
 +  else
-     return write (tt->fd, buf, len);
- }
- 
- int
- read_tun (struct tuntap* tt, uint8_t *buf, int len)
- {
++    return write (tt->fd, buf, len);
++}
++
++int
++read_tun (struct tuntap* tt, uint8_t *buf, int len)
++{
 +  if (tt->type == DEV_TYPE_TUN)
 +    {
 +      u_int32_t type;
@@ -3879,28 +3781,23 @@ Index: openvpn-2.1.3/tun.c
 +      return netbsd_modify_read_write_return (readv (tt->fd, iv, 2));
 +    }
 +  else
-     return read (tt->fd, buf, len);
- }
- 
-+#else	/* not NETBSD_MULTI_AF -> older code, IPv4 only */
-+
-+int
-+write_tun (struct tuntap* tt, uint8_t *buf, int len)
-+{
-+    return write (tt->fd, buf, len);
-+}
-+
-+int
-+read_tun (struct tuntap* tt, uint8_t *buf, int len)
-+{
 +    return read (tt->fd, buf, len);
 +}
-+#endif	/* NETBSD_MULTI_AF */
 +
++#else	/* not NETBSD_MULTI_AF -> older code, IPv4 only */
++
+ int
+ write_tun (struct tuntap* tt, uint8_t *buf, int len)
+ {
+@@ -1821,6 +2171,7 @@
+ {
+     return read (tt->fd, buf, len);
+ }
++#endif	/* NETBSD_MULTI_AF */
+ 
  #elif defined(TARGET_FREEBSD)
  
- static inline int
-@@ -1731,9 +2013,9 @@
+@@ -1834,9 +2185,9 @@
  }
  
  void
@@ -3912,7 +3809,7 @@ Index: openvpn-2.1.3/tun.c
  
    if (tt->fd >= 0 && tt->type == DEV_TYPE_TUN)
      {
-@@ -1819,9 +2101,9 @@
+@@ -1922,9 +2273,9 @@
  }
  
  void
@@ -3924,7 +3821,7 @@ Index: openvpn-2.1.3/tun.c
  
    if (tt->fd >= 0)
      {
-@@ -1890,6 +2172,61 @@
+@@ -1993,6 +2344,61 @@
      return read (tt->fd, buf, len);
  }
  
@@ -3986,7 +3883,7 @@ Index: openvpn-2.1.3/tun.c
  #elif defined(WIN32)
  
  int
-@@ -3873,7 +4210,7 @@
+@@ -3978,7 +4384,7 @@
  }
  
  void
@@ -3995,7 +3892,7 @@ Index: openvpn-2.1.3/tun.c
  {
    struct gc_arena gc = gc_new ();
    char device_path[256];
-@@ -3884,7 +4221,7 @@
+@@ -3989,7 +4395,7 @@
  
    /*netcmd_semaphore_lock ();*/
  
@@ -4004,7 +3901,7 @@ Index: openvpn-2.1.3/tun.c
  
    if (tt->type == DEV_TYPE_NULL)
      {
-@@ -4006,6 +4343,16 @@
+@@ -4111,6 +4517,16 @@
        msg (M_FATAL, "ERROR:  This version of " PACKAGE_NAME " requires a TAP-Win32 driver that is at least version %d.%d -- If you recently upgraded your " PACKAGE_NAME " distribution, a reboot is probably required at this point to get Windows to see the new driver.",
  	   TAP_WIN32_MIN_MAJOR,
  	   TAP_WIN32_MIN_MINOR);
@@ -4013,15 +3910,15 @@ Index: openvpn-2.1.3/tun.c
 +     * *this* version of the driver
 +     */
 +    if ( tt->ipv6 && tt->type == DEV_TYPE_TUN &&
-+         info[0] == 9 && info[1] < 7)
++         info[0] == 9 && info[1] < 8)
 +      {
-+	msg( M_INFO, "WARNING:  Tap-Win32 driver version %d.%d does not support IPv6 in TUN mode.  IPv6 will be disabled.  Upgrade to Tap-Win32 9.7 or use TAP mode to get IPv6", (int) info[0], (int) info[1] );
++	msg( M_INFO, "WARNING:  Tap-Win32 driver version %d.%d does not support IPv6 in TUN mode.  IPv6 will be disabled.  Upgrade to Tap-Win32 9.8 (2.2-beta3 release or later) or use TAP mode to get IPv6", (int) info[0], (int) info[1] );
 +	tt->ipv6 = false;
 +      }
    }
  
    /* get driver MTU */
-@@ -4330,6 +4677,12 @@
+@@ -4435,6 +4851,12 @@
  
    if (tt)
      {
@@ -4034,7 +3931,7 @@ Index: openvpn-2.1.3/tun.c
  #if 1
        if (tt->ipapi_context_defined)
  	{
-@@ -4433,9 +4786,9 @@
+@@ -4538,9 +4960,9 @@
  #else /* generic */
  
  void
@@ -4046,10 +3943,10 @@ Index: openvpn-2.1.3/tun.c
  }
  
  void
-Index: openvpn-2.1.3/tun.h
+Index: openvpn-2.2.0/tun.h
 ===================================================================
---- openvpn-2.1.3.orig/tun.h	2010-07-21 21:08:41.000000000 +0200
-+++ openvpn-2.1.3/tun.h	2011-03-22 10:18:18.043943002 +0100
+--- openvpn-2.2.0.orig/tun.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/tun.h	2011-05-10 17:06:44.372002310 +0200
 @@ -130,6 +130,7 @@
    int topology; /* one of the TOP_x values */
  
@@ -4096,10 +3993,10 @@ Index: openvpn-2.1.3/tun.h
  			 in_addr_t local_public,
  			 in_addr_t remote_public,
  			 const bool strict_warn,
-Index: openvpn-2.1.3/win32.c
+Index: openvpn-2.2.0/win32.c
 ===================================================================
---- openvpn-2.1.3.orig/win32.c	2010-07-21 21:08:41.000000000 +0200
-+++ openvpn-2.1.3/win32.c	2011-03-22 10:18:18.044943002 +0100
+--- openvpn-2.2.0.orig/win32.c	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/win32.c	2011-05-10 17:06:44.376002351 +0200
 @@ -874,16 +874,21 @@
  static char *
  env_block (const struct env_set *es)
@@ -4141,10 +4038,10 @@ Index: openvpn-2.1.3/win32.c
        *p = '\0';
        return ret;
      }
-Index: openvpn-2.1.3/win32.h
+Index: openvpn-2.2.0/win32.h
 ===================================================================
---- openvpn-2.1.3.orig/win32.h	2011-03-22 10:15:56.000000000 +0100
-+++ openvpn-2.1.3/win32.h	2011-03-22 10:18:18.045943002 +0100
+--- openvpn-2.2.0.orig/win32.h	2011-05-10 17:05:51.000000000 +0200
++++ openvpn-2.2.0/win32.h	2011-05-10 17:06:44.376002351 +0200
 @@ -272,6 +272,8 @@
  
  /* call self in a subprocess */
@@ -4152,5 +4049,5 @@ Index: openvpn-2.1.3/win32.h
 +const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 +int inet_pton(int af, const char *src, void *st);
  
- #endif
- #endif
+ /* Find temporary directory */
+ const char *win_get_tempdir();
