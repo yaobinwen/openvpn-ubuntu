@@ -1,3 +1,21 @@
+openvpn (2.2.0-1) experimental; urgency=low
+
+  * New upstream release (Closes: #625281)
+  * Removed Depends on open(ssl|vpn)-blacklist, since 
+    debian_openssl_vulnkeys.patch is no longer used.
+    Removed templates referring it too.
+  * Removed manpage_dash_escaping.patch, applied upstream
+  * Removed attemping_typo, applied upstream
+  * Removed counter_type_for_bytes.patch, applied upstream
+  * Removed eurephia.patch, applied upstream
+  * Updated JuanJo's & Gert's IPv6 patches
+  * Removed versioned Depends on libssl (Closes: #623503)
+  * Improved kFreeBSD support. Thanks Gonéri Le Bouder for the patch
+    (Closes: #626062)
+  * Updated Dutch debconf templates. (Closes: #625526)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 10 May 2011 16:17:00 +0200
+
 openvpn (2.1.3-5) experimental; urgency=low
 
   * Upload to experimental.

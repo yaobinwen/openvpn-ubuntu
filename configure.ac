@@ -80,6 +80,12 @@ AC_ARG_ENABLE(ssl,
    [SSL="yes"]
 )
 
+AC_ARG_ENABLE(x509-alt-username,
+   [  --enable-x509-alt-username    Enable the --x509-username-field feature],
+   [X509ALTUSERNAME="$enableval"],
+   [X509ALTUSERNAME="no"]
+)
+
 AC_ARG_ENABLE(multi,
    [  --disable-multi         Disable client/server support (--mode server + client mode)],
    [MULTI="$enableval"],
@@ -96,6 +102,12 @@ AC_ARG_ENABLE(plugins,
    [  --disable-plugins       Disable plug-in support],
    [PLUGINS="$enableval"],
    [PLUGINS="yes"]
+)
+
+AC_ARG_ENABLE(eurephia,
+   [  --disable-eurephia      Disable support for the eurephia plug-in],
+   [EUREPHIA="$enableval"],
+   [EUREPHIA="yes"]
 )
 
 AC_ARG_ENABLE(management,
@@ -156,12 +168,6 @@ AC_ARG_ENABLE(small,
    [  --enable-small          Enable smaller executable size (disable OCC, usage message, and verb 4 parm list)],
    [SMALL="$enableval"],
    [SMALL="no"]
-)
-
-AC_ARG_ENABLE(pthread,
-   [  --enable-pthread        Enable pthread support (Experimental for OpenVPN 2.0)],
-   [PTHREAD="$enableval"],
-   [PTHREAD="no"]
 )
 
 AC_ARG_ENABLE(password-save,
@@ -320,6 +326,7 @@ case "$host" in
 	;;
 *-mingw*)
 	AC_DEFINE(TARGET_WIN32, 1, [Are we running WIN32?])
+	CPPFLAGS="${CPPFLAGS} -DWIN32_LEAN_AND_MEAN"
 	OPENVPN_ADD_LIBS(-lgdi32)
 	OPENVPN_ADD_LIBS(-lws2_32)
 	OPENVPN_ADD_LIBS(-lwininet)
@@ -591,32 +598,6 @@ if test "$MEMCHECK" = "valgrind"; then
 fi
 
 dnl
-dnl check for pthread library
-dnl
-
-if test "$PTHREAD" = "yes"; then
-  AC_CHECKING([for pthread support])
-  AC_MSG_RESULT([********* WARNING: pthread support is experimental for OpenVPN 2.0])
-  ACX_PTHREAD(
-        [
-	    case "$host" in
-	    *openbsd*)
-		AC_MSG_RESULT([WARNING: pthread support on OpenBSD is unstable!])
-		CFLAGS="$CFLAGS -pthread"
-		;;
-	    esac
-	    LIBS="$PTHREAD_LIBS $LIBS"
-	    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-	    CC="$PTHREAD_CC"
-	    AC_DEFINE(USE_PTHREAD, 1, [Use pthread-based multithreading])
-	],
-	[
-	    AC_MSG_RESULT([I don't know how to build with pthread support on this platform.])
-	    AC_MSG_ERROR([try ./configure --disable-pthread])
-	])
-fi
-
-dnl
 dnl check for dmalloc library
 dnl
 
@@ -625,11 +606,7 @@ if test "$MEMCHECK" = "dmalloc"; then
    AC_CHECK_HEADER(dmalloc.h, 
         [AC_CHECK_LIB(dmalloc, malloc,
 	    [
-               if test "$PTHREAD" = "yes"; then
-                   OPENVPN_ADD_LIBS(-ldmallocth)
-               else
-                   OPENVPN_ADD_LIBS(-ldmalloc)
-               fi
+               OPENVPN_ADD_LIBS(-ldmalloc)
 	       AC_DEFINE(DMALLOC, 1, [Use dmalloc memory debugging library])
 	    ],
 	    [AC_MSG_ERROR([dmalloc library not found.])]
@@ -657,6 +634,9 @@ if test "${WIN32}" != "yes"; then
            )],
            [AC_MSG_RESULT([libdl headers not found.])]
       )
+      if test "$EUREPHIA" = "yes"; then
+         AC_DEFINE(ENABLE_EUREPHIA, 1, [Enable support for the eurephia plug-in])
+      fi
    fi
 fi
 
@@ -792,6 +772,11 @@ dnl
 
       AC_DEFINE(USE_SSL, 1, [Use OpenSSL SSL library])
    fi
+fi
+
+dnl enable --x509-username-field feature if requested
+if test "$X509ALTUSERNAME" = "yes"; then
+   AC_DEFINE(ENABLE_X509ALTUSERNAME, 1, [Enable --x509-username-field feature])
 fi
 
 dnl enable pkcs11 capability

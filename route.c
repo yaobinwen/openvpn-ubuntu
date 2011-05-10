@@ -61,26 +61,6 @@ print_bypass_addresses (const struct route_bypass *rb)
 
 #endif
 
-static bool
-add_bypass_address (struct route_bypass *rb, const in_addr_t a)
-{
-  int i;
-  for (i = 0; i < rb->n_bypass; ++i)
-    {
-      if (a == rb->bypass[i]) /* avoid duplicates */
-	return true;
-    }
-  if (rb->n_bypass < N_ROUTE_BYPASS)
-    {
-      rb->bypass[rb->n_bypass++] = a;
-      return true;
-    }
-  else
-    {
-      return false;
-    }
-}
-
 struct route_option_list *
 new_route_option_list (const int max_routes, struct gc_arena *a)
 {
@@ -557,6 +537,8 @@ init_route_list (struct route_list *rl,
 	struct resolve_list netlist;
 	struct route r;
 	int k;
+
+        CLEAR(netlist);		/* init_route() will not always init this */
 
 	CLEAR(netlist);                /* init_route() will not always init this */
 
@@ -1201,20 +1183,18 @@ add_route (struct route *r, const struct tuntap *tt, unsigned int flags, const s
   argv_printf (&argv, "%s add",
 		ROUTE_PATH);
 
-#if 0
-  if (r->metric_defined)
-    argv_printf_cat (&argv, "-rtt %d", r->metric);
-#endif
-
   argv_printf_cat (&argv, "%s -netmask %s %s",
 	      network,
 	      netmask,
 	      gateway);
 
+  if (r->metric_defined)
+    argv_printf_cat (&argv, "%d", r->metric);
+
   argv_msg (D_ROUTE, &argv);
   status = openvpn_execve_check (&argv, es, 0, "ERROR: Solaris route add command failed");
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD)||defined(__FreeBSD_kernel__)
 
   argv_printf (&argv, "%s add",
 		ROUTE_PATH);
@@ -1439,17 +1419,23 @@ add_route_ipv6 (struct route_ipv6 *r6, const struct tuntap *tt, unsigned int fla
   argv_msg (D_ROUTE, &argv);
   status = openvpn_execve_check (&argv, es, 0, "ERROR: MacOS X route add -inet6 command failed");
 
-#elif defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
+#elif defined(TARGET_OPENBSD)
 
-  /* GERT-TODO: this needs real-world testing on OpenBSD, but it should work
-   */
+  argv_printf (&argv, "%s add -inet6 %s -prefixlen %d %s",
+		ROUTE_PATH,
+	        network, r6->netbits, gateway );
+
+  argv_msg (D_ROUTE, &argv);
+  status = openvpn_execve_check (&argv, es, 0, "ERROR: OpenBSD route add -inet6 command failed");
+
+#elif defined(TARGET_NETBSD)
 
   argv_printf (&argv, "%s add -inet6 %s/%d %s",
 		ROUTE_PATH,
 	        network, r6->netbits, gateway );
 
   argv_msg (D_ROUTE, &argv);
-  status = openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD/OpenBSD route add -inet6 command failed");
+  status = openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD route add -inet6 command failed");
 
 #else
   msg (M_FATAL, "Sorry, but I don't know how to do 'route ipv6' commands on this operating system.  Try putting your routes in a --route-up script");
@@ -1709,17 +1695,23 @@ delete_route_ipv6 (const struct route_ipv6 *r6, const struct tuntap *tt, unsigne
   argv_msg (D_ROUTE, &argv);
   openvpn_execve_check (&argv, es, 0, "ERROR: *BSD route delete -inet6 command failed");
 
-#elif defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
+#elif defined(TARGET_OPENBSD)
 
-  /* GERT-TODO: this needs real-world testing on OpenBSD, but it should work
-   */
+  argv_printf (&argv, "%s delete -inet6 %s -prefixlen %d %s",
+		ROUTE_PATH,
+	        network, r6->netbits, gateway );
+
+  argv_msg (D_ROUTE, &argv);
+  openvpn_execve_check (&argv, es, 0, "ERROR: OpenBSD route delete -inet6 command failed");
+
+#elif defined(TARGET_NETBSD)
 
   argv_printf (&argv, "%s delete -inet6 %s/%d %s",
 		ROUTE_PATH,
 	        network, r6->netbits, gateway );
 
   argv_msg (D_ROUTE, &argv);
-  openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD/OpenBSD route delete -inet6 command failed");
+  openvpn_execve_check (&argv, es, 0, "ERROR: NetBSD route delete -inet6 command failed");
 
 #else
   msg (M_FATAL, "Sorry, but I don't know how to do 'route ipv6' commands on this operating system.  Try putting your routes in a --route-down script");
@@ -2698,8 +2690,18 @@ netmask_to_netbits (const in_addr_t network, const in_addr_t netmask, int *netbi
 static void
 add_host_route_if_nonlocal (struct route_bypass *rb, const in_addr_t addr)
 {
-  if (test_local_addr(addr) == TLA_NONLOCAL && addr != 0 && addr != ~0)
-    add_bypass_address (rb, addr);
+  if (test_local_addr(addr) == TLA_NONLOCAL && addr != 0 && addr != ~0) {
+    int i;
+    for (i = 0; i < rb->n_bypass; ++i)
+      {
+        if (addr == rb->bypass[i]) /* avoid duplicates */
+          return;
+      }
+    if (rb->n_bypass < N_ROUTE_BYPASS)
+      {
+        rb->bypass[rb->n_bypass++] = addr;
+      }
+  }
 }
 
 static void

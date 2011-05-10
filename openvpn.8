@@ -21,13 +21,13 @@
 .\"  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 .\"
 .\" Manual page for openvpn
-.\"
+.\
 .\" SH section heading
 .\" SS subsection heading
 .\" LP paragraph
 .\" IP indented paragraph
 .\" TP hanging label
-.\"
+.\
 .\" .nf -- no formatting
 .\" .fi -- resume formatting
 .\" .ft 3 -- boldface
@@ -270,6 +270,12 @@ chosen, providing a sort of basic load-balancing and
 failover capability.
 .\"*********************************************************
 .TP
+.B \-\-remote-random-hostname
+Add a random string (6 characters) to first DNS label of hostname to prevent
+DNS caching.  For example, "foo.bar.gov" would be modified to
+"<random-chars>.foo.bar.gov".
+.\"*********************************************************
+.TP
 .B <connection>
 Define a client connection
 profile.  Client connection profiles are groups of OpenVPN options that
@@ -378,7 +384,13 @@ block.  The effect would be as if
 were declared in all
 .B <connection>
 blocks below it.
-
+.\"*********************************************************
+.TP
+.B \-\-proto-force p
+When iterating through connection profiles,
+only consider profiles using protocol
+.B p
+('tcp'|'udp'). 
 .\"*********************************************************
 .TP
 .B \-\-remote-random
@@ -451,6 +463,14 @@ take
 as the
 number of seconds to wait
 between connection retries (default=5).
+.\"*********************************************************
+.TP
+.B \-\-connect-timeout n
+For
+.B \-\-proto tcp-client,
+set connection timeout to
+.B n
+seconds (default=10).
 .\"*********************************************************
 .TP
 .B \-\-connect-retry-max n
@@ -942,7 +962,7 @@ also be specified as a DNS or /etc/hosts
 file resolvable name, or as one of three special keywords:
 
 .B vpn_gateway
--- The remote VPN endpoint address
+\-\- The remote VPN endpoint address
 (derived either from
 .B \-\-route-gateway
 or the second parameter to
@@ -952,11 +972,11 @@ when
 is specified).
 
 .B net_gateway
--- The pre-existing IP default gateway, read from the routing
+\-\- The pre-existing IP default gateway, read from the routing
 table (not supported on all OSes).
 
 .B remote_host
--- The
+\-\- The
 .B \-\-remote
 address if OpenVPN is being run in client mode, and is undefined in server mode.
 .\"*********************************************************
@@ -1125,6 +1145,11 @@ on non-Windows clients).
 Using the def1 flag is highly recommended.
 .\"*********************************************************
 .TP
+.B \-\-redirect-private [flags]
+Like \-\-redirect-gateway, but omit actually changing the default
+gateway.  Useful when pushing private subnets.
+.\"*********************************************************
+.TP
 .B \-\-link-mtu n
 Sets an upper bound on the size of UDP packets which are sent
 between OpenVPN peers.  It's best not to set this parameter unless
@@ -1238,7 +1263,8 @@ their send packet sizes such that after OpenVPN has encapsulated them,
 the resulting UDP packet size that OpenVPN sends to its peer will not
 exceed
 .B max
-bytes.
+bytes. The default value is
+.B 1450.
 
 The
 .B max
@@ -1367,15 +1393,25 @@ to be between 100 bytes/sec and 100 Mbytes/sec.
 .B \-\-inactive n [bytes]
 Causes OpenVPN to exit after
 .B n
-seconds of inactivity on the TUN/TAP device.  The time length
-of inactivity is measured since the last incoming tunnel packet.
+seconds of inactivity on the TUN/TAP device. The time length of
+inactivity is measured since the last incoming or outgoing tunnel
+packet.  The default value is 0 seconds, which disables this feature.
 
 If the optional
 .B bytes
 parameter is included,
-exit after n seconds of activity on tun/tap device
-produces a combined in/out byte count that is less than
-.B bytes.
+exit if less than
+.B bytes
+of combined in/out traffic are produced on the tun/tap device
+in
+.B n
+seconds.
+
+In any case, OpenVPN's internal ping packets (which are just
+keepalives) and TLS control packets are not considered
+"activity", nor are they counted as traffic, as they are used
+internally by OpenVPN and are not an indication of actual user
+activity.
 .\"*********************************************************
 .TP
 .B \-\-ping n
@@ -1788,16 +1824,16 @@ and scripts.  Lower
 values are more restrictive, higher values are more permissive.  Settings for
 .B level:
 
-.B 0 --
+.B 0 \-\-
 Strictly no calling of external programs.
 .br
-.B 1 --
+.B 1 \-\-
 (Default) Only call built-in executables such as ifconfig, ip, route, or netsh.
 .br
-.B 2 --
+.B 2 \-\-
 Allow calling of built-in executables and user-defined scripts.
 .br
-.B 3 --
+.B 3 \-\-
 Allow passwords to be passed to scripts via environmental variables (potentially unsafe).
 
 The
@@ -1806,10 +1842,10 @@ parameter indicates how OpenVPN should call external commands and scripts.
 Settings for
 .B method:
 
-.B execve --
+.B execve \-\-
 (default) Use execve() function on Unix family OSes and CreateProcess() on Windows.
 .br
-.B system --
+.B system \-\-
 Use system() function (deprecated and less safe since the external program command
 line is subject to shell expansion).
 
@@ -2220,7 +2256,7 @@ limit repetitive logging of similar message types.
 .\"*********************************************************
 .TP
 .B \-\-comp-lzo [mode]
-Use fast LZO compression -- may add up to 1 byte per
+Use fast LZO compression \-\- may add up to 1 byte per
 packet for incompressible data.
 .B mode
 may be "yes", "no", or "adaptive" (default).
@@ -2323,6 +2359,13 @@ It is strongly recommended that
 be set to 127.0.0.1
 (localhost) to restrict accessibility of the management
 server to local clients. 
+.TP
+.B \-\-management-client
+Management interface will connect as a TCP client to
+.B IP:port
+specified by
+.B \-\-management
+rather than listen as a TCP server.
 .\"*********************************************************
 .TP
 .B \-\-management-query-passwords
@@ -2829,7 +2872,7 @@ on client connection.  The script is passed the common name
 and IP address of the just-authenticated client
 as environmental variables (see environmental variable section
 below).  The script is also passed
-the pathname of a not-yet-created temporary file as $1
+the pathname of a freshly created temporary file as $1
 (i.e. the first command line argument), to be used by the script
 to pass dynamically generated config file directives back to OpenVPN.
 
@@ -2880,7 +2923,9 @@ as the client's X509 common name.  If a matching file
 exists, it will be opened and parsed for client-specific
 configuration options.  If no matching file is found, OpenVPN
 will instead try to open and parse a default file called
-"DEFAULT", which may be provided but is not required.
+"DEFAULT", which may be provided but is not required. Note that
+the configuration files must be readable by the OpenVPN process
+after it has dropped it's root privileges.
 
 This file can specify a fixed IP address for a given
 client using
@@ -2911,9 +2956,26 @@ file.
 Specify a directory
 .B dir
 for temporary files.  This directory will be used by
+openvpn processes and script to communicate temporary
+data with openvpn main process. Note that
+the directory must be writable by the OpenVPN process
+after it has dropped it's root privileges.
+
+This directory will be used by in the following cases:
+
+*
 .B \-\-client-connect
 scripts to dynamically generate client-specific
 configuration files.
+
+*
+.B OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY
+plugin hook to return success/failure via auth_control_file
+when using deferred auth method
+
+*
+.B OPENVPN_PLUGIN_ENABLE_PF
+plugin hook to pass filtering rules via pf_file
 .\"*********************************************************
 .TP
 .B \-\-hash-size r v
@@ -3259,7 +3321,7 @@ Authenticate with server using username/password.
 is a file containing username/password on 2 lines (Note: OpenVPN
 will only read passwords from a file if it has been built
 with the \-\-enable-password-save configure option, or on Windows
-by defining ENABLE_PASSWORD_SAVE in config-win32.h).
+by defining ENABLE_PASSWORD_SAVE in win/settings.in).
 
 If
 .B up
@@ -3292,15 +3354,15 @@ tries to connect.
 .B type
 can be one of:
 
-.B none --
+.B none \-\-
 Client will exit with a fatal error (this is the default).
 .br
-.B nointeract --
+.B nointeract \-\-
 Client will retry the connection without requerying for an
 .B \-\-auth-user-pass
 username/password.  Use this option for unattended clients.
 .br
-.B interact --
+.B interact \-\-
 Client will requery for an
 .B \-\-auth-user-pass
 username/password and/or private key password before attempting a reconnection.
@@ -3323,8 +3385,9 @@ exit/restart, this
 option will tell the server to immediately close its client instance object
 rather than waiting for a timeout.  The
 .B n
-parameter (default=1) controls the maximum number of retries that the client
-will attempt to resend the exit notification message.
+parameter (default=1) controls the maximum number of attempts that the client
+will try to resend the exit notification message.  OpenVPN will not send any exit
+notifications unless this option is enabled.
 .\"*********************************************************
 .SS Data Channel Encryption Options:
 These options are meaningful for both Static & TLS-negotiated key modes
@@ -3777,6 +3840,11 @@ production environment, since by virtue of the fact that
 they are distributed with OpenVPN, they are totally insecure.
 .\"*********************************************************
 .TP
+.B \-\-capath dir
+Directory containing trusted certificates (CAs and CRLs).
+Available with OpenSSL version >= 0.9.7 dev.
+.\"*********************************************************
+.TP
 .B \-\-dh file
 File containing Diffie Hellman parameters
 in .pem format (required for
@@ -3894,19 +3962,19 @@ A different mode can be specified for each provider.
 Mode is encoded as hex number, and can be a mask one of the following:
 
 .B 0
-(default) -- Try to determind automatically.
+(default) \-\- Try to determind automatically.
 .br
 .B 1
--- Use sign.
+\-\- Use sign.
 .br
 .B 2
--- Use sign recover.
+\-\- Use sign recover.
 .br
 .B 4
--- Use decrypt.
+\-\- Use decrypt.
 .br
 .B 8
--- Use unwrap.
+\-\- Use unwrap.
 .br
 .\"*********************************************************
 .TP
@@ -4211,7 +4279,7 @@ to a certain extent invalidates the extra security provided by
 using an encrypted key (Note: OpenVPN
 will only read passwords from a file if it has been built
 with the \-\-enable-password-save configure option, or on Windows
-by defining ENABLE_PASSWORD_SAVE in config-win32.h).
+by defining ENABLE_PASSWORD_SAVE in win/settings.in).
 .\"*********************************************************
 .TP
 .B \-\-auth-nocache
@@ -4245,10 +4313,22 @@ test).
 
 .B cmd
 should return 0 to allow the TLS handshake to proceed, or 1 to fail.
+
+Note that
 .B cmd
-is executed as
+is a command line and as such may (if enclosed in quotes) contain
+whitespace separated arguments.  The first word of
+.B cmd
+is the shell command to execute and the remaining words are its
+arguments.
+When
+.B cmd
+is executed two arguments are appended, as follows:
 
 .B cmd certificate_depth X509_NAME_oneline
+
+These arguments are, respectively, the current certificate depth and
+the X509 common name (cn) of the peer.
 
 This feature is useful if the peer you want to trust has a certificate
 which was signed by a certificate authority who also signed many
@@ -4263,14 +4343,14 @@ in the OpenVPN distribution.
 
 See the "Environmental Variables" section below for
 additional parameters passed as environmental variables.
-
-Note that
-.B cmd
-can be a shell command with multiple arguments, in which
-case all OpenVPN-generated arguments will be appended
-to
-.B cmd
-to build a command line which will be passed to the script.
+.\"*********************************************************
+.TP
+.B \-\-tls-export-cert directory
+Store the certificates the clients uses upon connection to this
+directory. This will be done before --tls-verify is called.  The
+certificates will use a temporary name and will be deleted when
+the tls-verify script returns.  The file name used for the certificate
+is available via the peer_cert environment variable.
 .\"*********************************************************
 .TP
 .B \-\-tls-remote name
@@ -4545,14 +4625,14 @@ IP address and netmask using
 Don't use this option unless you are also using
 .B \-\-ifconfig.
 
-.B manual --
+.B manual \-\-
 Don't set the IP address or netmask automatically.
 Instead output a message
 to the console telling the user to configure the
 adapter manually and indicating the IP/netmask which
 OpenVPN expects the adapter to be set to.
 
-.B dynamic [offset] [lease-time] --
+.B dynamic [offset] [lease-time] \-\-
 Automatically set the IP address and netmask by replying to
 DHCP query messages generated by the kernel.  This mode is
 probably the "cleanest" solution
@@ -4863,7 +4943,7 @@ option can be used BEFORE this option to produce debugging information.
 The following options exist to support IPv6 tunneling in peer-to-peer
 and client-server mode.  As of now, this is just very basic
 documentation of the IPv6-related options. More documentation can be
-found on http://greenie.muc.de/ipv6/openvpn.html.
+found on http://www.greenie.net/ipv6/openvpn.html.
 .TP
 .B --ifconfig-ipv6 ipv6addr/bits ipv6remote
 configure IPv6 address
@@ -5322,6 +5402,11 @@ than their names as denoted on the command line
 or configuration file.
 .\"*********************************************************
 .TP
+.B peer_cert
+Temporary file name containing the client certificate upon
+connection.  Useful in conjunction with --tls-verify
+.\"*********************************************************
+.TP
 .B script_context
 Set to "init" or "restart" prior to up/down script execution.
 For more information, see
@@ -5330,12 +5415,12 @@ documentation for
 .\"*********************************************************
 .TP
 .B script_type
-One of
+Prior to execution of any script, this variable is set to the type of
+script being run.  It can be one of the following:
 .B up, down, ipchange, route-up, tls-verify, auth-user-pass-verify,
 .B client-connect, client-disconnect, 
 or
 .B learn-address.
-Set prior to execution of any script.
 .\"*********************************************************
 .TP
 .B signal
@@ -5401,7 +5486,12 @@ where
 is the verification level.  Only set for TLS connections.  Set prior
 to execution of
 .B \-\-tls-verify
-script.
+script. This is in the form of a hex string like "37AB46E0", which is
+suitable for doing serial-based OCSP queries (with OpenSSL, you have
+to prepend "0x" to the string). If something goes wrong while reading
+the value from the certificate it will be an empty string, so your
+code should check that.
+See the contrib/OCSP_check/OCSP_check.sh script for an example.
 .\"*********************************************************
 .TP
 .B tun_mtu
@@ -5413,13 +5503,16 @@ or
 script execution.
 .\"*********************************************************
 .TP
-.B trusted_ip
+.B trusted_ip (or trusted_ip6)
 Actual IP address of connecting client or peer which has been authenticated.
 Set prior to execution of
 .B \-\-ipchange, \-\-client-connect,
 and
 .B \-\-client-disconnect
 scripts.
+If using ipv6 endpoints (udp6, tcp6),
+.B trusted_ip6
+will be set instead.
 .\"*********************************************************
 .TP
 .B trusted_port
@@ -5431,7 +5524,7 @@ and
 scripts.
 .\"*********************************************************
 .TP
-.B untrusted_ip
+.B untrusted_ip (or untrusted_ip6)
 Actual IP address of connecting client or peer which has not been authenticated
 yet.  Sometimes used to
 .B nmap
@@ -5443,6 +5536,9 @@ Set prior to execution of
 and
 .B \-\-auth-user-pass-verify
 scripts.
+If using ipv6 endpoints (udp6, tcp6),
+.B untrusted_ip6
+will be set instead.
 .\"*********************************************************
 .TP
 .B untrusted_port

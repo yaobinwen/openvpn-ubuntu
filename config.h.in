@@ -27,6 +27,9 @@
 /* Enable debugging support */
 #undef ENABLE_DEBUG
 
+/* Enable support for the eurephia plug-in */
+#undef ENABLE_EUREPHIA
+
 /* Enable internal fragmentation support */
 #undef ENABLE_FRAGMENT
 
@@ -50,6 +53,9 @@
 
 /* Enable Socks proxy support */
 #undef ENABLE_SOCKS
+
+/* Enable --x509-username-field feature */
+#undef ENABLE_X509ALTUSERNAME
 
 /* Define to 1 if you have the `accept' function. */
 #undef HAVE_ACCEPT
@@ -245,9 +251,6 @@
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
-
-/* Define if you have POSIX threads libraries and header files. */
-#undef HAVE_PTHREAD
 
 /* Define to 1 if you have the `putenv' function. */
 #undef HAVE_PUTENV
@@ -459,10 +462,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to the necessary symbol if this constant uses a non-standard name on
-   your system. */
-#undef PTHREAD_CREATE_JOINABLE
-
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -537,9 +536,6 @@
 
 /* Enable PKCS11 capability */
 #undef USE_PKCS11
-
-/* Use pthread-based multithreading */
-#undef USE_PTHREAD
 
 /* Use OpenSSL SSL library */
 #undef USE_SSL

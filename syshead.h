@@ -33,11 +33,7 @@
 #define WINVER 0x0501
 #endif
 #ifndef PACKAGE_NAME
-#ifdef _MSC_VER
-#include "config-win32.h"
-#else
 #include "config.h"
-#endif
 #endif
 
 /* branch prediction hints */
@@ -55,6 +51,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <winsock2.h>
 #define sleep(x) Sleep((x)*1000)
 #define random rand
 #define srandom srand
@@ -393,9 +390,10 @@
 #endif
 
 /*
- * Does this platform support linux-style IP_PKTINFO?
+ * Does this platform support linux-style IP_PKTINFO
+ * or bsd-style IP_RECVDSTADDR ?
  */
-#if defined(ENABLE_MULTIHOME) && defined(HAVE_IN_PKTINFO) && defined(IP_PKTINFO) && defined(HAVE_MSGHDR) && defined(HAVE_CMSGHDR) && defined(HAVE_IOVEC) && defined(CMSG_FIRSTHDR) && defined(CMSG_NXTHDR) && defined(HAVE_RECVMSG) && defined(HAVE_SENDMSG)
+#if defined(ENABLE_MULTIHOME) && ((defined(HAVE_IN_PKTINFO)&&defined(IP_PKTINFO)) || defined(IP_RECVDSTADDR)) && defined(HAVE_MSGHDR) && defined(HAVE_CMSGHDR) && defined(HAVE_IOVEC) && defined(CMSG_FIRSTHDR) && defined(CMSG_NXTHDR) && defined(HAVE_RECVMSG) && defined(HAVE_SENDMSG)
 #define ENABLE_IP_PKTINFO 1
 #else
 #define ENABLE_IP_PKTINFO 0
@@ -547,24 +545,6 @@ socket_defined (const socket_descriptor_t sd)
 #define ENABLE_BUFFER_LIST
 
 /*
- * Do we have pthread capability?
- */
-#ifdef USE_PTHREAD
-#if defined(USE_CRYPTO) && defined(USE_SSL) && P2MP
-#include <pthread.h>
-#else
-#undef USE_PTHREAD
-#endif
-#endif
-
-/*
- * Pthread support is currently experimental (and quite unfinished).
- */
-#if 1 /* JYFIXME -- if defined, disable pthread */
-#undef USE_PTHREAD
-#endif
-
-/*
  * Should we include OCC (options consistency check) code?
  */
 #ifndef ENABLE_SMALL
@@ -670,6 +650,11 @@ socket_defined (const socket_descriptor_t sd)
 #else
 #define AUTO_USERID 0
 #endif
+
+/*
+ * Do we support challenge/response authentication, as a console-based client?
+ */
+#define ENABLE_CLIENT_CR
 
 /*
  * Do we support pushing peer info?

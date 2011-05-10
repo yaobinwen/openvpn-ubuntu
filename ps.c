@@ -234,18 +234,6 @@ port_share_sendmsg (const socket_descriptor_t sd,
     }
 }
 
-static int
-pc_list_len (struct proxy_connection *pc)
-{
-  int count = 0;
-  while (pc)
-    {
-      ++count;
-      pc = pc->next;
-    }
-  return count;
-}
-
 static void
 proxy_entry_close_sd (struct proxy_connection *pc, struct event_set *es)
 {
@@ -785,6 +773,9 @@ port_share_open (const char *host, const int port)
 
       /* Let msg know that we forked */
       msg_forked ();
+
+      /* Don't interact with management interface */
+      management = NULL;
 
       /* close all parent fds except our socket back to parent */
       close_fds_except (fd[1]);

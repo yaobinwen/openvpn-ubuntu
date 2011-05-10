@@ -315,3 +315,80 @@ Sun Mar  7 19:17:33 CET 2010
     is older than 9.7, log warning and disable IPv6 (won't work anyway).
 
   * release as patch 20100307-1
+
+Sat Jul 10 14:37:52 CEST 2010
+
+  * TEST SUCCESS: point-to-point tun mode with --ifconfig-ipv6 between
+                  Solaris10/sparc and Linux (Michal Ludvig)
+    (using the whiteboard tun driver on Solaris, otherwise "no IPv6")
+
+Sun Aug  8 12:30:44 CEST 2010
+
+  * route.c: split NetBSD and OpenBSD parts of add_route_ipv6() and
+             delete_route_ipv6(), implement OpenBSD variant
+             (needs "-prefixlen nn" while NetBSD uses "/nn")
+
+  * tun.c: implement IPv6 ifconfig for OpenBSD
+
+  * tun.c: destroy tunX interface at tun_close() on OpenBSD (cleanup)
+
+  * TEST SUCCESS: OpenBSD 4.7: client-tun/net30, v4+v6
+
+Thu Sep  2 21:18:32 CEST 2010
+
+  * tun.c: the TAP binary in 2.2-beta3 has the IPv6 related changes, but
+    the version number is 9.8 now -> check for 9.8, not 9.7
+
+Wed Sep 22 22:20:37 CEST 2010
+
+  * tun.c: bugfix for Linux/iproute2/"topology subnet".  Works :-)
+
+  * TEST SUCCESS: Linux/ifconfig: client-tun/net30+subnet, v4+v6
+
+  * TEST SUCCESS: Linux/iproute2: client-tun/net30+subnet, v4+v6
+
+  * options.c: tag as 20100922-1 so "allmerged" users can see IPv6 change
+
+Fri Sep 24 17:57:41 CEST 2010
+
+  * TEST SUCCESS: Linux/<both>: client-tap, v4+v6, ping6 on connected addr
+
+  * TEST FAIL: Linux/<both>: client-tap, v6, route6 (gateway missing)
+
+Do 21. Okt 19:36:49 CEST 2010
+
+  * t_client.sh.in: cherrypick commit f25fe91a40aa3f and 6f1e61b41be52 
+    (proper exit codes to signal "SKIP" if we do not want to run)
+
+So 16. Jan 17:25:23 CET 2011
+
+  * tun.c, route.c: cherrypick 121755c2cb4891f and f0eac1a5979096c67
+    (TAP driver and "topology subnet" support for Solaris)
+
+  * tun.c: add IPv6 configuration for TAP interfaces (<device>:1 inet6)
+
+  * tun.c: on close_tun on Solaris, unplumb IPv6 TUN or TAP interfaces
+
+  * TEST SUCCESS: OpenSolaris: client-tun, v4+v6
+    TEST SUCCESS: OpenSolaris: client-tap, v4+v6, ping6 on connected addr
+    TEST FAIL: OpenSolaris: client-tap, v6, route6 (gateway missing)
+
+So 24. Apr 16:51:45 CEST 2011
+
+  * rebase to "beta2.2" branch (at 2.2RC2 tag)
+
+  * mroute.c: remove mroute_helper_lock/_unlock() calls for IPv6
+  * socket.c: remove locking with L_INET_NTOA mutex
+      (all the threading stuff got removed by David Sommerseth for 2.2)
+
+  * mroute.c: remove duplicate mroute_helper_add_iroute6() and
+              mroute_helper_del_iroute6() - "git rebase" artefact
+
+  * ChangeLog.IPv6 and TODO.IPv6: add to commit
+
+  * options.c: tag as 20110424-2 (2.2RC2)
+
+  * TEST SUCCESS: Linux/ifconfig: client-tun/net30+subnet, v4+v6
+
+  * TEST SUCCESS: Linux/iproute2: client-tun/net30+subnet, v4+v6
+

@@ -64,6 +64,7 @@ static const char *netsh_get_id (const char *dev_node, struct gc_arena *gc);
 
 #ifdef TARGET_SOLARIS
 static void solaris_error_close (struct tuntap *tt, const struct env_set *es, const char *actual, bool unplumb_inet6);
+#include <stropts.h>
 #endif
 
 bool
@@ -572,7 +573,7 @@ init_tun_post (struct tuntap *tt,
 }
 
 #if defined(TARGET_WIN32) || \
-    defined(TARGET_DARWIN) || defined(TARGET_NETBSD)
+    defined(TARGET_DARWIN) || defined(TARGET_NETBSD) || defined(TARGET_OPENBSD)
 
 /* some of the platforms will auto-add a "network route" pointing
  * to the interface on "ifconfig tunX 2001:db8::1/64", others need
@@ -615,7 +616,8 @@ do_ifconfig (struct tuntap *tt,
 
       argv_init (&argv);
 
-      msg( M_INFO, "do_ifconfig, tt->ipv6=%d", tt->ipv6 );
+      msg( M_INFO, "do_ifconfig, tt->ipv6=%d, tt->did_ifconfig_ipv6_setup=%d",
+	           tt->ipv6, tt->did_ifconfig_ipv6_setup );
 
       /*
        * We only handle TUN/TAP devices here, not --dev null devices.
@@ -681,18 +683,6 @@ do_ifconfig (struct tuntap *tt,
 				  );
 		  argv_msg (M_INFO, &argv);
 		  openvpn_execve_check (&argv, es, S_FATAL, "Linux ip addr add failed");
-		  if ( do_ipv6 )
-		    {
-		      argv_printf( &argv,
-				  "%s -6 addr add %s/%d dev %s",
-				  iproute_path,
-				  ifconfig_ipv6_local,
-				  tt->netbits_ipv6,
-				  actual
-				  );
-		      argv_msg (M_INFO, &argv);
-		      openvpn_execve_check (&argv, es, S_FATAL, "Linux ip -6 addr add failed");
-		    }
 	} else {
 		argv_printf (&argv,
 				  "%s addr add dev %s %s/%d broadcast %s",
@@ -705,7 +695,19 @@ do_ifconfig (struct tuntap *tt,
 		  argv_msg (M_INFO, &argv);
 		  openvpn_execve_check (&argv, es, S_FATAL, "Linux ip addr add failed");
 	}
-	tt->did_ifconfig = true;
+      if ( do_ipv6 )
+	{
+	  argv_printf( &argv,
+		      "%s -6 addr add %s/%d dev %s",
+		      iproute_path,
+		      ifconfig_ipv6_local,
+		      tt->netbits_ipv6,
+		      actual
+		      );
+	  argv_msg (M_INFO, &argv);
+	  openvpn_execve_check (&argv, es, S_FATAL, "Linux ip -6 addr add failed");
+	}
+      tt->did_ifconfig = true;
 #else
       if (tun)
 	argv_printf (&argv,
@@ -772,20 +774,41 @@ do_ifconfig (struct tuntap *tt,
 			    );
 	}
       else
-	no_tap_ifconfig ();
+        if (tt->topology == TOP_SUBNET)
+	{
+          argv_printf (&argv,
+                              "%s %s %s %s netmask %s mtu %d up",
+                              IFCONFIG_PATH,
+                              actual,
+                              ifconfig_local,
+                              ifconfig_local,
+                              ifconfig_remote_netmask,
+                              tun_mtu
+                              );
+	}
+        else
+          argv_printf (&argv,
+                            " %s %s %s netmask %s broadcast + up",
+                            IFCONFIG_PATH,
+                            actual,
+                            ifconfig_local,
+                            ifconfig_remote_netmask
+                            );
 
       argv_msg (M_INFO, &argv);
       if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig phase-2 failed"))
 	solaris_error_close (tt, es, actual, false);
 
-      if ( do_ipv6 )			/* GERT-TODO: UNTESTED */
+      if ( do_ipv6 )
         {
  	  argv_printf (&argv, "%s %s inet6 unplumb",
 			    IFCONFIG_PATH, actual );
 	  argv_msg (M_INFO, &argv);
 	  openvpn_execve_check (&argv, es, 0, NULL);
 
-	  argv_printf (&argv,
+	  if ( tt->type == DEV_TYPE_TUN )
+	   {
+	      argv_printf (&argv,
 			    "%s %s inet6 plumb %s/%d %s up",
 			    IFCONFIG_PATH,
 			    actual,
@@ -793,10 +816,48 @@ do_ifconfig (struct tuntap *tt,
 			    tt->netbits_ipv6,
 			    ifconfig_ipv6_remote
 			    );
+	    }
+	  else						/* tap mode */
+	    {
+	      /* base IPv6 tap interface needs to be brought up first
+	       */
+	      argv_printf (&argv, "%s %s inet6 plumb up",
+			    IFCONFIG_PATH, actual );
+	      argv_msg (M_INFO, &argv);
+	      if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig IPv6 (prepare) failed"))
+		solaris_error_close (tt, es, actual, true);
+
+	      /* we might need to do "ifconfig %s inet6 auto-dhcp drop"
+	       * after the system has noticed the interface and fired up
+	       * the DHCPv6 client - but this takes quite a while, and the 
+	       * server will ignore the DHCPv6 packets anyway.  So we don't.
+	       */
+
+	      /* static IPv6 addresses need to go to a subinterface (tap0:1)
+	       */
+	      argv_printf (&argv,
+			    "%s %s inet6 addif %s/%d up",
+			    IFCONFIG_PATH, actual,
+			    ifconfig_ipv6_local, tt->netbits_ipv6 );
+	    }
 	  argv_msg (M_INFO, &argv);
 	  if (!openvpn_execve_check (&argv, es, 0, "Solaris ifconfig IPv6 failed"))
 	    solaris_error_close (tt, es, actual, true);
         }
+
+      if (!tun && tt->topology == TOP_SUBNET)
+	{
+	  /* Add a network route for the local tun interface */
+	  struct route r;
+	  CLEAR (r);      
+	  r.defined = true;       
+	  r.network = tt->local & tt->remote_netmask;
+	  r.netmask = tt->remote_netmask;
+	  r.gateway = tt->local;  
+	  r.metric_defined = true;
+	  r.metric = 0;
+	  add_route (&r, tt, 0, es);
+	}
 
       tt->did_ifconfig = true;
 
@@ -846,7 +907,18 @@ do_ifconfig (struct tuntap *tt,
       openvpn_execve_check (&argv, es, S_FATAL, "OpenBSD ifconfig failed");
       if ( do_ipv6 )
 	{
-	  msg( M_FATAL, "can't configure IPv6 on OpenBSD yet - unimplemented" );
+	  argv_printf (&argv,
+			  "%s %s inet6 %s/%d",
+			  IFCONFIG_PATH,
+			  actual,
+			  ifconfig_ipv6_local,
+			  tt->netbits_ipv6
+			  );
+	  argv_msg (M_INFO, &argv);
+	  openvpn_execve_check (&argv, es, S_FATAL, "OpenBSD ifconfig inet6 failed");
+
+	  /* and, hooray, we explicitely need to add a route... */
+	  add_route_connected_v6_net(tt, es);
 	}
       tt->did_ifconfig = true;
 
@@ -907,7 +979,7 @@ do_ifconfig (struct tuntap *tt,
 			  tt->netbits_ipv6
 			  );
 	  argv_msg (M_INFO, &argv);
-	  openvpn_execve_check (&argv, es, S_FATAL, "NetBSD ifconfig failed");
+	  openvpn_execve_check (&argv, es, S_FATAL, "NetBSD ifconfig inet6 failed");
 
 	  /* and, hooray, we explicitely need to add a route... */
 	  add_route_connected_v6_net(tt, es);
@@ -997,7 +1069,7 @@ do_ifconfig (struct tuntap *tt,
 	  add_route_connected_v6_net(tt, es);
 	}
 
-#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
+#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)||defined(__FreeBSD_kernel__)
 
       /* example: ifconfig tun2 10.2.0.2 10.2.0.1 mtu 1450 netmask 255.255.255.255 up */
       if (tun)
@@ -1338,7 +1410,7 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
        * Try making the TX send queue bigger
        */
 #if defined(IFF_ONE_QUEUE) && defined(SIOCSIFTXQLEN)
-      {
+      if (tt->options.txqueuelen) {
 	struct ifreq netifr;
 	int ctl_fd;
 
@@ -1564,18 +1636,20 @@ read_tun (struct tuntap* tt, uint8_t *buf, int len)
 void
 open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tuntap *tt)
 {
-  int if_fd, muxid, ppa = -1;
-  struct ifreq ifr;
+  int if_fd, ip_muxid, arp_muxid, arp_fd, ppa = -1;
+  struct lifreq ifr;
   const char *ptr;
-  const char *ip_node;
+  const char *ip_node, *arp_node;
   const char *dev_tuntap_type;
   int link_type;
   bool is_tun;
+  struct strioctl  strioc_if, strioc_ppa;
 
   /* improved generic TUN/TAP driver from
    * http://www.whiteboard.ne.jp/~admin2/tuntap/
    * has IPv6 support
    */
+  memset(&ifr, 0x0, sizeof(ifr));
 
   if (tt->type == DEV_TYPE_NULL)
     {
@@ -1594,9 +1668,10 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
     }
   else if (tt->type == DEV_TYPE_TAP)
     {
-      ip_node = "/dev/ip";
+      ip_node = "/dev/udp";
       if (!dev_node)
 	dev_node = "/dev/tap";
+      arp_node = dev_node;
       dev_tuntap_type = "tap";
       link_type = I_PLINK; /* was: I_LINK */
       is_tun = false;
@@ -1623,7 +1698,11 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
     msg (M_ERR, "Can't open %s", dev_node);
 
   /* Assign a new PPA and get its unit number. */
-  if ((ppa = ioctl (tt->fd, TUNNEWPPA, ppa)) < 0)
+  strioc_ppa.ic_cmd = TUNNEWPPA;
+  strioc_ppa.ic_timout = 0;
+  strioc_ppa.ic_len = sizeof(ppa);
+  strioc_ppa.ic_dp = (char *)&ppa;
+  if ((ppa = ioctl (tt->fd, I_STR, &strioc_ppa)) < 0)
     msg (M_ERR, "Can't assign new interface");
 
   if ((if_fd = open (dev_node, O_RDWR, 0)) < 0)
@@ -1632,27 +1711,83 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
   if (ioctl (if_fd, I_PUSH, "ip") < 0)
     msg (M_ERR, "Can't push IP module");
 
+  if (tt->type == DEV_TYPE_TUN)
+    {
   /* Assign ppa according to the unit number returned by tun device */
   if (ioctl (if_fd, IF_UNITSEL, (char *) &ppa) < 0)
     msg (M_ERR, "Can't set PPA %d", ppa);
-
-  if ((muxid = ioctl (tt->ip_fd, link_type, if_fd)) < 0)
-    msg (M_ERR, "Can't link %s device to IP", dev_tuntap_type);
-
-  close (if_fd);
+    }
 
   tt->actual_name = (char *) malloc (32);
   check_malloc_return (tt->actual_name);
 
   openvpn_snprintf (tt->actual_name, 32, "%s%d", dev_tuntap_type, ppa);
 
-  CLEAR (ifr);
-  strncpynt (ifr.ifr_name, tt->actual_name, sizeof (ifr.ifr_name));
-  ifr.ifr_ip_muxid = muxid;
-
-  if (ioctl (tt->ip_fd, SIOCSIFMUXID, &ifr) < 0)
+  if (tt->type == DEV_TYPE_TAP)
     {
-      ioctl (tt->ip_fd, I_PUNLINK, muxid);
+          if (ioctl(if_fd, SIOCGLIFFLAGS, &ifr) < 0)
+            msg (M_ERR, "Can't get flags\n");
+          strncpynt (ifr.lifr_name, tt->actual_name, sizeof (ifr.lifr_name));
+          ifr.lifr_ppa = ppa;
+          /* Assign ppa according to the unit number returned by tun device */
+          if (ioctl (if_fd, SIOCSLIFNAME, &ifr) < 0)
+            msg (M_ERR, "Can't set PPA %d", ppa);
+          if (ioctl(if_fd, SIOCGLIFFLAGS, &ifr) <0)
+            msg (M_ERR, "Can't get flags\n");
+          /* Push arp module to if_fd */
+          if (ioctl (if_fd, I_PUSH, "arp") < 0)
+            msg (M_ERR, "Can't push ARP module");
+
+          /* Pop any modules on the stream */
+          while (true)
+            {
+                 if (ioctl (tt->ip_fd, I_POP, NULL) < 0)
+                     break;
+            }
+          /* Push arp module to ip_fd */
+          if (ioctl (tt->ip_fd, I_PUSH, "arp") < 0)
+            msg (M_ERR, "Can't push ARP module\n");
+
+          /* Open arp_fd */
+          if ((arp_fd = open (arp_node, O_RDWR, 0)) < 0)
+            msg (M_ERR, "Can't open %s\n", arp_node);
+          /* Push arp module to arp_fd */
+          if (ioctl (arp_fd, I_PUSH, "arp") < 0)
+            msg (M_ERR, "Can't push ARP module\n");
+
+          /* Set ifname to arp */
+          strioc_if.ic_cmd = SIOCSLIFNAME;
+          strioc_if.ic_timout = 0;
+          strioc_if.ic_len = sizeof(ifr);
+          strioc_if.ic_dp = (char *)&ifr;
+          if (ioctl(arp_fd, I_STR, &strioc_if) < 0){
+              msg (M_ERR, "Can't set ifname to arp\n");
+          }
+   }
+
+  if ((ip_muxid = ioctl (tt->ip_fd, link_type, if_fd)) < 0)
+    msg (M_ERR, "Can't link %s device to IP", dev_tuntap_type);
+
+  if (tt->type == DEV_TYPE_TAP) {
+          if ((arp_muxid = ioctl (tt->ip_fd, link_type, arp_fd)) < 0)
+            msg (M_ERR, "Can't link %s device to ARP", dev_tuntap_type);
+          close (arp_fd);
+  }
+
+  CLEAR (ifr);
+  strncpynt (ifr.lifr_name, tt->actual_name, sizeof (ifr.lifr_name));
+  ifr.lifr_ip_muxid  = ip_muxid;
+  if (tt->type == DEV_TYPE_TAP) {
+          ifr.lifr_arp_muxid = arp_muxid;
+  }
+
+  if (ioctl (tt->ip_fd, SIOCSLIFMUXID, &ifr) < 0)
+    {
+      if (tt->type == DEV_TYPE_TAP)
+        {
+              ioctl (tt->ip_fd, I_PUNLINK , arp_muxid);
+        }
+      ioctl (tt->ip_fd, I_PUNLINK, ip_muxid);
       msg (M_ERR, "Can't set multiplexor id");
     }
 
@@ -1668,20 +1803,38 @@ solaris_close_tun (struct tuntap *tt)
 {
   if (tt)
     {
+      /* IPv6 interfaces need to be 'manually' de-configured */
+      if ( tt->ipv6 && tt->did_ifconfig_ipv6_setup )
+	{
+	  struct argv argv;
+	  argv_init (&argv);
+	  argv_printf( &argv, "%s %s inet6 unplumb",
+		       IFCONFIG_PATH, tt->actual_name );
+	  argv_msg (M_INFO, &argv);
+	  openvpn_execve_check (&argv, NULL, 0, "Solaris ifconfig inet6 unplumb failed");
+	  argv_reset (&argv);
+	}
+
       if (tt->ip_fd >= 0)
 	{
-	  struct ifreq ifr;
+          struct lifreq ifr;
 	  CLEAR (ifr);
-	  strncpynt (ifr.ifr_name, tt->actual_name, sizeof (ifr.ifr_name));
+          strncpynt (ifr.lifr_name, tt->actual_name, sizeof (ifr.lifr_name));
 
-	  if (ioctl (tt->ip_fd, SIOCGIFFLAGS, &ifr) < 0)
+          if (ioctl (tt->ip_fd, SIOCGLIFFLAGS, &ifr) < 0)
 	    msg (M_WARN | M_ERRNO, "Can't get iface flags");
 
-	  if (ioctl (tt->ip_fd, SIOCGIFMUXID, &ifr) < 0)
+          if (ioctl (tt->ip_fd, SIOCGLIFMUXID, &ifr) < 0)
 	    msg (M_WARN | M_ERRNO, "Can't get multiplexor id");
 
-	  if (ioctl (tt->ip_fd, I_PUNLINK, ifr.ifr_ip_muxid) < 0)
-	    msg (M_WARN | M_ERRNO, "Can't unlink interface");
+          if (tt->type == DEV_TYPE_TAP)
+            {
+                  if (ioctl (tt->ip_fd, I_PUNLINK, ifr.lifr_arp_muxid) < 0)
+                    msg (M_WARN | M_ERRNO, "Can't unlink interface(arp)");
+            }
+
+          if (ioctl (tt->ip_fd, I_PUNLINK, ifr.lifr_ip_muxid) < 0)
+            msg (M_WARN | M_ERRNO, "Can't unlink interface(ip)");
 
 	  close (tt->ip_fd);
 	  tt->ip_fd = -1;
@@ -1809,12 +1962,31 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
     }
 }
 
+/* the current way OpenVPN handles tun devices on OpenBSD leads to
+ * lingering tunX interfaces after close -> for a full cleanup, they
+ * need to be explicitely destroyed
+ */
+
 void
 close_tun (struct tuntap* tt)
 {
   if (tt)
     {
+      struct gc_arena gc = gc_new ();
+      struct argv argv;
+
+      /* setup command, close tun dev (clears tt->actual_name!), run command
+       */
+
+      argv_init (&argv);
+      argv_printf (&argv, "%s %s destroy",
+                          IFCONFIG_PATH, tt->actual_name);
+
       close_tun_generic (tt);
+
+      argv_msg (M_INFO, &argv);
+      openvpn_execve_check (&argv, NULL, 0, "OpenBSD 'destroy tun interface' failed (non-critical)");
+
       free (tt);
     }
 }
@@ -3717,6 +3889,7 @@ ipconfig_register_dns (const struct env_set *es)
   bool status;
   const char err[] = "ERROR: Windows ipconfig command failed";
 
+  msg (D_TUNTAP_INFO, "Start net commands...");
   netcmd_semaphore_lock ();
 
   argv_init (&argv);
@@ -3750,6 +3923,7 @@ ipconfig_register_dns (const struct env_set *es)
   argv_reset(&argv);
 
   netcmd_semaphore_release ();
+  msg (D_TUNTAP_INFO, "End net commands...");
 }
 
 void
@@ -4348,9 +4522,9 @@ open_tun (const char *dev, const char *dev_type, const char *dev_node, struct tu
      * *this* version of the driver
      */
     if ( tt->ipv6 && tt->type == DEV_TYPE_TUN &&
-         info[0] == 9 && info[1] < 7)
+         info[0] == 9 && info[1] < 8)
       {
-	msg( M_INFO, "WARNING:  Tap-Win32 driver version %d.%d does not support IPv6 in TUN mode.  IPv6 will be disabled.  Upgrade to Tap-Win32 9.7 or use TAP mode to get IPv6", (int) info[0], (int) info[1] );
+	msg( M_INFO, "WARNING:  Tap-Win32 driver version %d.%d does not support IPv6 in TUN mode.  IPv6 will be disabled.  Upgrade to Tap-Win32 9.8 (2.2-beta3 release or later) or use TAP mode to get IPv6", (int) info[0], (int) info[1] );
 	tt->ipv6 = false;
       }
   }

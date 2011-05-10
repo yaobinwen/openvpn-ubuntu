@@ -1,7 +1,7 @@
-Index: openvpn-2.1.3/README.eurephia
+Index: openvpn-2.2.0/README.eurephia
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ openvpn-2.1.3/README.eurephia	2010-09-29 13:15:32.005461607 +0200
++++ openvpn-2.2.0/README.eurephia	2011-05-10 16:33:23.900007905 +0200
 @@ -0,0 +1,24 @@
 +
 +  OpenVPN - eurephia version
@@ -27,13 +27,13 @@ Index: openvpn-2.1.3/README.eurephia
 +
 +             http://www.eurephia.net/
 +
-Index: openvpn-2.1.3/options.c
+Index: openvpn-2.2.0/options.c
 ===================================================================
---- openvpn-2.1.3.orig/options.c	2010-09-29 13:11:17.080458491 +0200
-+++ openvpn-2.1.3/options.c	2010-09-29 13:15:32.005461607 +0200
-@@ -7,6 +7,9 @@
-  *
-  *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
+--- openvpn-2.2.0.orig/options.c	2011-05-10 16:30:14.928001206 +0200
++++ openvpn-2.2.0/options.c	2011-05-10 16:33:23.900007905 +0200
+@@ -10,6 +10,9 @@
+  *  Additions for eurephia plugin done by:
+  *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2009
   *
 + *  Additions for eurephia plugin done by:
 + *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2009
@@ -41,7 +41,7 @@ Index: openvpn-2.1.3/options.c
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License version 2
   *  as published by the Free Software Foundation.
-@@ -79,6 +82,7 @@
+@@ -85,6 +88,7 @@
  #ifdef USE_PF_INET6
    " [PF_INET6]"
  #endif
@@ -49,13 +49,13 @@ Index: openvpn-2.1.3/options.c
    " built on " __DATE__
  ;
  
-Index: openvpn-2.1.3/ssl.c
+Index: openvpn-2.2.0/ssl.c
 ===================================================================
---- openvpn-2.1.3.orig/ssl.c	2010-07-27 08:12:04.000000000 +0200
-+++ openvpn-2.1.3/ssl.c	2010-09-29 13:15:32.009457925 +0200
-@@ -7,6 +7,10 @@
+--- openvpn-2.2.0.orig/ssl.c	2011-04-21 21:13:34.000000000 +0200
++++ openvpn-2.2.0/ssl.c	2011-05-10 16:33:23.904007483 +0200
+@@ -11,6 +11,10 @@
+  *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2008-2009
   *
-  *  Copyright (C) 2002-2010 OpenVPN Technologies, Inc. <sales@openvpn.net>
   *
 + *  Additions for eurephia plugin done by:
 + *         David Sommerseth <dazo@users.sourceforge.net> Copyright (C) 2008-2009
@@ -64,9 +64,9 @@ Index: openvpn-2.1.3/ssl.c
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License version 2
   *  as published by the Free Software Foundation.
-@@ -780,6 +784,14 @@
-   openvpn_snprintf (envname, sizeof(envname), "tls_id_%d", ctx->error_depth);
-   setenv_str (opt->es, envname, subject);
+@@ -388,6 +392,14 @@
+     }
+ }
  
 +  /* export X509 cert SHA1 fingerprint */
 +  {
@@ -77,5 +77,5 @@ Index: openvpn-2.1.3/ssl.c
 +    gc_free(&gc);
 +  }
  #if 0
-   /* export common name string as environmental variable */
-   openvpn_snprintf (envname, sizeof(envname), "tls_common_name_%d", ctx->error_depth);
+ static void
+ cert_hash_print (const struct cert_hash_set *chs, int msglevel)

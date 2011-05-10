@@ -26,9 +26,9 @@
 
 #include "buffer.h"
 #include "misc.h"
+#include "base64.h"
 #include "tun.h"
 #include "error.h"
-#include "thread.h"
 #include "otime.h"
 #include "plugin.h"
 #include "options.h"
@@ -229,7 +229,7 @@ run_up_down (const char *command,
 		  ifconfig_local, ifconfig_remote,
 		  context);
       argv_msg (M_INFO, &argv);
-      openvpn_execve_check (&argv, es, S_SCRIPT|S_FATAL, "script failed");
+      openvpn_run_script (&argv, es, S_FATAL, "--up/--down");
       argv_reset (&argv);
     }
 
@@ -492,6 +492,7 @@ openvpn_execve_allowed (const unsigned int flags)
     return script_security >= SSEC_BUILT_IN;
 }
 
+
 #ifndef WIN32
 /*
  * Run execve() inside a fork().  Designed to replicate the semantics of system() but
@@ -503,6 +504,7 @@ openvpn_execve (const struct argv *a, const struct env_set *es, const unsigned i
 {
   struct gc_arena gc = gc_new ();
   int ret = -1;
+  static bool warn_shown = false;
 
   if (a && a->argv[0])
     {
@@ -539,9 +541,10 @@ openvpn_execve (const struct argv *a, const struct env_set *es, const unsigned i
 	      ASSERT (0);
 	    }
 	}
-      else
+      else if (!warn_shown && (script_security < SSEC_SCRIPTS))
 	{
 	  msg (M_WARN, SCRIPT_SECURITY_WARNING);
+          warn_shown = true;
 	}
 #else
       msg (M_WARN, "openvpn_execve: execve function not available");
@@ -635,9 +638,7 @@ strerror_ts (int errnum, struct gc_arena *gc)
 #ifdef HAVE_STRERROR
   struct buffer out = alloc_buf_gc (256, gc);
 
-  mutex_lock_static (L_STRERR);
   buf_printf (&out, "%s", openvpn_strerror (errnum, gc));
-  mutex_unlock_static (L_STRERR);
   return BSTR (&out);
 #else
   return "[error string unavailable]";
@@ -775,18 +776,15 @@ struct env_set *
 env_set_create (struct gc_arena *gc)
 {
   struct env_set *es;
-  mutex_lock_static (L_ENV_SET);
   ALLOC_OBJ_CLEAR_GC (es, struct env_set, gc);
   es->list = NULL;
   es->gc = gc;
-  mutex_unlock_static (L_ENV_SET);
   return es;
 }
 
 void
 env_set_destroy (struct env_set *es)
 {
-  mutex_lock_static (L_ENV_SET);
   if (es && es->gc == NULL)
     {
       struct env_item *e = es->list;
@@ -799,7 +797,6 @@ env_set_destroy (struct env_set *es)
 	}
       free (es);
     }
-  mutex_unlock_static (L_ENV_SET);
 }
 
 bool
@@ -808,9 +805,7 @@ env_set_del (struct env_set *es, const char *str)
   bool ret;
   ASSERT (es);
   ASSERT (str);
-  mutex_lock_static (L_ENV_SET);
   ret = env_set_del_nolock (es, str);
-  mutex_unlock_static (L_ENV_SET);
   return ret;
 }
 
@@ -819,9 +814,7 @@ env_set_add (struct env_set *es, const char *str)
 {
   ASSERT (es);
   ASSERT (str);
-  mutex_lock_static (L_ENV_SET);
   env_set_add_nolock (es, str);
-  mutex_unlock_static (L_ENV_SET);
 }
 
 void
@@ -834,7 +827,6 @@ env_set_print (int msglevel, const struct env_set *es)
 
       if (es)
 	{
-	  mutex_lock_static (L_ENV_SET);
 	  e = es->list;
 	  i = 0;
 
@@ -845,7 +837,6 @@ env_set_print (int msglevel, const struct env_set *es)
 	      ++i;
 	      e = e->next;
 	    }
-	  mutex_unlock_static (L_ENV_SET);
 	}
     }
 }
@@ -859,14 +850,12 @@ env_set_inherit (struct env_set *es, const struct env_set *src)
 
   if (src)
     {
-      mutex_lock_static (L_ENV_SET);
       e = src->list;
       while (e)
 	{
 	  env_set_add_nolock (es, e->string);
 	  e = e->next;
 	}
-      mutex_unlock_static (L_ENV_SET);
     }
 }
 
@@ -878,7 +867,6 @@ env_set_add_to_environment (const struct env_set *es)
       struct gc_arena gc = gc_new ();
       const struct env_item *e;
 
-      mutex_lock_static (L_ENV_SET);
       e = es->list;
 
       while (e)
@@ -891,7 +879,6 @@ env_set_add_to_environment (const struct env_set *es)
 
 	  e = e->next;
 	}
-      mutex_unlock_static (L_ENV_SET);
       gc_free (&gc);
     }
 }
@@ -904,7 +891,6 @@ env_set_remove_from_environment (const struct env_set *es)
       struct gc_arena gc = gc_new ();
       const struct env_item *e;
 
-      mutex_lock_static (L_ENV_SET);
       e = es->list;
 
       while (e)
@@ -917,7 +903,6 @@ env_set_remove_from_environment (const struct env_set *es)
 
 	  e = e->next;
 	}
-      mutex_unlock_static (L_ENV_SET);
       gc_free (&gc);
     }
 }
@@ -1016,7 +1001,9 @@ setenv_str_ex (struct env_set *es,
 	{
 	  const char *str = construct_name_value (name_tmp, val_tmp, &gc);
 	  env_set_add (es, str);
-	  msg (M_INFO, "SETENV_ES '%s'", str);/**/
+#if DEBUG_VERBOSE_SETENV
+	  msg (M_INFO, "SETENV_ES '%s'", str);
+#endif
 	}
       else
 	env_set_del (es, name_tmp);
@@ -1036,12 +1023,10 @@ setenv_str_ex (struct env_set *es,
 	char *str = construct_name_value (name_tmp, val_tmp, NULL);
 	int status;
 
-	mutex_lock_static (L_PUTENV);
 	status = putenv (str);
 	/*msg (M_INFO, "PUTENV '%s'", str);*/
 	if (!status)
 	  manage_env (str);
-	mutex_unlock_static (L_PUTENV);
 	if (status)
 	  msg (M_WARN | M_ERRNO, "putenv('%s') failed", str);
       }
@@ -1178,9 +1163,7 @@ create_temp_file (const char *directory, const char *prefix, struct gc_arena *gc
       const char *rndstr;
 
       ++attempts;
-      mutex_lock_static (L_CREATE_TEMP);
       ++counter;
-      mutex_unlock_static (L_CREATE_TEMP);
 
       prng_bytes (rndbytes, sizeof rndbytes);
       rndstr = format_hex_ex (rndbytes, sizeof rndbytes, 40, 0, NULL, gc);
@@ -1394,10 +1377,11 @@ get_console_input (const char *prompt, const bool echo, char *input, const int c
  */
 
 bool
-get_user_pass (struct user_pass *up,
-	       const char *auth_file,
-	       const char *prefix,
-	       const unsigned int flags)
+get_user_pass_cr (struct user_pass *up,
+		  const char *auth_file,
+		  const char *prefix,
+		  const unsigned int flags,
+		  const char *auth_challenge)
 {
   struct gc_arena gc = gc_new ();
 
@@ -1410,7 +1394,7 @@ get_user_pass (struct user_pass *up,
 
 #ifdef ENABLE_MANAGEMENT
       /*
-       * Get username/password from standard input?
+       * Get username/password from management interface?
        */
       if (management
 	  && ((auth_file && streq (auth_file, "management")) || (from_stdin && (flags & GET_USER_PASS_MANAGEMENT)))
@@ -1450,22 +1434,47 @@ get_user_pass (struct user_pass *up,
        */
       else if (from_stdin)
 	{
-	  struct buffer user_prompt = alloc_buf_gc (128, &gc);
-	  struct buffer pass_prompt = alloc_buf_gc (128, &gc);
-
-	  buf_printf (&user_prompt, "Enter %s Username:", prefix);
-	  buf_printf (&pass_prompt, "Enter %s Password:", prefix);
-
-	  if (!(flags & GET_USER_PASS_PASSWORD_ONLY))
+#ifdef ENABLE_CLIENT_CR
+	  if (auth_challenge)
 	    {
-	      if (!get_console_input (BSTR (&user_prompt), true, up->username, USER_PASS_LEN))
-		msg (M_FATAL, "ERROR: could not read %s username from stdin", prefix);
-	      if (strlen (up->username) == 0)
-		msg (M_FATAL, "ERROR: %s username is empty", prefix);
-	    }
+	      struct auth_challenge_info *ac = get_auth_challenge (auth_challenge, &gc);
+	      if (ac)
+		{
+		  char *response = (char *) gc_malloc (USER_PASS_LEN, false, &gc);
+		  struct buffer packed_resp;
 
-	  if (!get_console_input (BSTR (&pass_prompt), false, up->password, USER_PASS_LEN))
-	    msg (M_FATAL, "ERROR: could not not read %s password from stdin", prefix);
+		  buf_set_write (&packed_resp, (uint8_t*)up->password, USER_PASS_LEN);
+		  msg (M_INFO, "CHALLENGE: %s", ac->challenge_text);
+		  if (!get_console_input ("Response:", BOOL_CAST(ac->flags&CR_ECHO), response, USER_PASS_LEN))
+		    msg (M_FATAL, "ERROR: could not read challenge response from stdin");
+		  strncpynt (up->username, ac->user, USER_PASS_LEN);
+		  buf_printf (&packed_resp, "CRV1::%s::%s", ac->state_id, response);
+		}
+	      else
+		{
+		  msg (M_FATAL, "ERROR: received malformed challenge request from server");
+		}
+	    }
+	  else
+#endif
+	    {
+	      struct buffer user_prompt = alloc_buf_gc (128, &gc);
+	      struct buffer pass_prompt = alloc_buf_gc (128, &gc);
+
+	      buf_printf (&user_prompt, "Enter %s Username:", prefix);
+	      buf_printf (&pass_prompt, "Enter %s Password:", prefix);
+
+	      if (!(flags & GET_USER_PASS_PASSWORD_ONLY))
+		{
+		  if (!get_console_input (BSTR (&user_prompt), true, up->username, USER_PASS_LEN))
+		    msg (M_FATAL, "ERROR: could not read %s username from stdin", prefix);
+		  if (strlen (up->username) == 0)
+		    msg (M_FATAL, "ERROR: %s username is empty", prefix);
+		}
+
+	      if (!get_console_input (BSTR (&pass_prompt), false, up->password, USER_PASS_LEN))
+		msg (M_FATAL, "ERROR: could not not read %s password from stdin", prefix);
+	    }
 	}
       else
 	{
@@ -1528,6 +1537,101 @@ get_user_pass (struct user_pass *up,
 
   return true;
 }
+
+#ifdef ENABLE_CLIENT_CR
+
+/*
+ * Parse a challenge message returned along with AUTH_FAILED.
+ * The message is formatted as such:
+ *
+ *  CRV1:<flags>:<state_id>:<username_base64>:<challenge_text>
+ *
+ * flags: a series of optional, comma-separated flags:
+ *  E : echo the response when the user types it
+ *  R : a response is required
+ *
+ * state_id: an opaque string that should be returned to the server
+ *  along with the response.
+ *
+ * username_base64 : the username formatted as base64
+ *
+ * challenge_text : the challenge text to be shown to the user
+ *
+ * Example challenge:
+ *
+ *   CRV1:R,E:Om01u7Fh4LrGBS7uh0SWmzwabUiGiW6l:Y3Ix:Please enter token PIN
+ *
+ * After showing the challenge_text and getting a response from the user
+ * (if R flag is specified), the client should submit the following
+ * auth creds back to the OpenVPN server:
+ *
+ * Username: [username decoded from username_base64]
+ * Password: CRV1::<state_id>::<response_text>
+ *
+ * Where state_id is taken from the challenge request and response_text
+ * is what the user entered in response to the challenge_text.
+ * If the R flag is not present, response_text may be the empty
+ * string.
+ *
+ * Example response (suppose the user enters "8675309" for the token PIN):
+ *
+ *   Username: cr1 ("Y3Ix" base64 decoded)
+ *   Password: CRV1::Om01u7Fh4LrGBS7uh0SWmzwabUiGiW6l::8675309
+ */
+struct auth_challenge_info *
+get_auth_challenge (const char *auth_challenge, struct gc_arena *gc)
+{
+  if (auth_challenge)
+    {
+      struct auth_challenge_info *ac;
+      const int len = strlen (auth_challenge);
+      char *work = (char *) gc_malloc (len+1, false, gc);
+      char *cp;
+
+      struct buffer b;
+      buf_set_read (&b, (const uint8_t *)auth_challenge, len);
+
+      ALLOC_OBJ_CLEAR_GC (ac, struct auth_challenge_info, gc);
+
+      /* parse prefix */
+      if (!buf_parse(&b, ':', work, len))
+	return NULL;
+      if (strcmp(work, "CRV1"))
+	return NULL;
+
+      /* parse flags */
+      if (!buf_parse(&b, ':', work, len))
+	return NULL;
+      for (cp = work; *cp != '\0'; ++cp)
+	{
+	  const char c = *cp;
+	  if (c == 'E')
+	    ac->flags |= CR_ECHO;
+	  else if (c == 'R')
+	    ac->flags |= CR_RESPONSE;
+	}
+      
+      /* parse state ID */
+      if (!buf_parse(&b, ':', work, len))
+	return NULL;
+      ac->state_id = string_alloc(work, gc);
+
+      /* parse user name */
+      if (!buf_parse(&b, ':', work, len))
+	return NULL;
+      ac->user = (char *) gc_malloc (strlen(work)+1, true, gc);
+      base64_decode(work, (void*)ac->user);
+
+      /* parse challenge text */
+      ac->challenge_text = string_alloc(BSTR(&b), gc);
+
+      return ac;
+    }
+  else
+    return NULL;
+}
+
+#endif
 
 #if AUTO_USERID
 

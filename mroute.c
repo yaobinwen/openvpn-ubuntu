@@ -421,17 +421,24 @@ mroute_addr_print_ex (const struct mroute_addr *ma,
 	  }
 	  break;
 	case MR_ADDR_IPV6:
-	  buf_printf (&out, "IPV6"); 
-	  break;
-	default:
-	  buf_printf (&out, "UNKNOWN"); 
-	  break;
-	}
-      return BSTR (&out);
-    }
-  else
-    return "[NULL]";
-}
+	  {
+	    buf_printf (&out, "%s",
+		  print_in6_addr( *(struct in6_addr*)&maddr.addr, 0, gc)); 
+	    if (maddr.type & MR_WITH_NETBITS)
+	      {
+		buf_printf (&out, "/%d", maddr.netbits);
+	      }
+	    }
+	    break;
+	  default:
+	    buf_printf (&out, "UNKNOWN"); 
+	    break;
+	  }
+	return BSTR (&out);
+      }
+    else
+      return "[NULL]";
+  }
 
 /*
  * mroute_helper's main job is keeping track of
@@ -444,7 +451,6 @@ mroute_helper_init (int ageable_ttl_secs)
 {
   struct mroute_helper *mh;
   ALLOC_OBJ_CLEAR (mh, struct mroute_helper);
-  /*mutex_init (&mh->mutex);*/
   mh->ageable_ttl_secs = ageable_ttl_secs;
   return mh;
 }
@@ -482,12 +488,10 @@ mroute_helper_add_iroute (struct mroute_helper *mh, const struct iroute *ir)
   if (ir->netbits >= 0)
     {
       ASSERT (ir->netbits < MR_HELPER_NET_LEN);
-      mroute_helper_lock (mh);
       ++mh->cache_generation;
       ++mh->net_len_refcount[ir->netbits];
       if (mh->net_len_refcount[ir->netbits] == 1)
 	mroute_helper_regenerate (mh);
-      mroute_helper_unlock (mh);
     }
 }
 
@@ -497,13 +501,11 @@ mroute_helper_del_iroute (struct mroute_helper *mh, const struct iroute *ir)
   if (ir->netbits >= 0)
     {
       ASSERT (ir->netbits < MR_HELPER_NET_LEN);
-      mroute_helper_lock (mh);
       ++mh->cache_generation;
       --mh->net_len_refcount[ir->netbits];
       ASSERT (mh->net_len_refcount[ir->netbits] >= 0);
       if (!mh->net_len_refcount[ir->netbits])
 	mroute_helper_regenerate (mh);
-      mroute_helper_unlock (mh);
     }
 }
 
@@ -519,12 +521,10 @@ mroute_helper_add_iroute6 (struct mroute_helper *mh,
   if (ir6->netbits >= 0)
     {
       ASSERT (ir6->netbits < MR_HELPER_NET_LEN);
-      mroute_helper_lock (mh);
       ++mh->cache_generation;
       ++mh->net_len_refcount[ir6->netbits];
       if (mh->net_len_refcount[ir6->netbits] == 1)
 	mroute_helper_regenerate (mh);
-      mroute_helper_unlock (mh);
     }
 }
 
@@ -535,20 +535,17 @@ mroute_helper_del_iroute6 (struct mroute_helper *mh,
   if (ir6->netbits >= 0)
     {
       ASSERT (ir6->netbits < MR_HELPER_NET_LEN);
-      mroute_helper_lock (mh);
       ++mh->cache_generation;
       --mh->net_len_refcount[ir6->netbits];
       ASSERT (mh->net_len_refcount[ir6->netbits] >= 0);
       if (!mh->net_len_refcount[ir6->netbits])
 	mroute_helper_regenerate (mh);
-      mroute_helper_unlock (mh);
     }
 }
 
 void
 mroute_helper_free (struct mroute_helper *mh)
 {
-  /*mutex_destroy (&mh->mutex);*/
   free (mh);
 }
 

@@ -26,7 +26,6 @@
 
 #include "socket.h"
 #include "fdmisc.h"
-#include "thread.h"
 #include "misc.h"
 #include "gremlin.h"
 #include "plugin.h"
@@ -53,12 +52,13 @@ const int proto_overhead[] = { /* indexed by PROTO_x */
  * Convert sockflags/getaddr_flags into getaddr_flags
  */
 static unsigned int
-sf2gaf(unsigned int getaddr_flags,
+sf2gaf(const unsigned int getaddr_flags,
        const unsigned int sockflags)
 {
-  getaddr_flags |= (sockflags & SF_GETADDRINFO_DGRAM) ? GETADDR_DGRAM : 0;
-  getaddr_flags |= (sockflags & SF_HOST_RANDOMIZE) ? GETADDR_RANDOMIZE : 0;
-  return getaddr_flags;
+  if (sockflags & SF_HOST_RANDOMIZE)
+    return getaddr_flags | GETADDR_RANDOMIZE;
+  else
+    return getaddr_flags;
 }
 
 /*
@@ -862,9 +862,17 @@ create_socket_udp (const unsigned int flags)
   else if (flags & SF_USE_IP_PKTINFO)
     {
       int pad = 1;
+#ifdef IP_PKTINFO
       if (setsockopt (sd, SOL_IP, IP_PKTINFO,
 		      (void*)&pad, sizeof(pad)) < 0)
         msg(M_SOCKERR, "UDP: failed setsockopt for IP_PKTINFO");
+#elif defined(IP_RECVDSTADDR)
+      if (setsockopt (sd, IPPROTO_IP, IP_RECVDSTADDR,
+		      (void*)&pad, sizeof(pad)) < 0)
+        msg(M_SOCKERR, "UDP: failed setsockopt for IP_RECVDSTADDR");
+#else
+#error ENABLE_IP_PKTINFO is set without IP_PKTINFO xor IP_RECVDSTADDR (fix syshead.h)
+#endif
     }
 #endif
   return sd;
@@ -2150,7 +2158,7 @@ link_socket_connection_initiated (const struct buffer *buf,
       struct argv argv = argv_new ();
       setenv_str (es, "script_type", "ipchange");
       ipchange_fmt (true, &argv, info, &gc);
-      openvpn_execve_check (&argv, es, S_SCRIPT, "ip-change command failed");
+      openvpn_run_script (&argv, es, 0, "--ipchange");
       argv_reset (&argv);
     }
 
@@ -2451,11 +2459,11 @@ print_sockaddr_ex (const struct openvpn_sockaddr *addr,
 	{
 	  const int port= ntohs (addr->addr.in4.sin_port);
 	  buf_puts (&out, "[AF_INET]");
-	  mutex_lock_static (L_INET_NTOA);
-	  buf_puts (&out, (addr_is_defined ? inet_ntoa (addr->addr.in4.sin_addr) : "[undef]"));
-	  mutex_unlock_static (L_INET_NTOA);
 
-	  if (((flags & PS_SHOW_PORT) || (addr_is_defined && (flags & PS_SHOW_PORT_IF_DEFINED)))
+	  if (!(flags & PS_DONT_SHOW_ADDR))
+	    buf_printf (&out, "%s", (addr_defined (addr) ? inet_ntoa (addr->addr.in4.sin_addr) : "[undef]"));
+
+	  if (((flags & PS_SHOW_PORT) || (addr_defined (addr) && (flags & PS_SHOW_PORT_IF_DEFINED)))
 	      && port)
 	    {
 	      if (separator)
@@ -2500,6 +2508,10 @@ print_link_socket_actual (const struct link_socket_actual *act, struct gc_arena 
   return print_link_socket_actual_ex (act, ":", PS_SHOW_PORT|PS_SHOW_PKTINFO, gc);
 }
 
+#ifndef IF_NAMESIZE
+#define IF_NAMESIZE 16
+#endif
+
 const char *
 print_link_socket_actual_ex (const struct link_socket_actual *act,
 			     const char *separator,
@@ -2523,8 +2535,15 @@ print_link_socket_actual_ex (const struct link_socket_actual *act,
 		  struct openvpn_sockaddr sa;
 		  CLEAR (sa);
 		  sa.addr.in4.sin_family = AF_INET;
+#ifdef IP_PKTINFO
 		  sa.addr.in4.sin_addr = act->pi.in4.ipi_spec_dst;
 		  if_indextoname(act->pi.in4.ipi_ifindex, ifname);
+#elif defined(IP_RECVDSTADDR)
+		  sa.addr.in4.sin_addr = act->pi.in4;
+		  ifname[0]=0;
+#else
+#error ENABLE_IP_PKTINFO is set without IP_PKTINFO xor IP_RECVDSTADDR (fix syshead.h)
+#endif
 		  buf_printf (&out, " (via %s%%%s)",
 			      print_sockaddr_ex (&sa, separator, 0, gc),
 			      ifname);
@@ -2572,9 +2591,7 @@ print_in_addr_t (in_addr_t addr, unsigned int flags, struct gc_arena *gc)
       CLEAR (ia);
       ia.s_addr = (flags & IA_NET_ORDER) ? addr : htonl (addr);
 
-      mutex_lock_static (L_INET_NTOA);
       buf_printf (&out, "%s", inet_ntoa (ia));
-      mutex_unlock_static (L_INET_NTOA);
     }
   return BSTR (&out);
 }
@@ -2582,7 +2599,6 @@ print_in_addr_t (in_addr_t addr, unsigned int flags, struct gc_arena *gc)
 /*
  * Convert an in6_addr in host byte order
  * to an ascii representation of an IPv6 address
- * (we reuse the L_INET_NTOA mutex, no contention here)
  */
 const char *
 print_in6_addr (struct in6_addr a6, unsigned int flags, struct gc_arena *gc)
@@ -2593,10 +2609,8 @@ print_in6_addr (struct in6_addr a6, unsigned int flags, struct gc_arena *gc)
   if ( memcmp(&a6, &in6addr_any, sizeof(a6)) != 0 || 
        !(flags & IA_EMPTY_IF_UNDEF))
     {
-      mutex_lock_static (L_INET_NTOA);
       inet_ntop (AF_INET6, &a6, tmp_out_buf, sizeof(tmp_out_buf)-1);
       buf_printf (&out, "%s", tmp_out_buf );
-      mutex_unlock_static (L_INET_NTOA);
     }
   return BSTR (&out);
 }
@@ -2648,9 +2662,7 @@ setenv_sockaddr (struct env_set *es, const char *name_prefix, const struct openv
       else
 	openvpn_snprintf (name_buf, sizeof (name_buf), "%s", name_prefix);
 
-      mutex_lock_static (L_INET_NTOA);
       setenv_str (es, name_buf, inet_ntoa (addr->addr.in4.sin_addr));
-      mutex_unlock_static (L_INET_NTOA);
 
       if ((flags & SA_IP_PORT) && addr->addr.in4.sin_port)
 	{
@@ -2665,8 +2677,11 @@ setenv_sockaddr (struct env_set *es, const char *name_prefix, const struct openv
 		  buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
       setenv_str (es, name_buf, buf);
 
-      openvpn_snprintf (name_buf, sizeof (name_buf), "%s_port", name_prefix);
-      setenv_int (es, name_buf, ntohs (addr->addr.in6.sin6_port));
+      if ((flags & SA_IP_PORT) && addr->addr.in6.sin6_port)
+	{
+	  openvpn_snprintf (name_buf, sizeof (name_buf), "%s_port", name_prefix);
+	  setenv_int (es, name_buf, ntohs (addr->addr.in6.sin6_port));
+	}
       break;
     }
 #endif
@@ -2920,7 +2935,12 @@ link_socket_read_tcp (struct link_socket *sock,
 struct openvpn_in4_pktinfo
 {
   struct cmsghdr cmsghdr;
+#ifdef HAVE_IN_PKTINFO
   struct in_pktinfo pi4;
+#endif
+#ifdef IP_RECVDSTADDR
+  struct in_addr pi4;
+#endif
 };
 #ifdef USE_PF_INET6
 struct openvpn_in6_pktinfo
@@ -2965,13 +2985,26 @@ link_socket_read_udp_posix_recvmsg (struct link_socket *sock,
       cmsg = CMSG_FIRSTHDR (&mesg);
       if (cmsg != NULL
 	  && CMSG_NXTHDR (&mesg, cmsg) == NULL
+#ifdef IP_PKTINFO
 	  && cmsg->cmsg_level == SOL_IP 
 	  && cmsg->cmsg_type == IP_PKTINFO
+#elif defined(IP_RECVDSTADDR)
+	  && cmsg->cmsg_level == IPPROTO_IP
+	  && cmsg->cmsg_type == IP_RECVDSTADDR
+#else
+#error ENABLE_IP_PKTINFO is set without IP_PKTINFO xor IP_RECVDSTADDR (fix syshead.h)
+#endif
 	  && cmsg->cmsg_len >= sizeof (struct openvpn_in4_pktinfo))
 	{
+#ifdef IP_PKTINFO
 	  struct in_pktinfo *pkti = (struct in_pktinfo *) CMSG_DATA (cmsg);
 	  from->pi.in4.ipi_ifindex = pkti->ipi_ifindex;
 	  from->pi.in4.ipi_spec_dst = pkti->ipi_spec_dst;
+#elif defined(IP_RECVDSTADDR)
+	  from->pi.in4 = *(struct in_addr*) CMSG_DATA (cmsg);
+#else
+#error ENABLE_IP_PKTINFO is set without IP_PKTINFO xor IP_RECVDSTADDR (fix syshead.h)
+#endif
 	}
 #ifdef USE_PF_INET6
       else if (cmsg != NULL
@@ -3056,7 +3089,6 @@ link_socket_write_udp_posix_sendmsg (struct link_socket *sock,
     case AF_INET:
       {
         struct openvpn_in4_pktinfo msgpi4;
-        struct in_pktinfo *pkti;
         mesg.msg_name = &to->dest.addr.sa;
         mesg.msg_namelen = sizeof (struct sockaddr_in);
         mesg.msg_control = &msgpi4;
@@ -3064,12 +3096,23 @@ link_socket_write_udp_posix_sendmsg (struct link_socket *sock,
         mesg.msg_flags = 0;
         cmsg = CMSG_FIRSTHDR (&mesg);
         cmsg->cmsg_len = sizeof (struct openvpn_in4_pktinfo);
+#ifdef HAVE_IN_PKTINFO
         cmsg->cmsg_level = SOL_IP;
         cmsg->cmsg_type = IP_PKTINFO;
+	{
+        struct in_pktinfo *pkti;
         pkti = (struct in_pktinfo *) CMSG_DATA (cmsg);
         pkti->ipi_ifindex = to->pi.in4.ipi_ifindex;
         pkti->ipi_spec_dst = to->pi.in4.ipi_spec_dst;
         pkti->ipi_addr.s_addr = 0;
+	}
+#elif defined(IP_RECVDSTADDR)
+        cmsg->cmsg_level = IPPROTO_IP;
+        cmsg->cmsg_type = IP_RECVDSTADDR;
+        *(struct in_addr *) CMSG_DATA (cmsg) = to->pi.in4;
+#else
+#error ENABLE_IP_PKTINFO is set without IP_PKTINFO xor IP_RECVDSTADDR (fix syshead.h)
+#endif
         break;
       }
 #ifdef USE_PF_INET6
