@@ -56,6 +56,7 @@ start_vpn () {
     fi
 
     # Handle backwards compatibility
+    script_security=""
     if test -z "$( grep '^[[:space:]]*script-security[[:space:]]' $CONFIG_DIR/$NAME.conf )" ; then
         script_security="--script-security 2"
     fi
