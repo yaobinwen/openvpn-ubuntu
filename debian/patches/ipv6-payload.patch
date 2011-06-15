@@ -1,3 +1,6 @@
+Description: IPv6 payload support
+Author: Gert Döring
+URL: http://www.greenie.net/ipv6/openvpn.html
 Index: openvpn-2.2.0/ChangeLog.IPv6
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000

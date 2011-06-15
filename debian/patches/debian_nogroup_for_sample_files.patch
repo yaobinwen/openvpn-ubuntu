@@ -1,3 +1,6 @@
+Description: Unpriviledged group in Debian is called nogroup instead of nobody
+Author: Alberto Gonzalez Iniesta <agi@inittab.org>
+Bug-Debian: http://bugs.debian.org/317987
 Index: openvpn-2.1_rc15/sample-config-files/server.conf
 ===================================================================
 --- openvpn-2.1_rc15.orig/sample-config-files/server.conf	2009-04-30 12:58:46.468752631 +0200

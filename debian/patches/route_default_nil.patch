@@ -1,3 +1,5 @@
+Description: Fix small wording in man page.
+Author: Alberto Gonzalez Iniesta <agi@inittab.org>
 Index: openvpn-2.2.0/openvpn.8
 ===================================================================
 --- openvpn-2.2.0.orig/openvpn.8	2011-05-10 16:30:14.924001253 +0200
