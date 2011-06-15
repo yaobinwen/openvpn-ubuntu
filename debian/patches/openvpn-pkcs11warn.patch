@@ -1,3 +1,6 @@
+Description: Warn users about deprecated pkcs11 options
+Author: Florian Kulzer <florian.kulzer+debian@icfo.es>
+Bug-Debian: http://bugs.debian.org/475353
 Index: openvpn-2.2.0/options.c
 ===================================================================
 --- openvpn-2.2.0.orig/options.c	2011-04-21 21:13:34.000000000 +0200

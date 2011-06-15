@@ -1,3 +1,6 @@
+Description: Improve kFreeBSD support
+Author: Gonéri Le Bouder <goneri@rulezlan.org>
+Bug-Debian: http://bugs.debian.org/626062
 Index: openvpn-2.2.0/route.c
 ===================================================================
 --- openvpn-2.2.0.orig/route.c	2011-05-10 16:50:20.556000843 +0200
