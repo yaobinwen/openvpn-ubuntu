@@ -540,8 +540,6 @@ init_route_list (struct route_list *rl,
 
         CLEAR(netlist);		/* init_route() will not always init this */
 
-	CLEAR(netlist);                /* init_route() will not always init this */
-
 	if (!init_route (&r,
 			 &netlist,
 			 &opt->routes[i],

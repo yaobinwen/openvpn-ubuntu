@@ -31,6 +31,7 @@ test -d $CONFIG_DIR || exit 0
 # Source defaults file; edit that file to configure this script.
 AUTOSTART="all"
 STATUSREFRESH=10
+OMIT_SENDSIGS=0
 if test -e /etc/default/openvpn ; then
   . /etc/default/openvpn
 fi
@@ -63,10 +64,13 @@ start_vpn () {
         --exec $DAEMON -- $OPTARGS --writepid /var/run/openvpn.$NAME.pid \
         $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
         --config $CONFIG_DIR/$NAME.conf || STATUS=1
+
+    [ "$OMIT_SENDSIGS" -ne 0 ] || ln -s /var/run/openvpn.$NAME.pid /run/sendsigs.omit.d/openvpn.$NAME.pid
 }
 stop_vpn () {
   kill `cat $PIDFILE` || true
   rm -f $PIDFILE
+  [ "$OMIT_SENDSIGS" -ne 0 ] || rm -f /run/sendsigs.omit.d/openvpn.$NAME.pid
   rm -f /var/run/openvpn.$NAME.status 2> /dev/null
 }
 
