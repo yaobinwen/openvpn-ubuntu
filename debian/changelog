@@ -1,3 +1,14 @@
+openvpn (2.2.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Added OMIT_SENDSIGS option in init.d script to let openvpn run after
+    sendsigs on system reboot or shutdown. (Closes: #636864)
+  * Configure with --enable-iproute2.
+  * Change path to route on kFreeBSD. (Closes: #646221) Thanks Robert Millan.
+
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 13 Dec 2011 11:04:22 +0100
+
 openvpn (2.2.0-2) unstable; urgency=low
 
   * Upload to unstable
