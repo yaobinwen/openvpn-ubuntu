@@ -20,10 +20,10 @@ msgstr ""
 "PO-Revision-Date: 2008-05-30 23:52+0900\n"
 "Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
-"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ja\n"
 
 #. Type: boolean
 #. Description
@@ -47,33 +47,42 @@ msgstr ""
 msgid "You should not choose this option if you're using devfs."
 msgstr "devfs を使っている場合は「いいえ」と答えてください。"
 
-#~ msgid "Vulnerable random number generator"
-#~ msgstr "脆弱な乱数生成器について"
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid "Vulnerable random number generator"
+msgstr "脆弱な乱数生成器について"
 
-#~ msgid ""
-#~ "A weakness has been discovered in the random number generator used by "
-#~ "OpenSSL on Ubuntu and Debian systems.  As a result of this weakness, "
-#~ "certain encryption keys are generated much more frequently than they "
-#~ "should be, such that an attacker could guess the key through a brute-"
-#~ "force attack given minimal knowledge of the system."
-#~ msgstr ""
-#~ "Ubuntu および Debian のシステムの OpenSSL で利用されている乱数生成器に弱点"
-#~ "が見つかりました。この弱点によって、本来あるべきより頻繁に特定の暗号鍵が生"
-#~ "成されてしまうことになり、システムについてほんの少しだけ知識を得るだけで、"
-#~ "攻撃者が総当たり攻撃によって鍵を推測できてしまいます。"
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid ""
+"A weakness has been discovered in the random number generator used by "
+"OpenSSL on Ubuntu and Debian systems.  As a result of this weakness, certain "
+"encryption keys are generated much more frequently than they should be, such "
+"that an attacker could guess the key through a brute-force attack given "
+"minimal knowledge of the system."
+msgstr ""
+"Ubuntu および Debian のシステムの OpenSSL で利用されている乱数生成器に弱点が"
+"見つかりました。この弱点によって、本来あるべきより頻繁に特定の暗号鍵が生成さ"
+"れてしまうことになり、システムについてほんの少しだけ知識を得るだけで、攻撃者"
+"が総当たり攻撃によって鍵を推測できてしまいます。"
 
-#~ msgid ""
-#~ "Any keys created on a vulnerable system may be affected by this problem. "
-#~ "The 'openssl-vulnkey' command may be used as a partial test for RSA keys "
-#~ "with certain bit sizes, and the 'openvpn-vulnkey' for OpenVPN shared "
-#~ "secret keys. Users are urged to verify their keys or simply regenerate "
-#~ "any server or client certificates and keys in use on the system."
-#~ msgstr ""
-#~ "脆弱性があるシステムで生成された全ての鍵がこの問題の影響を受けます。特定の"
-#~ "ビット数の RSA 鍵については 'openssl-vulnkey' コマンドが、OpenVPN の共有秘"
-#~ "密鍵には 'openvpn-vulnkey' コマンドが部分的なテストとして利用できます。"
-#~ "ユーザには鍵の確認を行うか、システムで利用しているサーバ／クライアント証明"
-#~ "書及び鍵を単に再生成することをお勧めします。"
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid ""
+"Any keys created on a vulnerable system may be affected by this problem. The "
+"'openssl-vulnkey' command may be used as a partial test for RSA keys with "
+"certain bit sizes, and the 'openvpn-vulnkey' for OpenVPN shared secret keys. "
+"Users are urged to verify their keys or simply regenerate any server or "
+"client certificates and keys in use on the system."
+msgstr ""
+"脆弱性があるシステムで生成された全ての鍵がこの問題の影響を受けます。特定の"
+"ビット数の RSA 鍵については 'openssl-vulnkey' コマンドが、OpenVPN の共有秘密"
+"鍵には 'openvpn-vulnkey' コマンドが部分的なテストとして利用できます。ユーザに"
+"は鍵の確認を行うか、システムで利用しているサーバ／クライアント証明書及び鍵を"
+"単に再生成することをお勧めします。"
 
 #~ msgid "Would you like to start openvpn sooner?"
 #~ msgstr "openvpn をすぐに起動しますか?"
