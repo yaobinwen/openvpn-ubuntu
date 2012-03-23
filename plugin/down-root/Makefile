@@ -8,10 +8,10 @@ INCLUDE=-I../..
 CC_FLAGS=-O2 -Wall
 
 down-root.so : down-root.o
-	gcc ${CC_FLAGS} -fPIC -shared -Wl,-soname,openvpn-down-root.so -o openvpn-down-root.so down-root.o -lc
+	gcc ${CFLAGS} ${CC_FLAGS} ${LDFLAGS} -fPIC -shared -Wl,-soname,openvpn-down-root.so -o openvpn-down-root.so down-root.o -lc
 
 down-root.o : down-root.c
-	gcc ${CC_FLAGS} -fPIC -c ${INCLUDE} down-root.c
+	gcc ${CFLAGS} ${CC_FLAGS} ${CPPFLAGS} -fPIC -c ${INCLUDE} down-root.c
 
 clean :
 	rm -f *.o *.so
