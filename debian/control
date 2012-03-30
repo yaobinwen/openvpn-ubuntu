@@ -1,14 +1,15 @@
 Source: openvpn
 Section: net
 Priority: optional
-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
 Build-Depends: debhelper (>= 7.0.50~), libssl-dev (>> 0.9.8g-9), liblzo2-dev, libpam0g-dev, libpkcs11-helper1-dev
 Standards-Version: 3.9.2
 Homepage: http://www.openvpn.net/
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, net-tools, initscripts (>= 2.88dsf-13.3)
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, net-tools, initscripts (>= 2.88dsf-13.3), lsb-base (>= 3.2-14)
 Suggests: openssl, resolvconf
 Description: virtual private network daemon
  OpenVPN is an application to securely tunnel IP networks over a
