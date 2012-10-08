@@ -1,3 +1,9 @@
+openvpn (2.2.1-8ubuntu2) quantal; urgency=low
+
+  * Rebuild for new armel compiler default of ARMv5t.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 08 Oct 2012 08:36:47 +0100
+
 openvpn (2.2.1-8ubuntu1) precise; urgency=low
 
   * Merge at Simon Deziel's request to build with PIE.
