@@ -1097,7 +1097,7 @@ do_ifconfig (struct tuntap *tt,
 	  add_route_connected_v6_net(tt, es);
 	}
 
-#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
+#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)||defined(__FreeBSD_kernel__)
 
       /* example: ifconfig tun2 10.2.0.2 10.2.0.1 mtu 1450 netmask 255.255.255.255 up */
       if (tun)

@@ -1412,7 +1412,7 @@ add_route (struct route *r,
   argv_msg (D_ROUTE, &argv);
   status = openvpn_execve_check (&argv, es, 0, "ERROR: Solaris route add command failed");
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD)||defined(__FreeBSD_kernel__)
 
   argv_printf (&argv, "%s add",
 		ROUTE_PATH);
