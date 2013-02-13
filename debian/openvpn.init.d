@@ -89,7 +89,7 @@ start_vpn () {
         --pidfile /var/run/openvpn.$NAME.pid \
         --exec $DAEMON -- $OPTARGS --writepid /var/run/openvpn.$NAME.pid \
         $DAEMONARG $STATUSARG --cd $CONFIG_DIR \
-        --config $CONFIG_DIR/$NAME.conf < /dev/null || STATUS=1
+        --config $CONFIG_DIR/$NAME.conf $script_security < /dev/null || STATUS=1
 
     [ "$OMIT_SENDSIGS" -ne 1 ] || ln -s /var/run/openvpn.$NAME.pid /run/sendsigs.omit.d/openvpn.$NAME.pid
 
