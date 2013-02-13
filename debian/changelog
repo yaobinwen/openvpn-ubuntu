@@ -1,3 +1,11 @@
+openvpn (2.2.1-8ubuntu2.1) quantal-proposed; urgency=low
+
+  [ Marc Gariépy ]
+  * Add --script-security to the init.d script (was generated but not passed
+    to openvpn). (LP: #1124398)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 13 Feb 2013 16:10:48 -0500
+
 openvpn (2.2.1-8ubuntu2) quantal; urgency=low
 
   * Rebuild for new armel compiler default of ARMv5t.
