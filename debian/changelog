@@ -1,3 +1,17 @@
+openvpn (2.3.1-1) unstable; urgency=low
+
+  * New upstream version. Fixes use of non-constant-time memcmp in HMAC
+    comparison. CVE-2013-2061 (Closes: #707329)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 17 May 2013 11:54:31 +0200
+
+openvpn (2.3.0-1) experimental; urgency=low
+
+  * New upstream release
+  * Add easy-rsa to Recommends
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 12 Nov 2012 16:56:47 +0100
+
 openvpn (2.3~rc1-1) experimental; urgency=low
 
   * Upload to experimental
