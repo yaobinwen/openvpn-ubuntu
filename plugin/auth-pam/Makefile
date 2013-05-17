@@ -18,13 +18,13 @@ INCLUDE=-I../..
 CC_FLAGS=-O2 -Wall -DDLOPEN_PAM=$(DLOPEN_PAM)
 
 openvpn-auth-pam.so : auth-pam.o pamdl.o
-	gcc ${CC_FLAGS} -fPIC -shared -Wl,-soname,openvpn-auth-pam.so -o openvpn-auth-pam.so auth-pam.o pamdl.o -lc $(LIBPAM)
+	gcc ${CFLAGS} ${CC_FLAGS} ${LDFLAGS} -fPIC -shared -Wl,-soname,openvpn-auth-pam.so -o openvpn-auth-pam.so auth-pam.o pamdl.o -lc $(LIBPAM)
 
 auth-pam.o : auth-pam.c pamdl.h
-	gcc ${CC_FLAGS} -fPIC -c ${INCLUDE} auth-pam.c
+	gcc ${CFLAGS} ${CC_FLAGS} ${CPPFLAGS} -fPIC -c ${INCLUDE} auth-pam.c
 
 pamdl.o : pamdl.c pamdl.h
-	gcc ${CC_FLAGS} -fPIC -c ${INCLUDE} pamdl.c
+	gcc ${CFLAGS} ${CC_FLAGS} ${CPPFLAGS} -fPIC -c ${INCLUDE} pamdl.c
 
 clean :
 	rm -f *.o *.so
