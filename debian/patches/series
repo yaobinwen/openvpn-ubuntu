@@ -9,3 +9,4 @@ kfreebsd_support.patch
 accommodate_typo.patch
 manpage_fixes.patch
 use-dpkg-buildflags.patch
+cve-2013-2061.patch
