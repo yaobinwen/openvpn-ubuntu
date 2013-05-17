@@ -5993,6 +5993,20 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_GENERAL);
       options->pkcs11_id_management = true;
     }
+  else if (streq (p[0], "pkcs11-id-type") ||
+           streq (p[0], "pkcs11-sign-mode") ||
+           streq (p[0], "pkcs11-slot") ||
+           streq (p[0], "pkcs11-slot-type") ||
+           streq (p[0], "show-pkcs11-objects") ||
+           streq (p[0], "show-pkcs11-slots"))
+    {
+      if (file)
+	msg (msglevel, "You are using an obsolete parameter in %s:%d: %s (%s).\nPlease see /usr/share/doc/openvpn/NEWS.Debian.gz for details.",
+             file, line, p[0], PACKAGE_VERSION);
+      else
+	msg (msglevel, "You are using an obsolete parameter: --%s (%s).\nPlease see /usr/share/doc/openvpn/NEWS.Debian.gz for details.",
+             p[0], PACKAGE_VERSION);
+    }
 #endif
 #ifdef TUNSETPERSIST
   else if (streq (p[0], "rmtun"))
