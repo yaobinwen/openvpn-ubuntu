@@ -529,6 +529,9 @@
 /* Use LZO compression library */
 #undef USE_LZO
 
+/* struct sockaddr_in6 is needed for IPv6 peer support */
+#undef USE_PF_INET6
+
 /* Enable PKCS11 capability */
 #undef USE_PKCS11
 
