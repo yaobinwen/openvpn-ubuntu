@@ -1,3 +1,10 @@
+openvpn (2.2.1-8+deb7u2) wheezy; urgency=low
+
+  * Applied upstream patch to fix UDP fails.
+    Thanks Gert Doering for the pointer (Closes: #712414)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 17 Jun 2013 15:46:47 +0000
+
 openvpn (2.2.1-8+deb7u1) wheezy; urgency=low
 
   * Applied upstream patch to fix use of non-constant-time memcmp
