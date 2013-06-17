@@ -1,3 +1,12 @@
+openvpn (2.2.1-8+deb7u3) wheezy-security; urgency=high
+
+  * Applied upstream patch that fixes possible DoS by authenticated
+    clients. CVE-2014-8104
+  * Patch sample certs since they were expired and made the package
+    build fail. (Closes: #770835)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 17 Jun 2013 15:46:47 +0000
+
 openvpn (2.2.1-8+deb7u2) wheezy; urgency=low
 
   * Applied upstream patch to fix UDP fails.
