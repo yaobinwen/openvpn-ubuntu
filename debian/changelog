@@ -1,3 +1,9 @@
+openvpn (2.3.2-7ubuntu2) trusty; urgency=medium
+
+  * Patch libtool.m4 and configure to support ppc64el.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Dec 2013 12:32:35 +0100
+
 openvpn (2.3.2-7ubuntu1) trusty; urgency=low
 
   * Merge from Debian unstable. Remaining changes:
