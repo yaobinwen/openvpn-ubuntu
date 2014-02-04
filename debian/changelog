@@ -1,3 +1,13 @@
+openvpn (2.3.2-7ubuntu3) trusty; urgency=medium
+
+  [ Simon Deziel ]
+  * Refresh delta with debian/openvpn.init.d:
+   - Make stop action reliable by killing if needed
+     (LP: #1274254, LP: #1200519)
+   - Use new path for status file (LP: #1261088)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Tue, 04 Feb 2014 09:31:39 -0500
+
 openvpn (2.3.2-7ubuntu2) trusty; urgency=medium
 
   * Patch libtool.m4 and configure to support ppc64el.
