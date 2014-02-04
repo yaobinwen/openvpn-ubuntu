@@ -101,11 +101,16 @@ start_vpn () {
     fi
 }
 stop_vpn () {
-  kill `cat $PIDFILE` || true
-  rm -f $PIDFILE
-  [ "$OMIT_SENDSIGS" -ne 1 ] || rm -f /run/sendsigs.omit.d/openvpn.$NAME.pid
-  rm -f /var/run/openvpn.$NAME.status 2> /dev/null
-  log_end_msg 0
+  start-stop-daemon --stop --quiet --oknodo \
+      --pidfile $PIDFILE --exec $DAEMON --retry 5
+  if [ "$?" -eq 0 ]; then
+    rm -f $PIDFILE
+    [ "$OMIT_SENDSIGS" -ne 1 ] || rm -f /run/sendsigs.omit.d/openvpn.$NAME.pid
+    rm -f /run/openvpn/$NAME.status 2> /dev/null
+    log_end_msg 0
+  else
+    log_failure_msg "  Unable to stop VPN '$NAME'"
+  fi
 }
 
 case "$1" in
@@ -191,7 +196,6 @@ reload|force-reload)
     if egrep '^[[:blank:]]*user[[:blank:]]' $CONFIG_DIR/$NAME.conf > /dev/null 2>&1 ; then
       log_daemon_msg "  Stopping VPN '$NAME'"
       stop_vpn
-      sleep 1
       log_daemon_msg "  Restarting VPN '$NAME'"
       start_vpn
     else
@@ -221,7 +225,6 @@ soft-restart)
 restart)
   shift
   $0 stop ${@}
-  sleep 1
   $0 start ${@}
   ;;
 cond-restart)
@@ -231,7 +234,6 @@ cond-restart)
     NAME=${NAME%%.pid}
     log_daemon_msg "  Stopping VPN '$NAME'"
     stop_vpn
-    sleep 1
     log_daemon_msg "  Restarting VPN '$NAME'"
     start_vpn
   done
