@@ -1,0 +1,38 @@
+From a812fed7fbc39d4936c348d4a1a9c0e07e6d65f6 Mon Sep 17 00:00:00 2001
+From: Simon Deziel <simon.deziel@gmail.com>
+Date: Sat, 12 May 2012 11:54:41 -0400
+Subject: [PATCH] Properly detect OpenSSL version strings with numbers only
+
+whichopensslcnf failed to return the right cnf for:
+
+$ openssl version
+OpenSSL 1.0.1 14 Mar 2012
+
+Signed-off-by: Simon Deziel <simon.deziel@gmail.com>
+Acked-by: Alon Bar-Lev <alon.barlev@gmail.com>
+Message-Id: 4FAE87C1.6000509@gmail.com
+URL: http://article.gmane.org/gmane.network.openvpn.devel/6534
+Signed-off-by: David Sommerseth <davids@redhat.com>
+---
+ 2.0/whichopensslcnf | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+Index: openvpn-2.2.1/easy-rsa/2.0/whichopensslcnf
+===================================================================
+--- openvpn-2.2.1.orig/easy-rsa/2.0/whichopensslcnf	2014-02-18 14:23:53.564156697 +0900
++++ openvpn-2.2.1/easy-rsa/2.0/whichopensslcnf	2014-02-18 14:23:53.556156698 +0900
+@@ -3,11 +3,11 @@
+ cnf="$1/openssl.cnf"
+ 
+ if [ "$OPENSSL" ]; then
+-	if $OPENSSL version | grep -E "0\.9\.6[[:alnum:]]" > /dev/null; then
++	if $OPENSSL version | grep -E "0\.9\.6[[:alnum:]]?" > /dev/null; then
+ 		cnf="$1/openssl-0.9.6.cnf"
+-	elif $OPENSSL version | grep -E "0\.9\.8[[:alnum:]]" > /dev/null; then
++	elif $OPENSSL version | grep -E "0\.9\.8[[:alnum:]]?" > /dev/null; then
+ 		cnf="$1/openssl-0.9.8.cnf"
+-	elif $OPENSSL version | grep -E "1\.0\.([[:digit:]][[:alnum:]])" > /dev/null; then
++	elif $OPENSSL version | grep -E "1\.0\.[[:digit:]][[:alnum:]]?" > /dev/null; then
+                 cnf="$1/openssl-1.0.0.cnf"
+ 	else
+ 		cnf="$1/openssl.cnf"
