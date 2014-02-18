@@ -1,3 +1,11 @@
+openvpn (2.2.1-8ubuntu1.2) precise-proposed; urgency=low
+
+  * d/p/lp992012-detect-openssl-properly.patch: fix "openssl.cnf file
+    could be found" error using easy-rsa by parsing openssl version
+    properly. (LP: #992012)
+
+ -- Nobuto MURATA <nobuto@ubuntu.com>  Tue, 18 Feb 2014 14:35:32 +0900
+
 openvpn (2.2.1-8ubuntu1.1) precise-proposed; urgency=low
 
   [ Marc Gariépy ]
