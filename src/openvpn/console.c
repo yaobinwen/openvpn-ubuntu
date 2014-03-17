@@ -145,13 +145,8 @@ check_systemd_running ()
 {
   struct stat a, b;
 
-  /* We simply test whether the systemd cgroup hierarchy is
-   * mounted */
-
-  return (lstat("/sys/fs/cgroup", &a) == 0)
-	  && (lstat("/sys/fs/cgroup/systemd", &b) == 0)
-	  && (a.st_dev != b.st_dev);
-
+  /* mirror what upstream sd_booted() does */
+  return (access("/run/systemd/system", F_OK) >= 0);
 }
 
 static bool
