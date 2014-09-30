@@ -1,3 +1,12 @@
+openvpn (2.2.1-8ubuntu1.3) precise-security; urgency=medium
+
+  * SECURITY UPDATE: timing attack when using UDP mode
+    - debian/patches/CVE-2013-2061.patch: use constant time memcmp when
+      comparing HMACs in crypto.c, added warning to buffer.h.
+    - CVE-2013-2061
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 30 Sep 2014 14:55:59 -0400
+
 openvpn (2.2.1-8ubuntu1.2) precise-proposed; urgency=low
 
   * d/p/lp992012-detect-openssl-properly.patch: fix "openssl.cnf file
