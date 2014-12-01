@@ -1,3 +1,14 @@
+openvpn (2.3.2-9ubuntu1.1) utopic-security; urgency=medium
+
+  * SECURITY UPDATE: server denial of service via too-short control channel
+    packets
+    - debian/patches/CVE-2014-8104.patch: drop too-short control channel
+      packets instead of asserting out in src/openvpn/ssl.c.
+    - CVE-2014-8104
+  * debian/patches/update_certs.patch: update test certs to fix FTBFS.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 01 Dec 2014 17:09:10 -0500
+
 openvpn (2.3.2-9ubuntu1) utopic; urgency=medium
 
   * Merge from Debian unstable. Remaining changes:
