@@ -7,3 +7,5 @@ kfreebsd_support.patch
 accommodate_typo.patch
 manpage_fixes.patch
 ppc64el.diff
+CVE-2014-8104.patch
+update_certs.patch
