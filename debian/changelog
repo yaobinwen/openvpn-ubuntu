@@ -1,3 +1,14 @@
+openvpn (2.3.2-9ubuntu3) vivid; urgency=medium
+
+  * Add better_systemd_detection.patch to avoid calling systemd-ask-password
+    under upstart. Backported from upstream. (Closes: #747265)
+  * Add systemd unit and generator from current Debian package. This avoids
+    using the init.d script, which unnecessarily blocks lightdm startup on the
+    network becoming online even if there are no auto-start connections
+    (LP: #1443489).
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 13 Apr 2015 11:22:56 -0500
+
 openvpn (2.3.2-9ubuntu2) vivid; urgency=medium
 
   * SECURITY UPDATE: server denial of service via too-short control channel

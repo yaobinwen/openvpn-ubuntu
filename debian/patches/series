@@ -9,3 +9,4 @@ manpage_fixes.patch
 ppc64el.diff
 CVE-2014-8104.patch
 update_certs.patch
+better_systemd_detection.patch
