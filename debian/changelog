@@ -1,3 +1,11 @@
+openvpn (2.3.2-9ubuntu4) vivid; urgency=medium
+
+  * Run openvpn@.service before systemd-user-sessions.service to avoid gettys
+    and lightdm starting on top of possible password prompts. This provides
+    the equivalent of the init.d script's X-Start-Before:.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 13 Apr 2015 16:09:01 -0500
+
 openvpn (2.3.2-9ubuntu3) vivid; urgency=medium
 
   * Add better_systemd_detection.patch to avoid calling systemd-ask-password
