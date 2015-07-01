@@ -34,6 +34,10 @@
 #include "buffer.h"
 #include "misc.h"
 
+#ifdef ENABLE_SYSTEMD
+#include <systemd/sd-daemon.h>
+#endif
+
 #ifdef WIN32
 
 #include "win32.h"
@@ -143,10 +147,15 @@ close_tty (FILE *fp)
 static bool
 check_systemd_running ()
 {
-  struct stat a, b;
+  struct stat c;
 
-  /* mirror what upstream sd_booted() does */
-  return (access("/run/systemd/system", F_OK) >= 0);
+  /* We simply test whether the systemd cgroup hierarchy is
+   * mounted, as well as the systemd-ask-password executable
+   * being available */
+
+  return (sd_booted() > 0)
+	  && (stat(SYSTEMD_ASK_PASSWORD_PATH, &c) == 0);
+
 }
 
 static bool
@@ -157,7 +166,7 @@ get_console_input_systemd (const char *prompt, const bool echo, char *input, con
   struct argv argv;
 
   argv_init (&argv);
-  argv_printf (&argv, "/bin/systemd-ask-password");
+  argv_printf (&argv, SYSTEMD_ASK_PASSWORD_PATH);
   argv_printf_cat (&argv, "%s", prompt);
 
   if ((std_out = openvpn_popen (&argv, NULL)) < 0) {

@@ -214,10 +214,6 @@
 
 #ifdef TARGET_LINUX
 
-#if defined(HAVE_NETINET_IF_ETHER_H)
-#include <netinet/if_ether.h>
-#endif
-
 #ifdef HAVE_LINUX_IF_TUN_H
 #include <linux/if_tun.h>
 #endif
@@ -348,6 +344,14 @@
 #endif
 
 #endif /* TARGET_DRAGONFLY */
+
+#ifdef TARGET_DARWIN
+
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+
+#endif /* TARGET_DARWIN */
 
 #ifdef WIN32
 #include <iphlpapi.h>
