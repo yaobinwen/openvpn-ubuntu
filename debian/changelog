@@ -1,3 +1,13 @@
+openvpn (2.3.7-2) unstable; urgency=medium
+
+  * Move libsystemd-daemon-dev Build-Dep to libsystemd-dev.
+    Add Build-Dep on systemd. (Closes: #791904)
+  * Bumped Standards-Version to 3.9.6
+  * Apply upstream patch to fix stdin password prompt.
+    (Closes: #791829)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 08 Sep 2015 08:23:19 +0000
+
 openvpn (2.3.7-1) unstable; urgency=medium
 
   * New upstream version
