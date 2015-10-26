@@ -1,3 +1,18 @@
+openvpn (2.3.7-2ubuntu1) xenial; urgency=medium
+
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Run openvpn@.service before systemd-user-sessions.service to avoid
+      gettys and lightdm starting on top of possible password prompts. This
+      provides the equivalent of the init.d script's X-Start-Before:.
+      (Closes: #803032)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 26 Oct 2015 09:32:31 +0100
+
 openvpn (2.3.7-2) unstable; urgency=medium
 
   * Move libsystemd-daemon-dev Build-Dep to libsystemd-dev.
@@ -7,6 +22,20 @@ openvpn (2.3.7-2) unstable; urgency=medium
     (Closes: #791829)
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 08 Sep 2015 08:23:19 +0000
+
+openvpn (2.3.7-1ubuntu1) wily; urgency=medium
+
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Run openvpn@.service before systemd-user-sessions.service to avoid
+      gettys and lightdm starting on top of possible password prompts. This
+      provides the equivalent of the init.d script's X-Start-Before:.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 08 Jul 2015 12:28:54 +0200
 
 openvpn (2.3.7-1) unstable; urgency=medium
 
@@ -28,6 +57,20 @@ openvpn (2.3.5-1) unstable; urgency=medium
   * Add Build-Depends on libsystemd-daemon-dev.
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 29 Oct 2014 17:44:06 +0100
+
+openvpn (2.3.4-5ubuntu1) wily; urgency=medium
+
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Run openvpn@.service before systemd-user-sessions.service to avoid
+      gettys and lightdm starting on top of possible password prompts. This
+      provides the equivalent of the init.d script's X-Start-Before:.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 07 May 2015 15:35:52 +0200
 
 openvpn (2.3.4-5) unstable; urgency=high
 
@@ -87,6 +130,52 @@ openvpn (2.3.3-1) experimental; urgency=medium
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 17 Mar 2014 19:40:12 +0100
 
+openvpn (2.3.2-9ubuntu4) vivid; urgency=medium
+
+  * Run openvpn@.service before systemd-user-sessions.service to avoid gettys
+    and lightdm starting on top of possible password prompts. This provides
+    the equivalent of the init.d script's X-Start-Before:.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 13 Apr 2015 16:09:01 -0500
+
+openvpn (2.3.2-9ubuntu3) vivid; urgency=medium
+
+  * Add better_systemd_detection.patch to avoid calling systemd-ask-password
+    under upstart. Backported from upstream. (Closes: #747265)
+  * Add systemd unit and generator from current Debian package. This avoids
+    using the init.d script, which unnecessarily blocks lightdm startup on the
+    network becoming online even if there are no auto-start connections
+    (LP: #1443489).
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 13 Apr 2015 11:22:56 -0500
+
+openvpn (2.3.2-9ubuntu2) vivid; urgency=medium
+
+  * SECURITY UPDATE: server denial of service via too-short control channel
+    packets
+    - debian/patches/CVE-2014-8104.patch: drop too-short control channel
+      packets instead of asserting out in src/openvpn/ssl.c.
+    - CVE-2014-8104
+  * debian/patches/update_certs.patch: update test certs to fix FTBFS.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 01 Dec 2014 15:26:58 -0500
+
+openvpn (2.3.2-9ubuntu1) utopic; urgency=medium
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Patch libtool.m4 and configure to support ppc64el.
+    - Refresh delta with debian/openvpn.init.d:
+      + Make stop action reliable by killing if needed
+        (LP: #1274254, LP: #1200519)
+      + Use new path for status file (LP: #1261088)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Fri, 02 May 2014 16:00:55 -0400
+
 openvpn (2.3.2-9) unstable; urgency=medium
 
   * Create /run/openvpn in init script even if no VPN is
@@ -101,6 +190,33 @@ openvpn (2.3.2-8) unstable; urgency=medium
     Add openvpn@.service and --enable-systemd to ./configure.
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 14 Mar 2014 12:59:57 +0100
+
+openvpn (2.3.2-7ubuntu3) trusty; urgency=medium
+
+  [ Simon Deziel ]
+  * Refresh delta with debian/openvpn.init.d:
+   - Make stop action reliable by killing if needed
+     (LP: #1274254, LP: #1200519)
+   - Use new path for status file (LP: #1261088)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Tue, 04 Feb 2014 09:31:39 -0500
+
+openvpn (2.3.2-7ubuntu2) trusty; urgency=medium
+
+  * Patch libtool.m4 and configure to support ppc64el.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Dec 2013 12:32:35 +0100
+
+openvpn (2.3.2-7ubuntu1) trusty; urgency=low
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 02 Dec 2013 18:14:42 -0500
 
 openvpn (2.3.2-7) unstable; urgency=low
 
@@ -118,6 +234,17 @@ openvpn (2.3.2-6) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 27 Nov 2013 13:58:33 +0100
 
+openvpn (2.3.2-5ubuntu1) trusty; urgency=low
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 21 Oct 2013 13:07:37 -0400
+
 openvpn (2.3.2-5) unstable; urgency=low
 
   * Patch init script to fix race conditions on restarts.
@@ -126,6 +253,16 @@ openvpn (2.3.2-5) unstable; urgency=low
     for the patch. (Closes: #721082)
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 15 Jul 2013 16:10:59 +0200
+
+openvpn (2.3.2-4ubuntu1) saucy; urgency=low
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Tue, 09 Jul 2013 17:20:31 -0400
 
 openvpn (2.3.2-4) unstable; urgency=low
 
@@ -159,6 +296,23 @@ openvpn (2.3.2-1) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 03 Jun 2013 18:48:44 +0200
 
+openvpn (2.3.1-2ubuntu2) saucy; urgency=low
+
+  * Move easy-rsa from Recommends to Suggests as it's not in main and isn't
+    actually required to operate an openvpn server.
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 19 Jun 2013 14:37:54 -0400
+
+openvpn (2.3.1-2ubuntu1) saucy; urgency=low
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Fri, 24 May 2013 17:42:45 -0400
+
 openvpn (2.3.1-2) unstable; urgency=low
 
   * Add net-tools to Build-Depends. (Closes: #709108)
@@ -186,6 +340,32 @@ openvpn (2.3~rc1-1) experimental; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Mon, 05 Nov 2012 16:31:15 +0100
 
+openvpn (2.2.1-8ubuntu3) raring; urgency=low
+
+  [ Marc Gariépy ]
+  * Add --script-security to the init.d script (was generated but not passed
+    to openvpn). (LP: #1124398)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 13 Feb 2013 16:10:48 -0500
+
+openvpn (2.2.1-8ubuntu2) quantal; urgency=low
+
+  * Rebuild for new armel compiler default of ARMv5t.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 08 Oct 2012 08:36:47 +0100
+
+openvpn (2.2.1-8ubuntu1) precise; urgency=low
+
+  * Merge at Simon Deziel's request to build with PIE.
+  * Merge from Debian unstable. Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Fri, 30 Mar 2012 13:19:09 -0400
+
 openvpn (2.2.1-8) unstable; urgency=low
 
   * Enable "PIE" and "BINDOW" hardening flags.
@@ -210,6 +390,17 @@ openvpn (2.2.1-6) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 09 Mar 2012 13:44:50 +0100
 
+openvpn (2.2.1-5ubuntu1) precise; urgency=low
+
+  * Merge from Debian unstable. Remaining changes: (LP: #907828)
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Sat, 25 Feb 2012 21:08:48 -0500
+
 openvpn (2.2.1-5) unstable; urgency=low
 
   * Avoid sending ICMP redirects when using tun devices and "subnet"
@@ -231,6 +422,20 @@ openvpn (2.2.1-4) unstable; urgency=low
     (Closes: #657610)
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 08 Feb 2012 16:31:32 +0100
+
+openvpn (2.2.1-3ubuntu1) precise; urgency=low
+
+  * Merge from Debian testing.  Remaining changes:
+   + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+    + debian/update-resolv-conf: Support multiple domains.
+    + fix bug where '--script-security 2' would be passed for all
+      daemons after the first. (LP: #794916)
+
+ -- Chuck Short <zulcss@ubuntu.com>  Sat, 31 Dec 2011 04:55:56 +0000
 
 openvpn (2.2.1-3) unstable; urgency=low
 
@@ -259,6 +464,20 @@ openvpn (2.2.1-1) unstable; urgency=low
 
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 13 Dec 2011 11:04:22 +0100
+
+openvpn (2.2.0-2ubuntu1) oneiric; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+   + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+    + debian/update-resolv-conf: Support multiple domains.
+    + fix bug where '--script-security 2' would be passed for all
+      daemons after the first. (LP: #794916
+
+ -- Chuck Short <zulcss@ubuntu.com>  Thu, 16 Jun 2011 18:33:37 +0100
 
 openvpn (2.2.0-2) unstable; urgency=low
 
@@ -294,6 +513,45 @@ openvpn (2.1.3-5) experimental; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 22 Mar 2011 10:57:18 +0100
 
+openvpn (2.1.3-4.1ubuntu2) oneiric; urgency=low
+
+  [Alexander Zielke]
+  * fix bug where '--script-security 2' would be passed for all
+    daemons after the first. (LP: #794916)
+
+ -- Scott Moser <smoser@ubuntu.com>  Thu, 09 Jun 2011 13:59:08 -0400
+
+openvpn (2.1.3-4.1ubuntu1) oneiric; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+   + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+    + debian/update-resolv-conf: Support multiple domains.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Tue, 17 May 2011 02:14:39 +0100
+
+openvpn (2.1.3-4.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Drop hard-coded dependency on libssl0.9.8.  (Closes: #623503)
+
+ -- Philipp Kern <pkern@debian.org>  Mon, 09 May 2011 23:20:03 +0200
+
+openvpn (2.1.3-4ubuntu1) oneiric; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+    + debian/update-resolv-conf: Support multiple domains.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Tue, 22 Mar 2011 23:28:26 +0000
+
 openvpn (2.1.3-4) unstable; urgency=low
 
   * Updated JuanJo's IPv6 patch. Now really fixes use from xinetd.
@@ -316,12 +574,55 @@ openvpn (2.1.3-3) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 11 Mar 2011 13:08:12 +0100
 
+openvpn (2.1.3-2ubuntu3) natty; urgency=low
+
+  * update-resolv-conf: Correctly handle multiple dns search domains,
+    using the same logic as nameservers.  Patch courtesy of Jeremy 
+    Zawodny. (LP: #662847)
+
+ -- Dave Walker (Daviey) <DaveWalker@ubuntu.com>  Fri, 11 Mar 2011 00:23:59 +0000
+
+openvpn (2.1.3-2ubuntu2) natty; urgency=low
+
+  * update-resolv-conf: Support mulitple domains (LP: #714358)
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 14 Feb 2011 15:21:46 -0500
+
+openvpn (2.1.3-2ubuntu1) natty; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    +  debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Chuck Short <zulcss@ubuntu.com>  Sat, 23 Oct 2010 01:59:28 +0100
+
 openvpn (2.1.3-2) unstable; urgency=low
 
   * Applied upstream patch to solve random routes added when using
     'remote_host'. (Closes: #600166)
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 21 Oct 2010 12:21:33 +0200
+
+openvpn (2.1.3-1ubuntu2) natty; urgency=low
+
+  * Fix jjo-ipv6-support.patch to avoid assertion failure at socket.c:629 in
+    corner cases where ! host && addr (LP: #627973)
+
+ -- Thierry Carrez (ttx) <thierry.carrez@ubuntu.com>  Wed, 20 Oct 2010 16:22:25 +0200
+
+openvpn (2.1.3-1ubuntu1) natty; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatablitiy
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Chuck Short <zulcss@ubuntu.com>  Tue, 05 Oct 2010 06:21:14 +0100
 
 openvpn (2.1.3-1) unstable; urgency=low
 
@@ -334,6 +635,17 @@ openvpn (2.1.3-1) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 29 Sep 2010 13:07:37 +0200
 
+openvpn (2.1.0-3ubuntu1) maverick; urgency=low
+
+  * Merge from debian unstable. Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and use </dev/null to avoid blocking boot
+      - Show per-VPN result messages
+      - Add "--script-security 2" by default for backwards compatablitiy
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 12 Jul 2010 09:39:43 -0400
+
 openvpn (2.1.0-3) unstable; urgency=low
 
   * The 'happy birthday to me' release
@@ -342,6 +654,24 @@ openvpn (2.1.0-3) unstable; urgency=low
   * Document possible problems when using 'chroot' option
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Fri, 09 Jul 2010 12:22:09 +0200
+
+openvpn (2.1.0-2ubuntu2) maverick; urgency=low
+
+  * debian/patches/client_hang_when_server_dont_push.patch: Fix client hanging
+    on PUSH_REQUEST when server does not push any option (LP: #579737)
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Mon, 28 Jun 2010 10:45:23 +0200
+
+openvpn (2.1.0-2ubuntu1) maverick; urgency=low
+
+  * Merge from debian unstable.  Remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and use </dev/null to avoid blocking boot
+      - Show per-VPN result messages
+      - Add "--script-security 2" by default for backwards compatablitiy
+     + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc() 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Wed, 05 May 2010 03:06:19 +0100
 
 openvpn (2.1.0-2) unstable; urgency=low
 
@@ -354,6 +684,17 @@ openvpn (2.1.0-2) unstable; urgency=low
   * Switch to dpkg-source 3.0 (quilt) format
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sat, 10 Apr 2010 17:26:42 +0200
+
+openvpn (2.1.0-1ubuntu1) lucid; urgency=low
+
+  * Merge from debian testing (LP: #509078), remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and use < /dev/null to avoid blocking boot
+      - Show per-VPN result messages
+      - Add "--script-security 2" by default for backwards compatibility
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+
+ -- Jan Brinkmann <lucky@the-luckyduck.de>  Fri, 22 Jan 2010 00:47:33 +0100
 
 openvpn (2.1.0-1) unstable; urgency=low
 
@@ -392,6 +733,20 @@ openvpn (2.1~rc20-3) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Wed, 04 Nov 2009 17:18:03 +0100
 
+openvpn (2.1~rc20-2ubuntu1) lucid; urgency=low
+
+  * Merge from debian testing, remaining changes:
+    + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and use < /dev/null to avoid blocking
+        boot.
+      - show per-VPN result messages
+      - add "--script-security 2" by default for backwards compatibility
+      - Add lab-base >= 3.2-14 to allow status_of_proc()
+     + Dropped debian/patches/redirect-gateway.patch: Already applied 
+       upstream.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Fri, 06 Nov 2009 01:36:35 +0000
+
 openvpn (2.1~rc20-2) unstable; urgency=low
 
   * init.d script: Added X-Interactive header. (Closes: #549424)
@@ -416,6 +771,25 @@ openvpn (2.1~rc19-2) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Sun, 30 Aug 2009 20:20:11 +0200
 
+openvpn (2.1~rc19-1ubuntu2) karmic; urgency=low
+
+  * debian/patches/redirect-gateway.patch: Fix regression introduced in
+    2.1rc17 that makes redirect-gateway (without options) to be ignored.
+    Patch cherrypicked from upstream 2.1rc20 (SVN r5011), LP: #445695
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Tue, 13 Oct 2009 09:31:20 +0200
+
+openvpn (2.1~rc19-1ubuntu1) karmic; urgency=low
+
+  * Merge from debian unstable (LP: #404099), remaining changes:
+    - debian/openvpn.init.d:
+      - Do not use start-stop-daemon and use < /dev/null to avoid blocking boot
+      - show per-VPN result messages
+      - add "--script-security 2" by default for backwards compatibility
+      - Added lsb-base>=3.2-14 depend to allow status_of_proc()
+
+ -- Bhavani Shankar <right2bhavi@gmail.com>  Fri, 24 Jul 2009 19:22:13 +0530
+
 openvpn (2.1~rc19-1) unstable; urgency=low
 
   * New upstream version
@@ -424,6 +798,17 @@ openvpn (2.1~rc19-1) unstable; urgency=low
   * Bumped Standards-Version to 3.8.2
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Tue, 21 Jul 2009 17:00:56 +0200
+
+openvpn (2.1~rc15-1ubuntu1) karmic; urgency=low
+
+  * Merge from debian unstable (LP: #372358), remaining changes:
+    - debian/openvpn.init.d: 
+      - Do not use start-stop-daemon and use < /dev/null to avoid blocking boot
+      - show per-VPN result messages 
+      - add "--script-security 2" by default for backwards compatibility
+      - Added lsb-base>=3.2-14 depend to allow status_of_proc()
+
+ -- Andres Rodriguez <andreserl@ubuntu.com>  Tue, 05 May 2009 14:25:37 -0500
 
 openvpn (2.1~rc15-1) unstable; urgency=low
 
@@ -444,6 +829,33 @@ openvpn (2.1~rc15-1) unstable; urgency=low
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 30 Apr 2009 12:35:05 +0200
 
+openvpn (2.1~rc11-1ubuntu3) jaunty; urgency=low
+
+  * debian/openvpn.init.d:
+    - Fix unexpected operator on startup (LP: #340120)
+
+ -- Michael Jeanson <mjeanson@revolutionlinux.com>  Mon, 09 Mar 2009 16:02:50 -0400
+
+openvpn (2.1~rc11-1ubuntu2) intrepid; urgency=low
+
+  * debian/openvpn.init.d:
+    - Revert fix from #454371 that was merged at 2.1~rc7-4 to prevent
+      openvpn prompts from blocking the boot (LP: #280428)
+    - Fix VPNs always reported started [ OK ]
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Wed, 15 Oct 2008 17:12:54 +0200
+
+openvpn (2.1~rc11-1ubuntu1) intrepid; urgency=low
+
+  * Merge with Debian (LP: #279655), remaining diffs:
+    - debian/openvpn.init.d: Added 'status' action to init script, show
+      per-VPN result messages and add "--script-security 2" by default for
+      backwards compatibility
+    - debian/control: Added lsb-base>=3.2-14 depend to allow status_of_proc()
+  * Fixes regression when calling commands with arguments (LP: #277447)
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Tue, 07 Oct 2008 16:30:44 +0200
+
 openvpn (2.1~rc11-1) unstable; urgency=low
 
   * New upstream version
@@ -463,6 +875,23 @@ openvpn (2.1~rc10-1) unstable; urgency=low
       (Closes: #495964, #496314, #497411)
 
  -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 11 Sep 2008 16:58:37 +0200
+
+openvpn (2.1~rc9-3ubuntu2) intrepid; urgency=low
+
+  * debian/openvpn.init.d:
+    - Added 'status' action to init script (LP: #251641)
+    - Restored per-VPN result messages by using log_action_begin_msg and
+      one log_daemon_msg per VPN instead of log_progress_msg (LP: #264966)
+  * debian/control: Added lsb-base>=3.2-14 depend to allow status_of_proc()
+
+ -- Thierry Carrez <thierry.carrez@ubuntu.com>  Tue, 09 Sep 2008 10:45:45 +0200
+
+openvpn (2.1~rc9-3ubuntu1) intrepid; urgency=low
+
+  * debian/openvpn.init.d: Add "--script-security 2" by default for backwards compatibility
+    (LP: #260291)
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 25 Aug 2008 10:20:31 -0400
 
 openvpn (2.1~rc9-3) unstable; urgency=low
 
