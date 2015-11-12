@@ -1,3 +1,10 @@
+openvpn (2.3.4-5+deb8u1) stable; urgency=medium
+
+  * Add --no-block to if-up.d script to avoid hanging boot on
+    interfaces with openvpn instances. (Closes: #787090, #785200)
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 12 Nov 2015 17:16:28 +0100
+
 openvpn (2.3.4-5) unstable; urgency=high
 
   * Apply upstream patch that fixes possible DoS by authenticated
