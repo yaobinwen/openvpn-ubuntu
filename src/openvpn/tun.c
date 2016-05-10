@@ -625,7 +625,7 @@ void delete_route_connected_v6_net(struct tuntap * tt,
 }
 #endif
 
-#if defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
+#if defined(TARGET_FREEBSD)||defined(__FreeBSD_kernel__)||defined(TARGET_DRAGONFLY)
 /* we can't use true subnet mode on tun on all platforms, as that
  * conflicts with IPv6 (wants to use ND then, which we don't do),
  * but the OSes want "a remote address that is different from ours"
@@ -2626,9 +2626,9 @@ open_darwin_utun (const char *dev, const char *dev_type, const char *dev_node, s
 
   /* dev_node is simply utun, do the normal dynamic utun
    * otherwise try to parse the utun number */
-  if (dev_node && !strcmp ("utun", dev_node)==0)
+  if (dev_node && (strcmp("utun", dev_node) != 0 ))
     {
-      if (!sscanf (dev_node, "utun%d", &utunnum)==1)
+      if (sscanf(dev_node, "utun%d", &utunnum) != 1 )
         msg (M_FATAL, "Cannot parse 'dev-node %s' please use 'dev-node utunX'"
              "to use a utun device number X", dev_node);
     }
