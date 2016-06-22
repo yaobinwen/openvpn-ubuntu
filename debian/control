@@ -11,7 +11,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/openvpn.git
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, initscripts, iproute2 [linux-any], net-tools [!linux-any]
+Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, iproute2 [linux-any], net-tools [!linux-any]
 Suggests: openssl, resolvconf, easy-rsa
 Description: virtual private network daemon
  OpenVPN is an application to securely tunnel IP networks over a
