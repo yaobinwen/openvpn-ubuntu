@@ -783,7 +783,7 @@ void delete_route_connected_v6_net(struct tuntap * tt,
 #endif
 
 #if defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)||\
-    defined(TARGET_OPENBSD)
+    defined(TARGET_OPENBSD)||defined(__FreeBSD_kernel__)
 /* we can't use true subnet mode on tun on all platforms, as that
  * conflicts with IPv6 (wants to use ND then, which we don't do),
  * but the OSes want "a remote address that is different from ours"
@@ -1314,7 +1314,7 @@ do_ifconfig (struct tuntap *tt,
 	  add_route_connected_v6_net(tt, es);
 	}
 
-#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
+#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)||defined(__FreeBSD_kernel__)
 
       in_addr_t remote_end;		/* for "virtual" subnet topology */
 
@@ -2548,7 +2548,7 @@ read_tun (struct tuntap* tt, uint8_t *buf, int len)
     return read (tt->fd, buf, len);
 }
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD)||defined(__FreeBSD_kernel__)
 
 static inline int
 freebsd_modify_read_write_return (int len)
