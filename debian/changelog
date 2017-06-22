@@ -1,3 +1,15 @@
+openvpn (2.4.0-6+deb9u1) stretch-security; urgency=high
+
+   * SECURITY UPDATE: (Closes: #865480)
+     - CVE-2017-7508.patch. Fix remotely-triggerable ASSERT() on malformed IPv6
+       packet.
+     - CVE-2017-7520.patch. Prevent two kinds of stack buffer OOB reads and a
+       crash for invalid input data.
+     - CVE-2017-7521.patch. Fix potential double-free in --x509-alt-username.
+     - CVE-2017-7521bis.patch. Fix remote-triggerable memory leaks.
+
+ -- Alberto Gonzalez Iniesta <agi@inittab.org>  Thu, 22 Jun 2017 18:00:56 +0200
+
 openvpn (2.4.0-6) unstable; urgency=medium
 
   * Apply upstream patch to fix shrinking MTU sizes on reconnects causing not
