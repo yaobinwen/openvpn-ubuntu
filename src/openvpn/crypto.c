@@ -112,25 +112,27 @@ openvpn_encrypt (struct buffer *buf, struct buffer work,
 		prng_bytes (iv_buf, iv_size);
 
 	      /* Put packet ID in plaintext buffer or IV, depending on cipher mode */
-	      if (opt->packet_id)
+	      if (opt->packet_id
+		  && !packet_id_write (&opt->packet_id->send, buf, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM), true))
 		{
-		  struct packet_id_net pin;
-		  packet_id_alloc_outgoing (&opt->packet_id->send, &pin, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM));
-		  ASSERT (packet_id_write (&pin, buf, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM), true));
+		  msg (D_CRYPT_ERRORS, "ENCRYPT ERROR: packet ID roll over");
+		  goto err;
 		}
 	    }
 	  else if (cipher_kt_mode_ofb_cfb(cipher_kt))
 	    {
-	      struct packet_id_net pin;
 	      struct buffer b;
 
 	      ASSERT (opt->flags & CO_USE_IV);    /* IV and packet-ID required */
 	      ASSERT (opt->packet_id); /*  for this mode. */
 
-	      packet_id_alloc_outgoing (&opt->packet_id->send, &pin, true);
 	      memset (iv_buf, 0, iv_size);
 	      buf_set_write (&b, iv_buf, iv_size);
-	      ASSERT (packet_id_write (&pin, &b, true, false));
+	      if (!packet_id_write (&opt->packet_id->send, &b, true, false))
+		{
+		  msg (D_CRYPT_ERRORS, "ENCRYPT ERROR: packet ID roll over");
+		  goto err;
+		}
 	    }
 	  else /* We only support CBC, CFB, or OFB modes right now */
 	    {
@@ -189,11 +191,11 @@ openvpn_encrypt (struct buffer *buf, struct buffer work,
 	}
       else				/* No Encryption */
 	{
-	  if (opt->packet_id)
+	  if (opt->packet_id
+	      && !packet_id_write (&opt->packet_id->send, buf, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM), true))
 	    {
-	      struct packet_id_net pin;
-	      packet_id_alloc_outgoing (&opt->packet_id->send, &pin, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM));
-	      ASSERT (packet_id_write (&pin, buf, BOOL_CAST (opt->flags & CO_PACKET_ID_LONG_FORM), true));
+	      msg (D_CRYPT_ERRORS, "ENCRYPT ERROR: packet ID roll over");
+	      goto err;
 	    }
 	  work = *buf;
 	}
@@ -492,9 +494,14 @@ init_key_ctx (struct key_ctx *ctx, struct key *key,
       dmsg (D_SHOW_KEYS, "%s: CIPHER KEY: %s", prefix,
           format_hex (key->cipher, kt->cipher_length, 0, &gc));
       dmsg (D_CRYPTO_DEBUG, "%s: CIPHER block_size=%d iv_size=%d",
-          prefix,
-          cipher_kt_block_size(kt->cipher),
-          cipher_kt_iv_size(kt->cipher));
+          prefix, cipher_kt_block_size(kt->cipher),
+	  cipher_kt_iv_size(kt->cipher));
+      if (cipher_kt_block_size(kt->cipher) < 128/8)
+	{
+	  msg (M_WARN, "WARNING: this cipher's block size is less than 128 bit "
+	      "(%d bit).  Consider using a --cipher with a larger block size.",
+	      cipher_kt_block_size(kt->cipher)*8);
+	}
     }
   if (kt->digest && kt->hmac_length > 0)
     {
