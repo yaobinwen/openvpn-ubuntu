@@ -17,10 +17,9 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program (see the file COPYING included with this
- *  distribution); if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -65,7 +64,8 @@
 
 static void
 openvpn_encrypt_aead(struct buffer *buf, struct buffer work,
-                     struct crypto_options *opt) {
+                     struct crypto_options *opt)
+{
 #ifdef HAVE_AEAD_CIPHER_MODES
     struct gc_arena gc;
     int outlen = 0;
@@ -332,7 +332,8 @@ openvpn_encrypt(struct buffer *buf, struct buffer work,
 bool
 crypto_check_replay(struct crypto_options *opt,
                     const struct packet_id_net *pin, const char *error_prefix,
-                    struct gc_arena *gc) {
+                    struct gc_arena *gc)
+{
     bool ret = false;
     packet_id_reap_test(&opt->packet_id.rec);
     if (packet_id_test(&opt->packet_id.rec, pin))
@@ -807,7 +808,10 @@ init_key_type(struct key_type *kt, const char *ciphername,
     {
         if (warn)
         {
-            msg(M_WARN, "******* WARNING *******: null cipher specified, no encryption will be used");
+            msg(M_WARN, "******* WARNING *******: '--cipher none' was specified. "
+                "This means NO encryption will be performed and tunnelled "
+                "data WILL be transmitted in clear text over the network! "
+                "PLEASE DO RECONSIDER THIS SETTING!");
         }
     }
     if (strcmp(authname, "none") != 0)
@@ -827,7 +831,11 @@ init_key_type(struct key_type *kt, const char *ciphername,
     {
         if (warn)
         {
-            msg(M_WARN, "******* WARNING *******: null MAC specified, no authentication will be used");
+            msg(M_WARN, "******* WARNING *******: '--auth none' was specified. "
+                "This means no authentication will be performed on received "
+                "packets, meaning you CANNOT trust that the data received by "
+                "the remote side have NOT been manipulated. "
+                "PLEASE DO RECONSIDER THIS SETTING!");
         }
     }
 }
@@ -843,7 +851,7 @@ init_key_ctx(struct key_ctx *ctx, struct key *key,
     if (kt->cipher && kt->cipher_length > 0)
     {
 
-        ALLOC_OBJ(ctx->cipher, cipher_ctx_t);
+        ctx->cipher = cipher_ctx_new();
         cipher_ctx_init(ctx->cipher, key->cipher, kt->cipher_length,
                         kt->cipher, enc);
 
@@ -867,7 +875,7 @@ init_key_ctx(struct key_ctx *ctx, struct key *key,
     }
     if (kt->digest && kt->hmac_length > 0)
     {
-        ALLOC_OBJ(ctx->hmac, hmac_ctx_t);
+        ctx->hmac = hmac_ctx_new();
         hmac_ctx_init(ctx->hmac, key->hmac, kt->hmac_length, kt->digest);
 
         msg(D_HANDSHAKE,
@@ -892,13 +900,13 @@ free_key_ctx(struct key_ctx *ctx)
     if (ctx->cipher)
     {
         cipher_ctx_cleanup(ctx->cipher);
-        free(ctx->cipher);
+        cipher_ctx_free(ctx->cipher);
         ctx->cipher = NULL;
     }
     if (ctx->hmac)
     {
         hmac_ctx_cleanup(ctx->hmac);
-        free(ctx->hmac);
+        hmac_ctx_free(ctx->hmac);
         ctx->hmac = NULL;
     }
     ctx->implicit_iv_len = 0;
@@ -1022,7 +1030,8 @@ generate_key_random(struct key *key, const struct key_type *kt)
 
     struct gc_arena gc = gc_new();
 
-    do {
+    do
+    {
         CLEAR(*key);
         if (kt)
         {
@@ -1798,7 +1807,8 @@ get_random()
 }
 
 static const cipher_name_pair *
-get_cipher_name_pair(const char *cipher_name) {
+get_cipher_name_pair(const char *cipher_name)
+{
     const cipher_name_pair *pair;
     size_t i = 0;
 
@@ -1818,7 +1828,8 @@ get_cipher_name_pair(const char *cipher_name) {
 }
 
 const char *
-translate_cipher_name_from_openvpn(const char *cipher_name) {
+translate_cipher_name_from_openvpn(const char *cipher_name)
+{
     const cipher_name_pair *pair = get_cipher_name_pair(cipher_name);
 
     if (NULL == pair)
@@ -1830,7 +1841,8 @@ translate_cipher_name_from_openvpn(const char *cipher_name) {
 }
 
 const char *
-translate_cipher_name_to_openvpn(const char *cipher_name) {
+translate_cipher_name_to_openvpn(const char *cipher_name)
+{
     const cipher_name_pair *pair = get_cipher_name_pair(cipher_name);
 
     if (NULL == pair)
