@@ -142,7 +142,10 @@ extract_x509_extension(X509 *cert, char *fieldname, char *out, int size)
             switch (name->type)
             {
                 case GEN_EMAIL:
-                    ASN1_STRING_to_UTF8((unsigned char **)&buf, name->d.ia5);
+                    if (ASN1_STRING_to_UTF8((unsigned char **)&buf, name->d.ia5) < 0)
+                    {
+                        continue;
+                    }
                     if (strlen(buf) != name->d.ia5->length)
                     {
                         msg(D_TLS_ERRORS, "ASN1 ERROR: string contained terminating zero");
@@ -162,7 +165,7 @@ extract_x509_extension(X509 *cert, char *fieldname, char *out, int size)
                     break;
             }
         }
-        sk_GENERAL_NAME_free(extensions);
+        GENERAL_NAMES_free(extensions);
     }
     return retval;
 }
@@ -215,8 +218,7 @@ extract_x509_field_ssl(X509_NAME *x509, const char *field_name, char *out,
     {
         return FAILURE;
     }
-    tmp = ASN1_STRING_to_UTF8(&buf, asn1);
-    if (tmp <= 0)
+    if (ASN1_STRING_to_UTF8(&buf, asn1) < 0)
     {
         return FAILURE;
     }
@@ -457,7 +459,7 @@ x509_setenv_track(const struct x509_track *xt, struct env_set *es, const int dep
                             ASN1_STRING *val = X509_NAME_ENTRY_get_data(ent);
                             unsigned char *buf;
                             buf = (unsigned char *)1; /* bug in OpenSSL 0.9.6b ASN1_STRING_to_UTF8 requires this workaround */
-                            if (ASN1_STRING_to_UTF8(&buf, val) > 0)
+                            if (ASN1_STRING_to_UTF8(&buf, val) >= 0)
                             {
                                 do_setenv_x509(es, xt->name, (char *)buf, depth);
                                 OPENSSL_free(buf);
@@ -545,7 +547,7 @@ x509_setenv(struct env_set *es, int cert_depth, openvpn_x509_cert_t *peer_cert)
             continue;
         }
         buf = (unsigned char *)1; /* bug in OpenSSL 0.9.6b ASN1_STRING_to_UTF8 requires this workaround */
-        if (ASN1_STRING_to_UTF8(&buf, val) <= 0)
+        if (ASN1_STRING_to_UTF8(&buf, val) < 0)
         {
             continue;
         }
