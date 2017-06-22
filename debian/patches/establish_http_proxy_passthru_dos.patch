@@ -1,0 +1,39 @@
+From bf547b8ac79b15a2b2dc59e27c0cb2ade73a3941 Mon Sep 17 00:00:00 2001
+From: Guido Vranken <guidovranken@gmail.com>
+Date: Fri, 16 Jun 2017 02:58:56 +0200
+Subject: [PATCH] Fix a null-pointer dereference in
+ establish_http_proxy_passthru()
+
+Prevents that the client crashes if the peer does not specify
+the 'realm' and/or 'nonce' values. These pointers are
+dereferenced in DigestCalcHA1() and DigestCalcResponse();
+hence, if not set, a null-pointer dereference would occur.
+
+Signed-off-by: Guido Vranken <guidovranken@gmail.com>
+Acked-by: Gert Doering <gert@greenie.muc.de>
+Message-Id: <1497574736-2092-1-git-send-email-gv@guidovranken.nl>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg14844.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+(cherry picked from commit 14865773ad64d861128bc80ad44c37bdc307c996)
+---
+ src/openvpn/proxy.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+Index: openvpn-2.4.0/src/openvpn/proxy.c
+===================================================================
+--- openvpn-2.4.0.orig/src/openvpn/proxy.c	2017-06-22 08:37:45.337017695 -0400
++++ openvpn-2.4.0/src/openvpn/proxy.c	2017-06-22 08:37:45.333017654 -0400
+@@ -870,6 +870,13 @@ establish_http_proxy_passthru(struct htt
+                 const char *algor = get_pa_var("algorithm", pa, &gc);
+                 const char *opaque = get_pa_var("opaque", pa, &gc);
+ 
++                if ( !realm || !nonce )
++                {
++                    msg(D_LINK_ERRORS, "HTTP proxy: digest auth failed, malformed response "
++                            "from server: realm= or nonce= missing" );
++                    goto error;
++                }
++
+                 /* generate a client nonce */
+                 ASSERT(rand_bytes(cnonce_raw, sizeof(cnonce_raw)));
+                 cnonce = make_base64_string2(cnonce_raw, sizeof(cnonce_raw), &gc);
