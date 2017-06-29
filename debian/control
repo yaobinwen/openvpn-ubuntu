@@ -1,17 +1,39 @@
 Source: openvpn
 Section: net
 Priority: optional
-Maintainer: Alberto Gonzalez Iniesta <agi@inittab.org>
-Build-Depends: debhelper (>= 7.0.50~), libssl1.0-dev, liblzo2-dev, libpam0g-dev, libpkcs11-helper1-dev, pkg-config, dpkg-dev (>= 1.16.1), iproute2 [linux-any], net-tools [!linux-any], dh-systemd (>= 1.5), libsystemd-dev [linux-any], systemd [linux-any], liblz4-dev
-Standards-Version: 3.9.8
-Homepage: http://www.openvpn.net/
-Vcs-Git: git://anonscm.debian.org/collab-maint/openvpn.git
-Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/openvpn.git
+Maintainer: Bernhard Schmidt <berni@debian.org>
+Uploaders: Jörg Frings-Fürst <debian@jff-webhosting.net>
+Build-Depends:
+ debhelper (>= 10),
+ dh-systemd (>= 1.5),
+ dpkg-dev (>= 1.16.1),
+ iproute2 [linux-any],
+ liblz4-dev,
+ liblzo2-dev,
+ libpam0g-dev,
+ libpkcs11-helper1-dev,
+ libssl1.0-dev,
+ libsystemd-dev [linux-any],
+ net-tools [!linux-any],
+ pkg-config,
+ systemd [linux-any]
+Standards-Version: 4.0.0
+Homepage: https://openvpn.net/
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/openvpn.git
+Vcs-Browser: https://anonscm.debian.org/git/collab-maint/openvpn.git
 
 Package: openvpn
 Architecture: any
-Depends: debconf | debconf-2.0, ${shlibs:Depends}, ${misc:Depends}, iproute2 [linux-any], net-tools [!linux-any], lsb-base (>= 3.0-6)
-Suggests: openssl, resolvconf
+Depends: 
+ debconf | debconf-2.0,
+ ${shlibs:Depends},
+ ${misc:Depends},
+ iproute2 [linux-any],
+ net-tools [!linux-any],
+ lsb-base (>= 3.0-6)
+Suggests:
+ openssl,
+ resolvconf
 Recommends: easy-rsa
 Description: virtual private network daemon
  OpenVPN is an application to securely tunnel IP networks over a
