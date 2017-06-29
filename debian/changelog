@@ -1,3 +1,23 @@
+openvpn (2.4.3-3) unstable; urgency=medium
+
+  [ Jörg Frings-Fürst ]
+  * debian/control:
+    - Set Bernhard Schmidt <berni@debian.org> as maintainer and myself as
+      Uploader (Closes: #865555)
+    - Many thanks to Alberto Gonzalez Iniesta.
+    - Change Vcs-Browser to cgit.
+  * Migrate to debhelper 10:
+    - Change debian/compat to 10.
+    - Bump minimum debhelper version in debian/control to >= 10.
+  * Declare compliance with Debian Policy 4.0.0. (No changes needed).
+
+  [ Bernhard Schmidt ]
+  * properly remove obsolete /etc/tmpfiles.d/openvpn.conf using
+    dpkg-maintscript-helper (Closes: #865717)
+  * Change Vcs-Git and Homepage to https
+
+ -- Bernhard Schmidt <berni@debian.org>  Thu, 29 Jun 2017 12:41:31 +0200
+
 openvpn (2.4.3-2) unstable; urgency=medium
 
   * The "Bye bye OpenVPN" revenge release
