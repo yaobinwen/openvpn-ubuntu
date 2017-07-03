@@ -1,7 +1,8 @@
 Source: openvpn
 Section: net
 Priority: optional
-Maintainer: Bernhard Schmidt <berni@debian.org>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Bernhard Schmidt <berni@debian.org>
 Uploaders: Jörg Frings-Fürst <debian@jff-webhosting.net>
 Build-Depends:
  debhelper (>= 10),
@@ -33,8 +34,8 @@ Depends:
  lsb-base (>= 3.0-6)
 Suggests:
  openssl,
- resolvconf
-Recommends: easy-rsa
+ resolvconf,
+ easy-rsa
 Description: virtual private network daemon
  OpenVPN is an application to securely tunnel IP networks over a
  single UDP or TCP port. It can be used to access remote sites, make

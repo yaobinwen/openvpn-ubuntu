@@ -1,3 +1,12 @@
+openvpn (2.4.3-4ubuntu1) artful; urgency=medium
+
+  * Sync with Debian. Remaining changes:
+    - debian/openvpn@.service: Add "--script-security 2" similar to what got
+      added to debian/openvpn.init.d ages ago (LP: #1454725)
+    - Demote easy-rsa to Suggests (universe package).
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sun, 02 Jul 2017 23:05:35 -0400
+
 openvpn (2.4.3-4) unstable; urgency=medium
 
   * fix FTBFS on kfreebsd
