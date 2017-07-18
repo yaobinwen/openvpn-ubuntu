@@ -1,0 +1,31 @@
+From: Selva Nair <selva.nair@gmail.com>
+Date: Tue, 3 Jan 2017 16:42:18 -0500
+Subject: [PATCH] Fix push options digest update
+Bug: https://community.openvpn.net/openvpn/ticket/812
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863110
+
+Trac: #812
+
+Signed-off-by: Selva Nair <selva.nair@gmail.com>
+Acked-by: Steffan Karger <steffan.karger@fox-it.com>
+Message-Id: <1483479738-17672-1-git-send-email-selva.nair@gmail.com>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg13816.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+---
+ src/openvpn/push.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/openvpn/push.c b/src/openvpn/push.c
+index f5154756a..c9c04a630 100644
+--- a/src/openvpn/push.c
++++ b/src/openvpn/push.c
+@@ -692,8 +692,8 @@ push_update_digest(md_ctx_t *ctx, struct buffer *buf, const struct options *opt)
+         {
+             continue;
+         }
++        md_ctx_update(ctx, (const uint8_t *) line, strlen(line)+1);
+     }
+-    md_ctx_update(ctx, (const uint8_t *) line, strlen(line)+1);
+ }
+ 
+ int
