@@ -1,3 +1,17 @@
+openvpn (2.2.1-8ubuntu1.5) precise-security; urgency=medium
+
+  * SECURITY UPDATE: Pre-authentication remote crash/information disclosure
+    for clients
+    - debian/patches/CVE-2017-7520.patch: prevent two kinds of stack buffer
+      OOB reads and a crash for invalid input data in src/openvpn/ntlm.c.
+    - CVE-2017-7520
+  * SECURITY UPDATE: DoS in establish_http_proxy_passthru()
+    - debian/patches/establish_http_proxy_passthru_dos.patch: fix
+      null-pointer dereference in src/openvpn/proxy.c.
+    - NO CVE number
+
+ -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Wed, 02 Aug 2017 11:23:00 -0300
+
 openvpn (2.2.1-8ubuntu1.4) precise-security; urgency=medium
 
   * SECURITY UPDATE: server denial of service via too-short control channel

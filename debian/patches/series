@@ -13,3 +13,5 @@ lp992012-detect-openssl-properly.patch
 CVE-2013-2061.patch
 CVE-2014-8104.patch
 update_certs.patch
+CVE-2017-7520.patch
+establish_http_proxy_passthru_dos.patch
