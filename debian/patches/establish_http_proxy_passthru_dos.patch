@@ -1,0 +1,34 @@
+From 479b6d13d8c230c11b6315665bf00998a1424eef Mon Sep 17 00:00:00 2001
+From: Guido Vranken <guidovranken@gmail.com>
+Date: Fri, 16 Jun 2017 02:58:56 +0200
+Subject: [PATCH] Fix a null-pointer dereference in
+ establish_http_proxy_passthru()
+
+Prevents that the client crashes if the peer does not specify
+the 'realm' and/or 'nonce' values. These pointers are
+dereferenced in DigestCalcHA1() and DigestCalcResponse();
+hence, if not set, a null-pointer dereference would occur.
+
+Signed-off-by: Guido Vranken <guidovranken@gmail.com>
+Acked-by: Gert Doering <gert@greenie.muc.de>
+Message-Id: <1497574736-2092-1-git-send-email-gv@guidovranken.nl>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg14844.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+(cherry picked from commit 14865773ad64d861128bc80ad44c37bdc307c996)
+diff --git a/proxy.c b/proxy.c
+index fce64a1..360da26 100644
+--- a/proxy.c
++++ b/proxy.c
+@@ -744,6 +744,12 @@ establish_http_proxy_passthru (struct http_proxy_info *p,
+ 	      const char *algor = get_pa_var("algorithm", pa, &gc);
+ 	      const char *opaque = get_pa_var("opaque", pa, &gc);
+ 
++	      if ( !realm || !nonce)
++		{
++		  msg(D_LINK_ERRORS, "HTTP proxy: digest auth failed, malformed response from server: realm= or nonce= missing");
++		  goto error;
++		}
++
+ 	      /* generate a client nonce */
+ 	      ASSERT(RAND_bytes(cnonce_raw, sizeof(cnonce_raw)));
+ 	      cnonce = make_base64_string2(cnonce_raw, sizeof(cnonce_raw), &gc);
