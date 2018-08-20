@@ -1,3 +1,12 @@
+openvpn (2.4.6-1ubuntu1) cosmic; urgency=medium
+
+  * Merge with Debian unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what got
+      added to debian/openvpn.init.d ages ago (LP 1454725)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 20 Aug 2018 13:30:20 +0200
+
 openvpn (2.4.6-1) unstable; urgency=medium
 
   [ Jörg Frings-Fürst ]
