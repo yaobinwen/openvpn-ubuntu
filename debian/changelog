@@ -41,12 +41,30 @@ openvpn (2.4.5-1) unstable; urgency=medium
 
  -- Bernhard Schmidt <berni@debian.org>  Sun, 04 Mar 2018 22:23:47 +0100
 
+openvpn (2.4.4-2ubuntu1) bionic; urgency=low
+
+  * Sync with Debian. Remaining changes:
+    - debian/openvpn@.service: Add "--script-security 2" similar to what got
+      added to debian/openvpn.init.d ages ago (LP: #1454725)
+    - Demote easy-rsa to Suggests (universe package).
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sat, 10 Feb 2018 20:27:56 +0000
+
 openvpn (2.4.4-2) unstable; urgency=medium
 
   * Build against OpenSSL 1.1.0 (Closes: #828477)
   * Bump Standards-Version to 4.1.2, no changes necessary
 
  -- Bernhard Schmidt <berni@debian.org>  Mon, 11 Dec 2017 00:22:11 +0100
+
+openvpn (2.4.4-1ubuntu1) bionic; urgency=medium
+
+  * Sync with Debian. Remaining changes:
+    - debian/openvpn@.service: Add "--script-security 2" similar to what got
+      added to debian/openvpn.init.d ages ago (LP: #1454725)
+    - Demote easy-rsa to Suggests (universe package).
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 28 Oct 2017 15:13:58 -0400
 
 openvpn (2.4.4-1) unstable; urgency=medium
 
