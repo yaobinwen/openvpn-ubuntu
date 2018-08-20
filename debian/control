@@ -1,8 +1,9 @@
 Source: openvpn
 Section: net
 Priority: optional
-Maintainer: Bernhard Schmidt <berni@debian.org>
-Uploaders: Jörg Frings-Fürst <debian@jff.email>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Bernhard Schmidt <berni@debian.org>
+Uploaders: Jörg Frings-Fürst <debian@jff-webhosting.net>
 Build-Depends:
  debhelper (>= 11),
  dpkg-dev (>= 1.16.1),
