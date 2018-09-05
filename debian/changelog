@@ -1,3 +1,11 @@
+openvpn (2.4.4-2ubuntu1.1) bionic; urgency=medium
+
+  * d/openvpn@.service: Add CAP_AUDIT_WRITE to avoid issues with callout
+    scripts breaking due to sudo/pam being unable to audit the action.
+    Fixed in upstream issue #918, suggested to Debian in #868806 (LP: #1787208)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 05 Sep 2018 14:43:16 +0200
+
 openvpn (2.4.4-2ubuntu1) bionic; urgency=low
 
   * Sync with Debian. Remaining changes:
