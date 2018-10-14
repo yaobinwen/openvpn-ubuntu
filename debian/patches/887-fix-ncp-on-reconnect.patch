@@ -1,0 +1,37 @@
+From: Gert Döring <gert@greenie.muc.de>
+Subject: Fix NCP behaviour on TLS reconnect.
+Origin: upstream, https://community.openvpn.net/openvpn/changeset/13c05ca4e9da88ef30a778c16a97f0c0d767b448/
+Bug: https://community.openvpn.net/openvpn/ticket/887
+Bug-Debian: https://bugs.debian.org/909430
+
+Index: src/openvpn/push.c
+===================================================================
+--- a/src/openvpn/push.c	(revision 5d5437710c282b1a60a892d1910160027a81db92)
++++ b/src/openvpn/push.c	(revision 13c05ca4e9da88ef30a778c16a97f0c0d767b448)
+@@ -373,6 +373,7 @@
+     if (tls_peer_info_ncp_ver(peer_info) >= 2 && o->ncp_enabled)
+     {
+-        /* if we have already created our key, we cannot change our own
+-         * cipher, so disable NCP and warn = explain why
++        /* if we have already created our key, we cannot *change* our own
++         * cipher -> so log the fact and push the "what we have now" cipher
++         * (so the client is always told what we expect it to use)
+          */
+         const struct tls_session *session = &tls_multi->session[TM_ACTIVE];
+@@ -381,5 +382,6 @@
+             msg( M_INFO, "PUSH: client wants to negotiate cipher (NCP), but "
+                  "server has already generated data channel keys, "
+-                 "ignoring client request" );
++                 "re-sending previously negotiated cipher '%s'",
++                 o->ciphername );
+         }
+         else
+@@ -389,6 +391,6 @@
+             char *push_cipher = string_alloc(o->ncp_ciphers, &o->gc);
+             o->ciphername = strtok(push_cipher, ":");
+-            push_option_fmt(gc, push_list, M_USAGE, "cipher %s", o->ciphername);
+-        }
++        }
++        push_option_fmt(gc, push_list, M_USAGE, "cipher %s", o->ciphername);
+     }
+     else if (o->ncp_enabled)
