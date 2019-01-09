@@ -665,7 +665,7 @@ md_ctx_final (md_context_t *ctx, uint8_t *dst)
  * TODO: re-enable dmsg for crypto debug
  */
 void
-hmac_ctx_init (md_context_t *ctx, const uint8_t *key, int key_len, const md_info_t *kt)
+hmac_ctx_init (md_context_t *ctx, const uint8_t *key, int key_len, const md_info_t *kt, bool prf_use)
 {
   ASSERT(NULL != kt && NULL != ctx);
 

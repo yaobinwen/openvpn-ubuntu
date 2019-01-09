@@ -1360,12 +1360,12 @@ do_route (const struct options *options,
  */
 #if P2MP
 static void
-save_pulled_options_digest (struct context *c, const struct md5_digest *newdigest)
+save_pulled_options_digest (struct context *c, const struct sha256_digest *newdigest)
 {
   if (newdigest)
     c->c1.pulled_options_digest_save = *newdigest;
   else
-    md5_digest_clear (&c->c1.pulled_options_digest_save);
+    sha256_digest_clear (&c->c1.pulled_options_digest_save);
 }
 #endif
 
@@ -1695,8 +1695,8 @@ do_up (struct context *c, bool pulled_options, unsigned int option_types_found)
 	  if (!c->c2.did_open_tun
 	      && PULL_DEFINED (&c->options)
 	      && c->c1.tuntap
-	      && (!md5_digest_defined (&c->c1.pulled_options_digest_save) || !md5_digest_defined (&c->c2.pulled_options_digest)
-		  || !md5_digest_equal (&c->c1.pulled_options_digest_save, &c->c2.pulled_options_digest)))
+	      && (!sha256_digest_defined (&c->c1.pulled_options_digest_save) || !sha256_digest_defined (&c->c2.pulled_options_digest)
+		  || !sha256_digest_equal (&c->c1.pulled_options_digest_save, &c->c2.pulled_options_digest)))
 	    {
 	      /* if so, close tun, delete routes, then reinitialize tun and add routes */
 	      msg (M_INFO, "NOTE: Pulled options changed on restart, will need to close and reopen TUN/TAP device.");
@@ -2774,11 +2774,11 @@ do_compute_occ_strings (struct context *c)
 #ifdef ENABLE_CRYPTO
   msg (D_SHOW_OCC_HASH, "Local Options hash (VER=%s): '%s'",
        options_string_version (c->c2.options_string_local, &gc),
-       md5sum ((uint8_t*)c->c2.options_string_local,
+       sha256sum ((uint8_t*)c->c2.options_string_local,
 	       strlen (c->c2.options_string_local), 9, &gc));
   msg (D_SHOW_OCC_HASH, "Expected Remote Options hash (VER=%s): '%s'",
        options_string_version (c->c2.options_string_remote, &gc),
-       md5sum ((uint8_t*)c->c2.options_string_remote,
+       sha256sum ((uint8_t*)c->c2.options_string_remote,
 	       strlen (c->c2.options_string_remote), 9, &gc));
 #endif
 
