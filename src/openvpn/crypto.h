@@ -430,24 +430,24 @@ void free_ssl_lib (void);
 #endif /* ENABLE_SSL */
 
 /*
- * md5 functions
+ * sha256 functions
  */
 
-struct md5_state {
+struct sha256_state {
   md_ctx_t ctx;
 };
 
-struct md5_digest {
-  uint8_t digest [MD5_DIGEST_LENGTH];
+struct sha256_digest {
+  uint8_t digest [SHA256_DIGEST_LENGTH];
 };
 
-const char *md5sum(uint8_t *buf, int len, int n_print_chars, struct gc_arena *gc);
-void md5_state_init (struct md5_state *s);
-void md5_state_update (struct md5_state *s, void *data, size_t len);
-void md5_state_final (struct md5_state *s, struct md5_digest *out);
-void md5_digest_clear (struct md5_digest *digest);
-bool md5_digest_defined (const struct md5_digest *digest);
-bool md5_digest_equal (const struct md5_digest *d1, const struct md5_digest *d2);
+const char *sha256sum(uint8_t *buf, int len, int n_print_chars, struct gc_arena *gc);
+void sha256_state_init (struct sha256_state *s);
+void sha256_state_update (struct sha256_state *s, void *data, size_t len);
+void sha256_state_final (struct sha256_state *s, struct sha256_digest *out);
+void sha256_digest_clear (struct sha256_digest *digest);
+bool sha256_digest_defined (const struct sha256_digest *digest);
+bool sha256_digest_equal (const struct sha256_digest *d1, const struct sha256_digest *d2);
 
 /*
  * Inline functions

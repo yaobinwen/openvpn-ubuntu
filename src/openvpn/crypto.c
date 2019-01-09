@@ -506,7 +506,7 @@ init_key_ctx (struct key_ctx *ctx, struct key *key,
   if (kt->digest && kt->hmac_length > 0)
     {
       ALLOC_OBJ(ctx->hmac, hmac_ctx_t);
-      hmac_ctx_init (ctx->hmac, key->hmac, kt->hmac_length, kt->digest);
+      hmac_ctx_init (ctx->hmac, key->hmac, kt->hmac_length, kt->digest, 0);
 
       msg (D_HANDSHAKE,
       "%s: Using %d bit message hash '%s' for HMAC authentication",
@@ -1422,61 +1422,62 @@ free_ssl_lib (void)
 #endif /* ENABLE_SSL */
 
 /*
- * md5 functions
+ * sha256 functions
  */
 
 const char *
-md5sum (uint8_t *buf, int len, int n_print_chars, struct gc_arena *gc)
+sha256sum (uint8_t *buf, int len, int n_print_chars, struct gc_arena *gc)
 {
-  uint8_t digest[MD5_DIGEST_LENGTH];
-  const md_kt_t *md5_kt = md_kt_get("MD5");
+  uint8_t digest[SHA256_DIGEST_LENGTH];
+  const md_kt_t *sha256_kt = md_kt_get("SHA256");
 
-  md_full(md5_kt, buf, len, digest);
+  md_full(sha256_kt, buf, len, digest);
 
-  return format_hex (digest, MD5_DIGEST_LENGTH, n_print_chars, gc);
+  return format_hex (digest, SHA256_DIGEST_LENGTH, n_print_chars, gc);
 }
 
 void
-md5_state_init (struct md5_state *s)
+sha256_state_init (struct sha256_state *s)
 {
-  const md_kt_t *md5_kt = md_kt_get("MD5");
+  const md_kt_t *sha256_kt = md_kt_get("SHA256");
 
-  md_ctx_init(&s->ctx, md5_kt);
+  md_ctx_init(&s->ctx, sha256_kt);
 }
 
 void
-md5_state_update (struct md5_state *s, void *data, size_t len)
+sha256_state_update (struct sha256_state *s, void *data, size_t len)
 {
   md_ctx_update(&s->ctx, data, len);
 }
 
 void
-md5_state_final (struct md5_state *s, struct md5_digest *out)
+sha256_state_final (struct sha256_state *s, struct sha256_digest *out)
 {
   md_ctx_final(&s->ctx, out->digest);
   md_ctx_cleanup(&s->ctx);
 }
 
 void
-md5_digest_clear (struct md5_digest *digest)
+sha256_digest_clear (struct sha256_digest *digest)
 {
   CLEAR (*digest);
 }
 
 bool
-md5_digest_defined (const struct md5_digest *digest)
+sha256_digest_defined (const struct sha256_digest *digest)
 {
   int i;
-  for (i = 0; i < MD5_DIGEST_LENGTH; ++i)
+  for (i = 0; i < SHA256_DIGEST_LENGTH; ++i)
     if (digest->digest[i])
       return true;
   return false;
 }
 
 bool
-md5_digest_equal (const struct md5_digest *d1, const struct md5_digest *d2)
+sha256_digest_equal (const struct sha256_digest *d1,
+                     const struct sha256_digest *d2)
 {
-  return memcmp(d1->digest, d2->digest, MD5_DIGEST_LENGTH) == 0;
+  return memcmp(d1->digest, d2->digest, SHA256_DIGEST_LENGTH) == 0;
 }
 
 #endif /* ENABLE_CRYPTO */

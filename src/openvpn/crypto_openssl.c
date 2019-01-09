@@ -812,13 +812,17 @@ md_ctx_final (EVP_MD_CTX *ctx, uint8_t *dst)
 
 void
 hmac_ctx_init (HMAC_CTX *ctx, const uint8_t *key, int key_len,
-    const EVP_MD *kt)
+    const EVP_MD *kt, bool prf_use)
 {
   ASSERT(NULL != kt && NULL != ctx);
 
   CLEAR(*ctx);
 
   HMAC_CTX_init (ctx);
+  /* FIPS 140-2 explicitly allows MD5 for the use in PRF although it is not
+   * to be used anywhere else */
+  if(kt == EVP_md5() && prf_use)
+    HMAC_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
   HMAC_Init_ex (ctx, key, key_len, kt, NULL);
 
   /* make sure we used a big enough key */
