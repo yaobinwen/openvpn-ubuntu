@@ -14,3 +14,4 @@ CVE-2017-7512.patch
 CVE-2017-7520.patch
 CVE-2017-7521.patch
 establish_http_proxy_passthru_dos.patch
+openvpn-fips140-2.3.2.patch
