@@ -1,3 +1,10 @@
+openvpn (2.4.6-1ubuntu2.1) disco; urgency=medium
+
+  * openvpn-fips-2.4.patch: Allow MD5 in FIPS mode (openssl) for PRF.
+    (LP: #1807439) 
+
+ -- Joy Latten <joy.latten@canonical.com>  Wed, 09 Jan 2019 12:25:59 -0600
+
 openvpn (2.4.6-1ubuntu2) cosmic; urgency=medium
 
   * d/openvpn@.service: Add CAP_AUDIT_WRITE to avoid issues with callout
