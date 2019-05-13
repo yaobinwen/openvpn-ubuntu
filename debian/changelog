@@ -1,3 +1,19 @@
+openvpn (2.4.7-1ubuntu1) eoan; urgency=medium
+
+  * Merge with Debian unstable (LP: #1828771). Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what got
+      added to debian/openvpn.init.d ages ago (LP 1454725)
+    - d/p/openvpn-fips-2.4.patch: Allow MD5 in FIPS mode (openssl) for PRF.
+      (LP 1807439)
+  * Dropped changes:
+    - d/openvpn@.service: Add CAP_AUDIT_WRITE to avoid issues with callout
+      scripts breaking due to sudo/pam being unable to audit the action.
+      Fixed in upstream issue #918, suggested to Debian in #868806 (LP 1787208)
+      [in Debian now]
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 13 May 2019 15:55:22 +0200
+
 openvpn (2.4.7-1) unstable; urgency=medium
 
   [ Bernhard Schmidt ]
