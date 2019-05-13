@@ -7,3 +7,4 @@ match-manpage-and-command-help.patch
 spelling_errors.patch
 systemd.patch
 fix-pkcs11-helper-hang.patch
+openvpn-fips-2.4.patch
