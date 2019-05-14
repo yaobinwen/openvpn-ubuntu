@@ -1693,7 +1693,7 @@ add_route(struct route_ipv4 *r,
     argv_msg(D_ROUTE, &argv);
     status = openvpn_execve_check(&argv, es, 0, "ERROR: Solaris route add command failed");
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
 
     argv_printf(&argv, "%s add",
                 ROUTE_PATH);
@@ -1879,7 +1879,7 @@ add_route_ipv6(struct route_ipv6 *r6, const struct tuntap *tt, unsigned int flag
     network = print_in6_addr( r6->network, 0, &gc);
     gateway = print_in6_addr( r6->gateway, 0, &gc);
 
-#if defined(TARGET_DARWIN)    \
+#if defined(TARGET_DARWIN) || defined(__FreeBSD_kernel__)    \
     || defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY)    \
     || defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
 
@@ -2047,7 +2047,7 @@ add_route_ipv6(struct route_ipv6 *r6, const struct tuntap *tt, unsigned int flag
     argv_msg(D_ROUTE, &argv);
     status = openvpn_execve_check(&argv, es, 0, "ERROR: Solaris route add -inet6 command failed");
 
-#elif defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY)
+#elif defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY) || defined(__FreeBSD_kernel__)
 
     argv_printf(&argv, "%s add -inet6 %s/%d",
                 ROUTE_PATH,
@@ -2239,7 +2239,7 @@ delete_route(struct route_ipv4 *r,
     argv_msg(D_ROUTE, &argv);
     openvpn_execve_check(&argv, es, 0, "ERROR: Solaris route delete command failed");
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
 
     argv_printf(&argv, "%s delete -net %s %s %s",
                 ROUTE_PATH,
@@ -2346,7 +2346,7 @@ delete_route_ipv6(const struct route_ipv6 *r6, const struct tuntap *tt, unsigned
     network = print_in6_addr( r6->network, 0, &gc);
     gateway = print_in6_addr( r6->gateway, 0, &gc);
 
-#if defined(TARGET_DARWIN)    \
+#if defined(TARGET_DARWIN) || defined(__FreeBSD_kernel__)    \
     || defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY)    \
     || defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
 
@@ -2481,7 +2481,7 @@ delete_route_ipv6(const struct route_ipv6 *r6, const struct tuntap *tt, unsigned
     argv_msg(D_ROUTE, &argv);
     openvpn_execve_check(&argv, es, 0, "ERROR: Solaris route delete -inet6 command failed");
 
-#elif defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY)
+#elif defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY) || defined(__FreeBSD_kernel__)
 
     argv_printf(&argv, "%s delete -inet6 %s/%d",
                 ROUTE_PATH,
@@ -3533,7 +3533,8 @@ done:
 
 #elif defined(TARGET_DARWIN) || defined(TARGET_SOLARIS)    \
     || defined(TARGET_FREEBSD) || defined(TARGET_DRAGONFLY)    \
-    || defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)
+    || defined(TARGET_OPENBSD) || defined(TARGET_NETBSD)    \
+    || defined(__FreeBSD_kernel__)
 
 #include <sys/types.h>
 #include <sys/socket.h>
