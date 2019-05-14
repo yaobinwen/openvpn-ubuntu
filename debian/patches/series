@@ -5,3 +5,4 @@ openvpn-pkcs11warn.patch
 kfreebsd_support.patch
 match-manpage-and-command-help.patch
 openvpn-fips-2.4.patch
+lp-1828771-CapabilityBoundingSet-for-auth_pam.patch
