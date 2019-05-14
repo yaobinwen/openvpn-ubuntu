@@ -7,3 +7,4 @@ match-manpage-and-command-help.patch
 spelling_errors.patch
 systemd.patch
 openvpn-fips-2.4.patch
+lp-1828771-CapabilityBoundingSet-for-auth_pam.patch
