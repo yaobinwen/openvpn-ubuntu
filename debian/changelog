@@ -1,3 +1,9 @@
+openvpn (2.4.7-1ubuntu2) eoan; urgency=medium
+
+  * No-change upload with strops.h and sys/strops.h removed in glibc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Sep 2019 11:05:25 +0000
+
 openvpn (2.4.7-1ubuntu1) eoan; urgency=medium
 
   * Merge with Debian unstable (LP: #1828771). Remaining changes:
