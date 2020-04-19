@@ -1,3 +1,28 @@
+openvpn (2.4.9-1) unstable; urgency=medium
+
+  [ Jörg Frings-Fürst ]
+  * New upstream release (Closes: #950610).
+  * Refresh debian/patches/openvpn-pkcs11warn.patch.
+  * Remove upstream applied fix-pkcs11-helper-hang.patch.
+  * Add libp11-kit-dev to Build - Depends (Closes: #940727).
+  * Add symlinks for plugins into /usr/lib/openvpn/ (Closes: #946348).
+  * Declare compliance with Debian Policy 4.5.0 (No changes needed).
+  * Switch to debhelper-compat:
+    - debian/control: change to debhelper-compat (=12).
+    - remove debian/compat.
+  * debian/copyright:
+    - Add year 2020 to debian/*.
+    - Add year 2019 to *.
+  * debian/control:
+    - Add Rules-Requires-Root: No.
+
+  [ Bernhard Schmidt ]
+  * New upstream version 2.4.9
+    - CVE-2020-11810
+      illegal client float can break VPN session for other users
+
+ -- Bernhard Schmidt <berni@debian.org>  Sun, 19 Apr 2020 15:52:57 +0200
+
 openvpn (2.4.7-1) unstable; urgency=medium
 
   [ Bernhard Schmidt ]
