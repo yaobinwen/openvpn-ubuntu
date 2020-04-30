@@ -5,6 +5,7 @@ openvpn (2.4.9-2ubuntu1) groovy; urgency=medium
     - debian/openvpn@.service: Add '--script-security 2' similar to what
       got added to debian/openvpn.init.d ages ago (LP 1454725)
     - Allow MD5 for PRF in FIPS mode openssl.
+  * Added changes:
     - d/tests: add two DEP-8 test cases
       + d/t/server-setup-with-static-key: test the OpenVPN server side setup
         using a static key.
