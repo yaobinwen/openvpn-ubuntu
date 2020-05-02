@@ -35,13 +35,6 @@ case "$1" in
       [ -e /dev/net ] || mkdir -m 755 /dev/net
       [ -d /dev/net -a ! -e /dev/net/tun ] && mknod /dev/net/tun c 10 200
     fi
-    # move /run/openvpn.foo.pid to (subdir) /run/openvpn/foo.pid
-    if [ -n "$2" ] && dpkg --compare-versions "$2" lt 2.3.2-6 ; then
-      mkdir -p /run/openvpn
-      for f in $(ls /var/run/openvpn.*.pid /var/run/openvpn.*.status 2>/dev/null); do
-        mv "$f" "/run/openvpn/$(basename $f | sed 's/^openvpn\.//')"
-      done
-    fi
     for f in /run/sendsigs.omit.d/openvpn.*.pid; do
       [ -e "$f" ] && continue
       b="$(basename $f|sed 's/openvpn\.//')"
@@ -49,17 +42,12 @@ case "$1" in
       echo "$b" | grep -q '\*' && continue
       ln -sf "/run/openvpn/$b" "/run/sendsigs.omit.d/openvpn.$b"
     done
+    if pidof -c /usr/sbin/openvpn >/dev/null; then
+        echo "A reboot is required to replace the running openvpn." >&2
+        echo "Please reboot the system as soon as possible." >&2
+    fi
   ;;
 esac
-
-if [ -x "/etc/init.d/openvpn" ]; then
-	pathfind invoke-rc.d
-	if [ $? = 0 ]; then
-	   invoke-rc.d openvpn cond-restart || invoke-rc.d openvpn restart
-	else
-	   /etc/init.d/openvpn cond-restart || /etc/init.d/openvpn restart
-	fi
-fi
 
 db_stop
 
