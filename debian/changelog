@@ -1,3 +1,9 @@
+openvpn (2.4.9-2ubuntu2) groovy; urgency=medium
+
+  * Drop reload support from systemd unit files (LP: #1868127)
+
+ -- Lucas Kanashiro <kanashiro@ubuntu.com>  Tue, 26 May 2020 19:04:33 -0300
+
 openvpn (2.4.9-2ubuntu1) groovy; urgency=medium
 
   * Merge with Debian unstable. Remaining changes:
