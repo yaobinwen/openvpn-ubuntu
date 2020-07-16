@@ -1,0 +1,4 @@
+  * Use dh-systemd in order to enable the service unit.
+    (Closes: #768411)
+  * Add comment on /etc/default/openvpn file about options
+    not supported on systemd. (Closes: #768384)
