@@ -1,0 +1,5 @@
+  * Move libsystemd-daemon-dev Build-Dep to libsystemd-dev.
+    Add Build-Dep on systemd. (Closes: #791904)
+  * Bumped Standards-Version to 3.9.6
+  * Apply upstream patch to fix stdin password prompt.
+    (Closes: #791829)
