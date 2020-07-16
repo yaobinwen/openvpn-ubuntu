@@ -1,0 +1,63 @@
+  * Fake sync (different orig.tar.gz). (LP: #242537)
+  * init.d script: Set default exit code to 0 when undefined.
+    (Closes: #486441)
+  * The 'Miriam helped me move to quilt' release
+  * Moved all the patches to debian/patches
+  * debian/control: Added Build-Dep on quilt
+  * Applied patch by Jamie Strandboge to fix openssl-vulnkey
+    extra passphrase prompts. Thanks Jamie.
+    (Closes: #483020, #483500, #486129)
+  * Updated Portuguese debconf templates. (Closes: #484007)
+  [ Martin Pitt ]
+  * Added note on Out Of Memory issues. (Closes: #484113)
+  * Avoid asking about the tun device creation if using udev.
+    (Closes: #484111)
+  * Reworked init.d script to use LSB functions. (Closes: #484110)
+  * The 'Thanks the transtalors' release
+  * Updated Japanese debconf templates. (Closes: #483848)
+  * Updated Russian debconf templates. (Closes: #483693)
+  * Updated Brazilian Portuguese debconf templates. (Closes: #483686)
+  * Updated German debconf templates. (Closes: #483610)
+  * Updated French debconf templates. (Closes: #483104)
+  * Updated Spanish debconf templates. (Closes: #482939)
+  * Updated Italian debconf templates. (Closes: #482809)
+  * Updated Finnish debconf templates. (Closes: #482763)
+  * Updated Swedish debconf templates. (Closes: #482677)
+  * Updated Vietnamese debconf templates. (Closes: #482640)
+  * Updated Galician debconf templates. (Closes: #482461)
+  * Updated Czech debconf templates. (Closes: #482430)
+  * Updated Basque debconf templates. (Closes: #482398)
+  * Updated path to openssl-vulnkey. (Closes: #483723)
+  * init.c: Warn of use of known vulnerable weak SSL/TLS
+    and shared secret keys caused by Debian openssl bug.
+    Patch taken from Ubuntu. CVE-2008-0166
+  * debian/(templates|postinst): Add warning on vulnerable 
+    secrect/key files.
+  * debian/control: Add dependencies on openssl-blacklist and
+    openvpn-blacklist. Bumped dependency on libssl version.
+  * New upstream release (Closes: #464181)
+    - Slashes in X509 common name allowed (Closes: #452274)
+  * init.d script: Removed /dev/null stdin redirection, so passphrases
+    can be typed in. (Closes: #454371)
+  * Set FD_CLOEXEC in socket initialization BEFORE running the 'up script'
+    Thanks a lot Julien Cristau for finding this out and sending the
+    patch (Closes: #367716)
+  * Added multiple VPN configuration in /e/n/interfaces.
+    Thanks Sam Couter for the patch (Closes: #472924)
+  * Bumped Standards-Version to 3.7.3
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. (Closes: #462048)
+  * Updated Vietnamese debconf templates. (Closes: #465535)
+  * Updated German debconf templates. (Closes: #465317)
+  * Updated Brazilian Portuguese debconf templates. (Closes: #465440)
+  * Updated Japanese debconf templates. (Closes: #462736)
+  * Updated Portuguese debconf templates. (Closes: #462795)
+  * Updated Swedish debconf templates. (Closes: #462979)
+  * Updated Galician debconf templates. (Closes: #462990)
+  * Updated Spanish debconf templates. (Closes: #463047)
+  * Updated French debconf templates. (Closes: #463636)
+  * Updated Italian debconf templates. (Closes: #463703)
+  * Updated Finnish debconf templates. (Closes: #463952)
+  * Updated Czech debconf templates. (Closes: #464221)
+  * Updated Russian debconf templates. (Closes: #464666)
+  * Updated Norwegian Bokmål debconf templates. (Closes: #462811)
