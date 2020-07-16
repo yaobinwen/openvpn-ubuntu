@@ -1,0 +1,4 @@
+  * init.c: send modulus to openssl-vulnkey rather than calling
+    openssl-vulnkey on the file. This allows for password protected ssl keys
+    (LP: #230197)
+  * debian/control: Depends on openssl-blacklist > 0.3.2
