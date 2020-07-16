@@ -1,0 +1,2 @@
+  * Move easy-rsa from Recommends to Suggests as it's not in main and isn't
+    actually required to operate an openvpn server.
