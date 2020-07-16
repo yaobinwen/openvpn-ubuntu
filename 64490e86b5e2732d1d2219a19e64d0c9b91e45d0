@@ -1,0 +1,7 @@
+  * Patched ssl.[ch] to fix integer overflow. (Closes: #576827)
+    Thanks David Sommerseth for the patch.
+  * Fixed manpage typo. (Closes: #576823)
+  * Bloat the init.d script with more dependencies required by the
+    new init systems. Sucky. (Closes: #568647, #553338)
+  * Reworded README.Debian (Closes: #550164)
+  * Switch to dpkg-source 3.0 (quilt) format
