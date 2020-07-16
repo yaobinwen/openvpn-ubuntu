@@ -1,0 +1,2 @@
+  * debian/openvpn.init.d:
+    - Fix unexpected operator on startup (LP: #340120)
