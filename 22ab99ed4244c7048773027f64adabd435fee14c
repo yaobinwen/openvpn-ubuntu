@@ -1,0 +1,2 @@
+  * Apply patch by Samuel Thibault to clean up temporary files.
+    (Closes: #764651). Thanks Samuel!
