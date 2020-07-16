@@ -1,0 +1,6 @@
+  * New upstream release.
+  * tun.c: patch to fix FTBFS in kfreebsd. (Closes: #815283)
+    Thanks Steven Chamberlain for the patch.
+  * README.Debian: Document limits in the service file.
+    (Closes: #819919, #823621)
+  * Removed versioned dependency on initscripts. (Closes: #804968)
