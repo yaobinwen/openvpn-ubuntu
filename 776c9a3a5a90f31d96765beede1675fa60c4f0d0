@@ -1,0 +1,3 @@
+  * Create /run/openvpn in init script even if no VPN is
+    autostarted by it. (Closes: #741938)
+  * Fix systemd detection based on /run/systemd/system.
