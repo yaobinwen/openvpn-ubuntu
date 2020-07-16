@@ -1,0 +1,2 @@
+  * Add --no-block to if-up.d script to avoid hanging boot on
+    interfaces with openvpn instances. (Closes: #787090, #785200)
