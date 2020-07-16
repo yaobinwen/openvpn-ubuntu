@@ -1,0 +1,5 @@
+  * debian/openvpn.init.d:
+    - Added 'status' action to init script (LP: #251641)
+    - Restored per-VPN result messages by using log_action_begin_msg and
+      one log_daemon_msg per VPN instead of log_progress_msg (LP: #264966)
+  * debian/control: Added lsb-base>=3.2-14 depend to allow status_of_proc()
