@@ -1,0 +1,11 @@
+  * debian/rules: run ./configure with path to 'route', for
+    those build daemons without 'route'. (Closes: #495082)
+  * Created NEWS.Debian with info on new option script-security.
+    (Closes: #494998)
+  * debian/rules: run ./configure with path to ifconfig, for
+    those build daemons without ifconfig. (Closes: #494918)
+  * New upstream version.
+  * Urgency high since it fixes a security bug in versions
+    2.1-beta14 to 2.1-rc8. CVE-2008-3459. (Closes: #493488)
+  * Added sample-scripts/ to examples directory.
+  * Thanks Tristan Hill for rewritten debian_openssl_vulnkeys.patch
