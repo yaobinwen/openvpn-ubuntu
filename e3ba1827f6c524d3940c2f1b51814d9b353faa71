@@ -1,0 +1,5 @@
+  * New upstream release
+  * Added OMIT_SENDSIGS option in init.d script to let openvpn run after
+    sendsigs on system reboot or shutdown. (Closes: #636864)
+  * Configure with --enable-iproute2.
+  * Change path to route on kFreeBSD. (Closes: #646221) Thanks Robert Millan.
