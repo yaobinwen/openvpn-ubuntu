@@ -1,0 +1,6 @@
+  * New upstream release (Closes: #595684)
+  * Fixed multiple building in a row (Closes: #592086)
+  * Added handling of newer DEB_BUILD_OPTIONS.
+    Thanks Lionel Elie Mamane for the patch. (Closes: #592098)
+  * Updated IPv6 patch from JuanJo Ciarlante.
+    Fixes --multihome option. (Closes: #562099)
