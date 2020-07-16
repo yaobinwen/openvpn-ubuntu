@@ -1,0 +1,6 @@
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn@.service: Add "--script-security 2" similar to what got
+      added to debian/openvpn.init.d ages ago (see LP: #260291).
+    - Demote easy-rsa to Suggests (universe package).
+  * Drop intrusive changes (showing per-VPN result messages) from
+    debian/openvpn.init.d. This isn't being used under systemd.
