@@ -1,0 +1,13 @@
+  * Rebuild for openssl 0.9.8 transition
+  * New upstream release. Urgency high due to security issues.
+      - DoS vulnerability on the server in TCP mode.
+        (CVE-2005-3409) (Closes: #337334)
+      - Format string vulnerability in the foreign_option
+        function in options.c could potentially allow a malicious
+        or compromised server to execute arbitrary code on the
+        client.  (CVE-2005-3393) (Closes: #336751)
+  * debian/control: fix Depends on debconf. (Closes: #332056)
+  * Bumped Standards-Version to 3.6.2.0, no change.
+  * Updated Danish debconf translation. (Closes: #326907)
+  * Updated French debconf translation. (Closes: #328076)
+  * Added Swedish debconf translation. (Closes: #332785)
