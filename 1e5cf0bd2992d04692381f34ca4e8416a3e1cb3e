@@ -1,0 +1,3 @@
+  [ Marc Gariépy ]
+  * Add --script-security to the init.d script (was generated but not passed
+    to openvpn). (LP: #1124398)
