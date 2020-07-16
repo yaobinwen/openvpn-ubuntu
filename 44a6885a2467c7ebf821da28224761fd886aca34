@@ -1,0 +1,2 @@
+  * debian/patches/client_hang_when_server_dont_push.patch: Fix client hanging
+    on PUSH_REQUEST when server does not push any option (LP: #579737)
