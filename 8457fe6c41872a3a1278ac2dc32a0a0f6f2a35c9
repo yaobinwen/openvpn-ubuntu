@@ -1,0 +1,4 @@
+  * Move PID and status files to openvpn subdir in /run.
+    (Closes: #614036). Thanks Stephen Gildea for the patch and Simon Deziel
+    for the upgrade path.
+  * Add --enable-x509-alt-username option to ./configure
