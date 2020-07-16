@@ -1,0 +1,6 @@
+  * SECURITY UPDATE: server denial of service via too-short control channel
+    packets
+    - debian/patches/CVE-2014-8104.patch: drop too-short control channel
+      packets instead of asserting out in ssl.c.
+    - CVE-2014-8104
+  * debian/patches/update_certs.patch: update test certs to fix FTBFS.
