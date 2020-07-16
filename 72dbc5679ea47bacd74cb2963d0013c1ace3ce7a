@@ -1,0 +1,7 @@
+   * SECURITY UPDATE: (Closes: #865480)
+     - CVE-2017-7508.patch. Fix remotely-triggerable ASSERT() on malformed IPv6
+       packet.
+     - CVE-2017-7520.patch. Prevent two kinds of stack buffer OOB reads and a
+       crash for invalid input data.
+     - CVE-2017-7521.patch. Fix potential double-free in --x509-alt-username.
+     - CVE-2017-7521bis.patch. Fix remote-triggerable memory leaks.
