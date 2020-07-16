@@ -302,6 +302,8 @@ struct options
   bool route_delay_defined;
   struct route_option_list *routes;
   bool route_nopull;
+  bool route_gateway_via_dhcp;
+  bool allow_pull_fqdn; /* as a client, allow server to push a FQDN for certain parameters */
 
 #ifdef ENABLE_OCC
   /* Enable options consistency check between peers */
@@ -339,6 +341,8 @@ struct options
 
 # define SF_NOPOOL (1<<0)
   unsigned int server_flags;
+
+  bool server_bridge_proxy_dhcp;
 
   bool server_bridge_defined;
   in_addr_t server_bridge_ip;

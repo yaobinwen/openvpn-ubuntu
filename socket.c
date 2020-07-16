@@ -294,6 +294,29 @@ ip_addr_dotted_quad_safe (const char *dotted_quad)
   }
 }
 
+static bool
+dns_addr_safe (const char *addr)
+{
+  if (addr)
+    {
+      const size_t len = strlen (addr);
+      return len > 0 && len <= 255 && string_class (addr, CC_ALNUM|CC_DASH|CC_DOT, 0);
+    }
+  else
+    return false;
+}
+
+bool
+ip_or_dns_addr_safe (const char *addr, const bool allow_fqdn)
+{
+  if (ip_addr_dotted_quad_safe (addr))
+    return true;
+  else if (allow_fqdn)
+    return dns_addr_safe (addr);
+  else
+    return false;
+}
+
 static void
 update_remote (const char* host,
 	       struct openvpn_sockaddr *addr,
@@ -1528,7 +1551,7 @@ ipchange_fmt (const bool include_cmd, struct argv *argv, const struct link_socke
   const char *ip = print_sockaddr_ex (&info->lsa->actual.dest, NULL, 0, gc);
   const char *port = print_sockaddr_ex (&info->lsa->actual.dest, NULL, PS_DONT_SHOW_ADDR|PS_SHOW_PORT, gc);
   if (include_cmd)
-    argv_printf (argv, "%s %s %s",
+    argv_printf (argv, "%sc %s %s",
 		 info->ipchange_command,
 		 ip,
 		 port);
