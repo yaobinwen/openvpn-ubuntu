@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -347,6 +347,7 @@ struct options
 
 # define SF_NOPOOL (1<<0)
 # define SF_TCP_NODELAY_HELPER (1<<1)
+# define SF_NO_PUSH_ROUTE_GATEWAY (1<<2)
   unsigned int server_flags;
 
   bool server_bridge_proxy_dhcp;

@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -182,7 +182,7 @@ static const char usage_message[] =
   "                  by server EXCEPT for routes.\n"
   "--allow-pull-fqdn : Allow client to pull DNS names from server for\n"
   "                    --ifconfig, --route, and --route-gateway.\n"
-  "--redirect-gateway [flags]: (Experimental) Automatically execute routing\n"
+  "--redirect-gateway [flags]: Automatically execute routing\n"
   "                  commands to redirect all outgoing IP traffic through the\n"
   "                  VPN.  Add 'local' flag if both " PACKAGE_NAME " servers are directly\n"
   "                  connected via a common subnet, such as with WiFi.\n"
@@ -190,6 +190,8 @@ static const char usage_message[] =
   "                  and 128.0.0.0/1 rather than 0.0.0.0/0.  Add 'bypass-dhcp'\n"
   "                  flag to add a direct route to DHCP server, bypassing tunnel.\n"
   "                  Add 'bypass-dns' flag to similarly bypass tunnel for DNS.\n"
+  "--redirect-private [flags]: Like --redirect-gateway, but omit actually changing\n"
+  "                  the default gateway.  Useful when pushing private subnets.\n"
   "--setenv name value : Set a custom environmental variable to pass to script.\n"
   "--setenv FORWARD_COMPATIBLE 1 : Relax config file syntax checking to allow\n"
   "                  directives for future OpenVPN versions to be ignored.\n"
@@ -769,8 +771,8 @@ setenv_connection_entry (struct env_set *es,
   setenv_str_i (es, "proto", proto2ascii (e->proto, false), i);
   setenv_str_i (es, "local", e->local, i);
   setenv_int_i (es, "local_port", e->local_port, i);
-  setenv_str_i (es, "remote", e->local, i);
-  setenv_int_i (es, "remote_port", e->local_port, i);
+  setenv_str_i (es, "remote", e->remote, i);
+  setenv_int_i (es, "remote_port", e->remote_port, i);
 
 #ifdef ENABLE_HTTP_PROXY
   if (e->http_proxy_options)
@@ -795,6 +797,8 @@ setenv_settings (struct env_set *es, const struct options *o)
   setenv_int (es, "verb", o->verbosity);
   setenv_int (es, "daemon", o->daemon);
   setenv_int (es, "daemon_log_redirect", o->log);
+  setenv_unsigned (es, "daemon_start_time", time(NULL));
+  setenv_int (es, "daemon_pid", openvpn_getpid());
 
 #ifdef ENABLE_CONNECTION
   if (o->connection_list)
@@ -1583,12 +1587,8 @@ options_postprocess_verify_ce (const struct options *options, const struct conne
        || options->management_log_history_cache != defaults.management_log_history_cache))
     msg (M_USAGE, "--management is not specified, however one or more options which modify the behavior of --management were specified");
 
-  if ((options->management_flags & (MF_LISTEN_UNIX|MF_CONNECT_AS_CLIENT))
-      == (MF_LISTEN_UNIX|MF_CONNECT_AS_CLIENT))
-    msg (M_USAGE, "--management-client does not support unix domain sockets");
-
   if ((options->management_client_user || options->management_client_group)
-      && !(options->management_flags & MF_LISTEN_UNIX))
+      && !(options->management_flags & MF_UNIX_SOCK))
     msg (M_USAGE, "--management-client-(user|group) can only be used on unix domain sockets");
 #endif
 
@@ -2671,7 +2671,7 @@ auth_retry_print (void)
 static void
 usage (void)
 {
-  FILE *fp = msg_fp();
+  FILE *fp = msg_fp(0);
 
 #ifdef ENABLE_SMALL
 
@@ -2729,7 +2729,7 @@ usage_version (void)
 {
   msg (M_INFO|M_NOPREFIX, "%s", title_string);
   msg (M_INFO|M_NOPREFIX, "Developed by James Yonan");
-  msg (M_INFO|M_NOPREFIX, "Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>");
+  msg (M_INFO|M_NOPREFIX, "Copyright (C) 2002-2009 OpenVPN Technologies, Inc. <sales@openvpn.net>");
   openvpn_exit (OPENVPN_EXIT_STATUS_USAGE); /* exit point */
 }
 
@@ -3056,7 +3056,10 @@ read_config_file (struct options *options,
   ++level;
   if (level <= max_recursive_levels)
     {
-      fp = fopen (file, "r");
+      if (streq (file, "stdin"))
+	fp = stdin;
+      else
+	fp = fopen (file, "r");
       if (fp)
 	{
 	  line_num = 0;
@@ -3073,7 +3076,8 @@ read_config_file (struct options *options,
 		  add_option (options, p, file, line_num, level, msglevel, permission_mask, option_types_found, es);
 		}
 	    }
-	  fclose (fp);
+	  if (fp != stdin)
+	    fclose (fp);
 	}
       else
 	{
@@ -3385,7 +3389,7 @@ add_option (struct options *options,
       if (streq (p[2], "unix"))
 	{
 #if UNIX_SOCK_SUPPORT
-	  options->management_flags |= MF_LISTEN_UNIX;
+	  options->management_flags |= MF_UNIX_SOCK;
 #else
 	  msg (msglevel, "MANAGEMENT: this platform does not support unix domain sockets");
 	  goto err;
@@ -3856,6 +3860,11 @@ add_option (struct options *options,
     {
       VERIFY_PERMISSION (OPT_P_MESSAGES);
       options->mute = positive_atoi (p[1]);
+    }
+  else if (streq (p[0], "errors-to-stderr"))
+    {
+      VERIFY_PERMISSION (OPT_P_MESSAGES);
+      errors_to_stderr();
     }
   else if (streq (p[0], "status") && p[1])
     {
@@ -4384,15 +4393,19 @@ add_option (struct options *options,
       VERIFY_PERMISSION (OPT_P_GENERAL);
       options->allow_pull_fqdn = true;
     }
-  else if (streq (p[0], "redirect-gateway"))
+  else if (streq (p[0], "redirect-gateway") || streq (p[0], "redirect-private"))
     {
       int j;
       VERIFY_PERMISSION (OPT_P_ROUTE);
       rol_check_alloc (options);
       for (j = 1; j < MAX_PARMS && p[j] != NULL; ++j)
 	{
+	  if (streq (p[0], "redirect-gateway"))
+	    options->routes->flags |= RG_REROUTE_GW;
 	  if (streq (p[j], "local"))
 	    options->routes->flags |= RG_LOCAL;
+	  else if (streq (p[j], "autolocal"))
+	    options->routes->flags |= RG_AUTO_LOCAL;
 	  else if (streq (p[j], "def1"))
 	    options->routes->flags |= RG_DEF1;
 	  else if (streq (p[j], "bypass-dhcp"))
@@ -4401,7 +4414,7 @@ add_option (struct options *options,
 	    options->routes->flags |= RG_BYPASS_DNS;
 	  else
 	    {
-	      msg (msglevel, "unknown --redirect-gateway flag: %s", p[j]);
+	      msg (msglevel, "unknown --%s flag: %s", p[0], p[j]);
 	      goto err;
 	    }
 	}
@@ -4511,6 +4524,12 @@ add_option (struct options *options,
       options->server_bridge_netmask = netmask;
       options->server_bridge_pool_start = pool_start;
       options->server_bridge_pool_end = pool_end;
+    }
+  else if (streq (p[0], "server-bridge") && p[1] && streq (p[1], "nogw"))
+    {
+      VERIFY_PERMISSION (OPT_P_GENERAL);
+      options->server_bridge_proxy_dhcp = true;
+      options->server_flags |= SF_NO_PUSH_ROUTE_GATEWAY;
     }
   else if (streq (p[0], "server-bridge") && !p[1])
     {
