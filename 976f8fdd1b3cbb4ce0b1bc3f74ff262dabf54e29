@@ -1,0 +1,4 @@
+  * Upload to unstable
+  * debian/control: added Homepage field
+  * Added debian/watch file
+  * debian/patches: Added descriptions/authors/etc. to patches
