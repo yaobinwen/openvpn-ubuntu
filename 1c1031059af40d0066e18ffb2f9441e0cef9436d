@@ -1,0 +1,3 @@
+  * init.d script: Added X-Interactive header. (Closes: #549424)
+  * patches/jjo-ipv6-support.patch: Added ipv6 support. (Closes: #307846)
+    Patch from JuanJo Ciarlante.
