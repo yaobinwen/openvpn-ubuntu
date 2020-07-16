@@ -1,0 +1,2 @@
+  * debian/openvpn.init.d: Add "--script-security 2" by default for backwards compatibility
+    (LP: #260291)
