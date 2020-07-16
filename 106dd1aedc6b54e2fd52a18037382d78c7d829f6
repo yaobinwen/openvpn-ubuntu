@@ -1,0 +1,4 @@
+  * New upstream version
+    - Removed remote_env.patch, applied upstream
+    - trusted_ip is exported again. (Closes: #524979)
+  * Bumped Standards-Version to 3.8.2
