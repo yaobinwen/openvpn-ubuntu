@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -252,6 +252,48 @@ openvpn_inet_aton (const char *dotted_quad, struct in_addr *addr)
     return OIA_HOSTNAME; /* probably a hostname */
 }
 
+bool
+ip_addr_dotted_quad_safe (const char *dotted_quad)
+{
+  /* verify non-NULL */
+  if (!dotted_quad)
+    return false;
+
+  /* verify length is within limits */
+  if (strlen (dotted_quad) > 15)
+    return false;
+
+  /* verify that all chars are either numeric or '.' and that no numeric
+     substring is greater than 3 chars */
+  {
+    int nnum = 0;
+    const char *p = dotted_quad;
+    int c;
+
+    while ((c = *p++))
+      {
+	if (c >= '0' && c <= '9')
+	  {
+	    ++nnum;
+	    if (nnum > 3)
+	      return false;
+	  }
+	else if (c == '.')
+	  {
+	    nnum = 0;
+	  }
+	else
+	  return false;
+      }
+  }
+
+  /* verify that string will convert to IP address */
+  {
+    struct in_addr a;
+    return openvpn_inet_aton (dotted_quad, &a) == OIA_IP;
+  }
+}
+
 static void
 update_remote (const char* host,
 	       struct openvpn_sockaddr *addr,
@@ -292,9 +334,12 @@ static void
 socket_set_sndbuf (int sd, int size)
 {
 #if defined(HAVE_SETSOCKOPT) && defined(SOL_SOCKET) && defined(SO_SNDBUF)
-  if (setsockopt (sd, SOL_SOCKET, SO_SNDBUF, (void *) &size, sizeof (size)) != 0)
+  if (size > 0 && size < SOCKET_SND_RCV_BUF_MAX)
     {
-      msg (M_WARN, "NOTE: setsockopt SO_SNDBUF=%d failed", size);
+      if (setsockopt (sd, SOL_SOCKET, SO_SNDBUF, (void *) &size, sizeof (size)) != 0)
+	{
+	  msg (M_WARN, "NOTE: setsockopt SO_SNDBUF=%d failed", size);
+	}
     }
 #endif
 }
@@ -318,10 +363,13 @@ static bool
 socket_set_rcvbuf (int sd, int size)
 {
 #if defined(HAVE_SETSOCKOPT) && defined(SOL_SOCKET) && defined(SO_RCVBUF)
-  if (setsockopt (sd, SOL_SOCKET, SO_RCVBUF, (void *) &size, sizeof (size)) != 0)
+  if (size > 0 && size < SOCKET_SND_RCV_BUF_MAX)
     {
-      msg (M_WARN, "NOTE: setsockopt SO_RCVBUF=%d failed", size);
-      return false;
+      if (setsockopt (sd, SOL_SOCKET, SO_RCVBUF, (void *) &size, sizeof (size)) != 0)
+	{
+	  msg (M_WARN, "NOTE: setsockopt SO_RCVBUF=%d failed", size);
+	  return false;
+	}
     }
   return true;
 #endif
@@ -1474,6 +1522,22 @@ setenv_trusted (struct env_set *es, const struct link_socket_info *info)
   setenv_link_socket_actual (es, "trusted", &info->lsa->actual, SA_IP_PORT);
 }
 
+static void
+ipchange_fmt (const bool include_cmd, struct argv *argv, const struct link_socket_info *info, struct gc_arena *gc)
+{
+  const char *ip = print_sockaddr_ex (&info->lsa->actual.dest, NULL, 0, gc);
+  const char *port = print_sockaddr_ex (&info->lsa->actual.dest, NULL, PS_DONT_SHOW_ADDR|PS_SHOW_PORT, gc);
+  if (include_cmd)
+    argv_printf (argv, "%s %s %s",
+		 info->ipchange_command,
+		 ip,
+		 port);
+  else
+    argv_printf (argv, "%s %s",
+		 ip,
+		 port);
+}
+
 void
 link_socket_connection_initiated (const struct buffer *buf,
 				  struct link_socket_info *info,
@@ -1502,20 +1566,21 @@ link_socket_connection_initiated (const struct buffer *buf,
   /* Process --ipchange plugin */
   if (plugin_defined (info->plugins, OPENVPN_PLUGIN_IPCHANGE))
     {
-      const char *addr_ascii = print_sockaddr_ex (&info->lsa->actual.dest, " ", PS_SHOW_PORT, &gc);
-      if (plugin_call (info->plugins, OPENVPN_PLUGIN_IPCHANGE, addr_ascii, NULL, es) != OPENVPN_PLUGIN_FUNC_SUCCESS)
+      struct argv argv = argv_new ();
+      ipchange_fmt (false, &argv, info, &gc);
+      if (plugin_call (info->plugins, OPENVPN_PLUGIN_IPCHANGE, &argv, NULL, es) != OPENVPN_PLUGIN_FUNC_SUCCESS)
 	msg (M_WARN, "WARNING: ipchange plugin call failed");
+      argv_reset (&argv);
     }
 
   /* Process --ipchange option */
   if (info->ipchange_command)
     {
-      struct buffer out = alloc_buf_gc (256, &gc);
+      struct argv argv = argv_new ();
       setenv_str (es, "script_type", "ipchange");
-      buf_printf (&out, "%s %s",
-		  info->ipchange_command,
-		  print_sockaddr_ex (&info->lsa->actual.dest, " ", PS_SHOW_PORT, &gc));
-      system_check (BSTR (&out), es, S_SCRIPT, "ip-change command failed");
+      ipchange_fmt (true, &argv, info, &gc);
+      openvpn_execve_check (&argv, es, S_SCRIPT, "ip-change command failed");
+      argv_reset (&argv);
     }
 
   gc_free (&gc);
@@ -1785,7 +1850,8 @@ print_sockaddr_ex (const struct openvpn_sockaddr *addr,
       const int port = ntohs (addr->sa.sin_port);
 
       mutex_lock_static (L_INET_NTOA);
-      buf_printf (&out, "%s", (addr_defined (addr) ? inet_ntoa (addr->sa.sin_addr) : "[undef]"));
+      if (!(flags & PS_DONT_SHOW_ADDR))
+	buf_printf (&out, "%s", (addr_defined (addr) ? inet_ntoa (addr->sa.sin_addr) : "[undef]"));
       mutex_unlock_static (L_INET_NTOA);
 
       if (((flags & PS_SHOW_PORT) || (addr_defined (addr) && (flags & PS_SHOW_PORT_IF_DEFINED)))

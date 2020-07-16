@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -27,6 +27,8 @@
 
 #include "basic.h"
 #include "thread.h"
+
+#define BUF_SIZE_MAX 1000000
 
 /*
  * Define verify_align function, otherwise
@@ -56,6 +58,12 @@ struct buffer
 #endif
 };
 
+/* used by argv_x functions */
+struct argv {
+  size_t argc;
+  char **argv;
+};
+
 /* for garbage collection */
 
 struct gc_entry
@@ -68,12 +76,12 @@ struct gc_arena
   struct gc_entry *list;
 };
 
-#define BPTR(buf)  ((buf)->data + (buf)->offset)
-#define BEND(buf)  (BPTR(buf) + (buf)->len)
-#define BLAST(buf) (((buf)->data && (buf)->len) ? (BPTR(buf) + (buf)->len - 1) : NULL)
-#define BLEN(buf)  ((buf)->len)
-#define BDEF(buf)  ((buf)->data != NULL)
-#define BSTR(buf)  ((char *)BPTR(buf))
+#define BPTR(buf)  (buf_bptr(buf))
+#define BEND(buf)  (buf_bend(buf))
+#define BLAST(buf) (buf_blast(buf))
+#define BLEN(buf)  (buf_len(buf))
+#define BDEF(buf)  (buf_defined(buf))
+#define BSTR(buf)  (buf_str(buf))
 #define BCAP(buf)  (buf_forward_capacity (buf))
 
 void buf_clear (struct buffer *buf);
@@ -86,8 +94,12 @@ bool buf_assign (struct buffer *dest, const struct buffer *src);
 void string_clear (char *str);
 int string_array_len (const char **array);
 
+size_t array_mult_safe (const size_t m1, const size_t m2);
+
 #define PA_BRACKET (1<<0)
 char *print_argv (const char **p, struct gc_arena *gc, const unsigned int flags);
+
+void buf_size_error (const size_t size);
 
 /* for dmalloc debugging */
 
@@ -128,6 +140,69 @@ bool buf_init_debug (struct buffer *buf, int offset, const char *file, int line)
 
 /* inline functions */
 
+static inline bool
+buf_defined (const struct buffer *buf)
+{
+  return buf->data != NULL;
+}
+
+static inline bool
+buf_valid (const struct buffer *buf)
+{
+  return likely (buf->data != NULL) && likely (buf->len >= 0);
+}
+
+static inline uint8_t *
+buf_bptr (const struct buffer *buf)
+{
+  if (buf_valid (buf))
+    return buf->data + buf->offset;
+  else
+    return NULL;
+}
+
+static int
+buf_len (const struct buffer *buf)
+{
+  if (buf_valid (buf))
+    return buf->len;
+  else
+    return 0;
+}
+
+static inline uint8_t *
+buf_bend (const struct buffer *buf)
+{
+  return buf_bptr (buf) + buf_len (buf);
+}
+
+static inline uint8_t *
+buf_blast (const struct buffer *buf)
+{
+  if (buf_len (buf) > 0)
+    return buf_bptr (buf) + buf_len (buf) - 1;
+  else
+    return NULL;
+}
+
+static inline bool
+buf_size_valid (const size_t size)
+{
+  return likely (size < BUF_SIZE_MAX);
+}
+
+static inline bool
+buf_size_valid_signed (const int size)
+{
+  return likely (size >= -BUF_SIZE_MAX) && likely (size < BUF_SIZE_MAX);
+}
+
+static inline char *
+buf_str (const struct buffer *buf)
+{
+  return (char *)buf_bptr(buf);
+}
+
 static inline void
 buf_reset (struct buffer *buf)
 {
@@ -154,15 +229,11 @@ buf_init_dowork (struct buffer *buf, int offset)
   return true;
 }
 
-static inline bool
-buf_defined (struct buffer *buf)
-{
-  return buf->data != NULL;
-}
-
 static inline void
 buf_set_write (struct buffer *buf, uint8_t *data, int size)
 {
+  if (!buf_size_valid (size))
+    buf_size_error (size);
   buf->len = 0;
   buf->offset = 0;
   buf->capacity = size;
@@ -174,6 +245,8 @@ buf_set_write (struct buffer *buf, uint8_t *data, int size)
 static inline void
 buf_set_read (struct buffer *buf, const uint8_t *data, int size)
 {
+  if (!buf_size_valid (size))
+    buf_size_error (size);
   buf->len = buf->capacity = size;
   buf->offset = 0;
   buf->data = (uint8_t *)data;
@@ -204,7 +277,7 @@ has_digit (const unsigned char* src)
 /*
  * printf append to a buffer with overflow check
  */
-void buf_printf (struct buffer *buf, const char *format, ...)
+bool buf_printf (struct buffer *buf, const char *format, ...)
 #ifdef __GNUC__
     __attribute__ ((format (printf, 2, 3)))
 #endif
@@ -218,6 +291,37 @@ int openvpn_snprintf(char *str, size_t size, const char *format, ...)
     __attribute__ ((format (printf, 3, 4)))
 #endif
     ;
+
+/*
+ * A printf-like function (that only recognizes a subset of standard printf
+ * format operators) that prints arguments to an argv list instead
+ * of a standard string.  This is used to build up argv arrays for passing
+ * to execve.
+ */
+void argv_init (struct argv *a);
+struct argv argv_new (void);
+void argv_reset (struct argv *a);
+size_t argv_argc (const char *format);
+char *argv_term (const char **f);
+const char *argv_str (const struct argv *a, struct gc_arena *gc, const unsigned int flags);
+struct argv argv_insert_head (const struct argv *a, const char *head);
+void argv_msg (const int msglev, const struct argv *a);
+void argv_msg_prefix (const int msglev, const struct argv *a, const char *prefix);
+
+#define APA_CAT (1<<0) /* concatentate onto existing struct argv list */
+void argv_printf_arglist (struct argv *a, const char *format, const unsigned int flags, va_list arglist);
+
+void argv_printf (struct argv *a, const char *format, ...)
+#ifdef __GNUC__
+  __attribute__ ((format (printf, 2, 3)))
+#endif
+  ;
+
+void argv_printf_cat (struct argv *a, const char *format, ...)
+#ifdef __GNUC__
+  __attribute__ ((format (printf, 2, 3)))
+#endif
+  ;
 
 /*
  * remove/add trailing characters
@@ -283,38 +387,57 @@ struct buffer buf_sub (struct buffer *buf, int size, bool prepend);
 static inline bool
 buf_safe (const struct buffer *buf, int len)
 {
-  return len >= 0 && buf->offset + buf->len + len <= buf->capacity;
+  return buf_valid (buf) && buf_size_valid (len)
+    && buf->offset + buf->len + len <= buf->capacity;
 }
 
 static inline bool
 buf_safe_bidir (const struct buffer *buf, int len)
 {
-  const int newlen = buf->len + len;
-  return newlen >= 0 && buf->offset + newlen <= buf->capacity;
+  if (buf_valid (buf) && buf_size_valid_signed (len))
+    {
+      const int newlen = buf->len + len;
+      return newlen >= 0 && buf->offset + newlen <= buf->capacity;
+    }
+  else
+    return false;
 }
 
 static inline int
 buf_forward_capacity (const struct buffer *buf)
 {
-  int ret = buf->capacity - (buf->offset + buf->len);
-  if (ret < 0)
-    ret = 0;
-  return ret;
+  if (buf_valid (buf))
+    {
+      int ret = buf->capacity - (buf->offset + buf->len);
+      if (ret < 0)
+	ret = 0;
+      return ret;
+    }
+  else
+    return 0;
 }
 
 static inline int
 buf_forward_capacity_total (const struct buffer *buf)
 {
-  int ret = buf->capacity - buf->offset;
-  if (ret < 0)
-    ret = 0;
-  return ret;
+  if (buf_valid (buf))
+    {
+      int ret = buf->capacity - buf->offset;
+      if (ret < 0)
+	ret = 0;
+      return ret;
+    }
+  else
+    return 0;
 }
 
 static inline int
 buf_reverse_capacity (const struct buffer *buf)
 {
-  return buf->offset;
+  if (buf_valid (buf))
+    return buf->offset;
+  else
+    return 0;
 }
 
 static inline bool
@@ -334,7 +457,7 @@ buf_inc_len (struct buffer *buf, int inc)
 static inline uint8_t *
 buf_prepend (struct buffer *buf, int size)
 {
-  if (size < 0 || size > buf->offset)
+  if (!buf_valid (buf) || size < 0 || size > buf->offset)
     return NULL;
   buf->offset -= size;
   buf->len += size;
@@ -344,7 +467,7 @@ buf_prepend (struct buffer *buf, int size)
 static inline bool
 buf_advance (struct buffer *buf, int size)
 {
-  if (size < 0 || buf->len < size)
+  if (!buf_valid (buf) || size < 0 || buf->len < size)
     return false;
   buf->offset += size;
   buf->len -= size;
@@ -613,6 +736,8 @@ const char *string_mod_const (const char *str,
 			      const char replace,
 			      struct gc_arena *gc);
 
+void string_replace_leading (char *str, const char match, const char replace);
+
 #ifdef CHARACTER_CLASS_DEBUG
 void character_class_debug (void);
 #endif
@@ -688,23 +813,23 @@ void out_of_memory (void);
 
 #define ALLOC_ARRAY(dptr, type, n) \
 { \
-  check_malloc_return ((dptr) = (type *) malloc (sizeof (type) * (n))); \
+  check_malloc_return ((dptr) = (type *) malloc (array_mult_safe (sizeof (type), (n)))); \
 }
 
 #define ALLOC_ARRAY_GC(dptr, type, n, gc) \
 { \
-  (dptr) = (type *) gc_malloc (sizeof (type) * (n), false, (gc)); \
+  (dptr) = (type *) gc_malloc (array_mult_safe (sizeof (type), (n)), false, (gc)); \
 }
 
 #define ALLOC_ARRAY_CLEAR(dptr, type, n) \
 { \
   ALLOC_ARRAY (dptr, type, n); \
-  memset ((dptr), 0, (sizeof(type) * (n))); \
+  memset ((dptr), 0, (array_mult_safe (sizeof(type), (n)))); \
 }
 
 #define ALLOC_ARRAY_CLEAR_GC(dptr, type, n, gc) \
 { \
-  (dptr) = (type *) gc_malloc (sizeof (type) * (n), true, (gc)); \
+  (dptr) = (type *) gc_malloc (array_mult_safe (sizeof (type), (n)), true, (gc)); \
 }
 
 #define ALLOC_OBJ_GC(dptr, type, gc) \

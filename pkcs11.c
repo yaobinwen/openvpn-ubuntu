@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -436,7 +436,9 @@ pkcs11_management_id_get (
 ) {
 	pkcs11h_certificate_id_list_t id_list = NULL;
 	pkcs11h_certificate_id_list_t entry = NULL;
+#if 0 /* certificate_id seems to be unused -- JY */
 	pkcs11h_certificate_id_t certificate_id = NULL;
+#endif
 	pkcs11h_certificate_t certificate = NULL;
 	CK_RV rv = CKR_OK;
 	char *certificate_blob = NULL;

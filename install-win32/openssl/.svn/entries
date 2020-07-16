@@ -1,7 +1,7 @@
 8
 
 dir
-2997
+3125
 https://svn.openvpn.net/projects/openvpn/branches/BETA21/openvpn/install-win32/openssl
 https://svn.openvpn.net/projects/openvpn
 
@@ -40,14 +40,14 @@ james
 
 openssl098.patch
 file
+3149
 
 
 
-
-2008-06-13T07:54:55.000000Z
-862203f336bfd6e83e0a7ebef1999250
-2008-06-04T10:53:57.832544Z
-2982
+2008-07-31T20:41:13.000000Z
+6f2e5ab0b37296726fbbd4dbc59df49c
+2008-07-31T22:03:38.310201Z
+3149
 james
 
 README.txt

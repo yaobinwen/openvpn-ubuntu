@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -40,6 +40,11 @@
  * OpenVPN's default port number as assigned by IANA.
  */
 #define OPENVPN_PORT 1194
+
+/*
+ * Maximum size passed passed to setsockopt SNDBUF/RCVBUF
+ */
+#define SOCKET_SND_RCV_BUF_MAX 1000000
 
 /*
  * Number of seconds that "resolv-retry infinite"
@@ -320,6 +325,7 @@ void link_socket_close (struct link_socket *sock);
 #define PS_SHOW_PORT_IF_DEFINED (1<<0)
 #define PS_SHOW_PORT            (1<<1)
 #define PS_SHOW_PKTINFO         (1<<2)
+#define PS_DONT_SHOW_ADDR       (1<<3)
 
 const char *print_sockaddr_ex (const struct openvpn_sockaddr *addr,
 			       const char* separator,
@@ -390,6 +396,7 @@ void link_socket_update_buffer_sizes (struct link_socket *ls, int rcvbuf, int sn
 #define OIA_IP         1
 #define OIA_ERROR     -1
 int openvpn_inet_aton (const char *dotted_quad, struct in_addr *addr);
+bool ip_addr_dotted_quad_safe (const char *dotted_quad);
 
 socket_descriptor_t create_socket_tcp (void);
 

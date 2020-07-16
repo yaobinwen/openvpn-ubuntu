@@ -111,6 +111,9 @@
 /* Define to 1 if you have the `EVP_CIPHER_CTX_set_key_length' function. */
 #undef HAVE_EVP_CIPHER_CTX_SET_KEY_LENGTH
 
+/* Define to 1 if you have the `execve' function. */
+#undef HAVE_EXECVE
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 

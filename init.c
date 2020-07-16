@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -370,7 +370,7 @@ init_port_share (struct context *c)
 bool
 init_static (void)
 {
-  configure_path ();
+  /* configure_path (); */
 
 #if defined(USE_CRYPTO) && defined(DMALLOC)
   openssl_dmalloc_init ();
@@ -437,6 +437,40 @@ init_static (void)
 #ifdef TIME_TEST
   time_test ();
   return false;
+#endif
+
+#ifdef GEN_PATH_TEST
+  {
+    struct gc_arena gc = gc_new ();
+    const char *fn = gen_path ("foo",
+			       "bar",
+			       &gc);
+    printf ("%s\n", fn);
+    gc_free (&gc);
+  }
+  return false;
+#endif
+
+#ifdef STATUS_PRINTF_TEST
+  {
+    struct gc_arena gc = gc_new ();
+    const char *tmp_file = create_temp_filename ("/tmp", "foo", &gc);
+    struct status_output *so = status_open (tmp_file, 0, -1, NULL, STATUS_OUTPUT_WRITE);
+    status_printf (so, "%s", "foo");
+    status_printf (so, "%s", "bar");
+    if (!status_close (so))
+      msg (M_WARN, "STATUS_PRINTF_TEST: %s: write error", tmp_file);
+    gc_free (&gc);
+  }
+  return false;
+#endif
+
+#ifdef ARGV_TEST
+  {
+    void argv_test (void);
+    argv_test ();
+    return false;
+  }
 #endif
 
   return true;
@@ -887,8 +921,11 @@ do_route (const struct options *options,
 
   if (options->route_script)
     {
+      struct argv argv = argv_new ();
       setenv_str (es, "script_type", "route-up");
-      system_check (options->route_script, es, S_SCRIPT, "Route script failed");
+      argv_printf (&argv, "%s", options->route_script);
+      openvpn_execve_check (&argv, es, S_SCRIPT, "Route script failed");
+      argv_reset (&argv);
     }
 
 #ifdef WIN32
@@ -1912,6 +1949,9 @@ do_option_warnings (struct context *c)
      msg (M_WARN, "WARNING: you are using user/group/chroot without persist-key -- this may cause restarts to fail");
    }
 
+  if (o->chroot_dir && !(o->username && o->groupname))
+    msg (M_WARN, "WARNING: you are using chroot without specifying user and group -- this may cause the chroot jail to be insecure");
+
 #if P2MP
   if (o->pull && o->ifconfig_local && c->first_time)
     msg (M_WARN, "WARNING: using --pull/--client and --ifconfig together is probably not what you want");
@@ -1942,6 +1982,8 @@ do_option_warnings (struct context *c)
       && !(o->ns_cert_type & NS_SSL_SERVER)
       && !o->remote_cert_eku)
     msg (M_WARN, "WARNING: No server certificate verification method has been enabled.  See http://openvpn.net/howto.html#mitm for more info.");
+  if (o->tls_remote)
+    msg (M_WARN, "WARNING: Make sure you understand the semantics of --tls-remote before using it (see the man page).");
 #endif
 #endif
 
@@ -1949,6 +1991,11 @@ do_option_warnings (struct context *c)
   if (o->ce.connect_timeout_defined)
     msg (M_WARN, "NOTE: --connect-timeout option is not supported on this OS");
 #endif
+
+  if (script_security >= SSEC_SCRIPTS)
+    msg (M_WARN, "NOTE: the current --script-security setting may allow this configuration to call user-defined scripts");
+  if (script_security >= SSEC_PW_ENV)
+    msg (M_WARN, "WARNING: the current --script-security setting may allow passwords to be passed to scripts via environmental variables");
 }
 
 static void
