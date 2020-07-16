@@ -1,0 +1,3 @@
+  * The "Bye bye OpenVPN" revenge release
+  * Put upstream tmpfiles conf in the right place and merge with Debian's.
+    (Closes: #865589)
