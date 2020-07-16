@@ -1,0 +1,2 @@
+  * debian/control: Actually drop the initscripts dependency.
+    (Closes: #804968)
