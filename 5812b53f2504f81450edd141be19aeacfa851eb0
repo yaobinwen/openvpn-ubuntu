@@ -1,0 +1,2 @@
+  * Apply upstream patch to fix shrinking MTU sizes on reconnects causing not
+    usable VPN tunnels.
