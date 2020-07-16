@@ -1,0 +1,2 @@
+  * Fix jjo-ipv6-support.patch to avoid assertion failure at socket.c:629 in
+    corner cases where ! host && addr (LP: #627973)
