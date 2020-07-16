@@ -1,0 +1,30 @@
+  [ Jörg Frings-Fürst ]
+  * New upstream release.
+    - Refresh patches.
+    - Fix "does not start if link-mtu is too low" (Closes: #867113).
+    - Fix "auth-tokens are purged if auth-nocache is set" (Closes: #883601).
+  * Migrate to debhelper 11:
+    - Change debian/compat to 11.
+    - Bump minimum debhelper version in debian/control to >= 11.
+  * Declare compliance with Debian Policy 4.1.5 (No changes needed).
+  * New debian/patches/spelling_errors.patch to correct spelling errors.
+  * New debian/patches/systemd.patch to remove obsolete syslog.target.
+  * debian/changelog:
+    - Rewrite to DEP5 copyright format.
+  * debian/control:
+    - Change to my new email address.
+    - Remove trailing whitespaces.
+  * debian/rules:
+    - Remove trailing whitespaces.
+    - Replace outdated dh_installsystemd with dh_systemd_start.
+    - Remove usr/share/doc/openvpn/COPYING.
+    - Replace rm -f with $(RM).
+  * debian/update-resolv-conf:
+    - Fix "preserve order of pushed parameters" (Closes: #807808).
+      Thanks to Thibaut Chèze.
+    - Add syslog message if used without binary resolvconf (Closes: #895135).
+      Thanks to Roger Price <debian@rogerprice.org>.
+  * debian/watch:
+    - Use secure URI.
+  * Remove obsolete debian/openvpn.lintian-overrides.
+  * New README.source to explain the branching model used.
