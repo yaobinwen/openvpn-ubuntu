@@ -1,0 +1,2 @@
+  * Non-maintainer upload.
+  * Drop hard-coded dependency on libssl0.9.8.  (Closes: #623503)
