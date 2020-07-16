@@ -1,0 +1,2 @@
+  * Remove dependency on initscripts. (Closes: #804968)
+  * README.Debian. Fix CapabilityBoundingSet reference.
