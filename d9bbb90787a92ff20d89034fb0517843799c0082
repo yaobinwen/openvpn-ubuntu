@@ -1,0 +1,8 @@
+  * Updated JuanJo's IPv6 patch.
+    Fixes use from xinetd (Closes: #574164)
+  * Patched update-resolv-conf to support multiple DNS search domains.
+    Thanks Jeremy Zawodny and Dave Walker for the patch.
+    (Closes: #617740)
+  * Added a note about bridge-utils helpers in README.Debian.
+    Thanks Sven Hoexter. (Closes: #599192)
+  * Updated Danish debconf templates. (Closes: #608425)
