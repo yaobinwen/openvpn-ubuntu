@@ -1,0 +1,4 @@
+  * Updated JuanJo's IPv6 patch. Now really fixes use from xinetd.
+    Thanks JuanJo & Christian Weinberger for testing it (Closes: #574164)
+  * Removed debian_openssl_vulnkeys.patch since we're Etch + 2 now.
+    (Closes: #484105, #487994)
