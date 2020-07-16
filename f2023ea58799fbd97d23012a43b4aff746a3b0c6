@@ -1,0 +1,2 @@
+  * Fix broken reconnect on connection loss due to wrong push digest calculation.
+    Thanks to Patrick Matthäi for testing (Closes: #863110)
