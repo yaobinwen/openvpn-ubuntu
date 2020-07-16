@@ -1,0 +1,11 @@
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Patch libtool.m4 and configure to support ppc64el.
+    - Refresh delta with debian/openvpn.init.d:
+      + Make stop action reliable by killing if needed
+        (LP: #1274254, LP: #1200519)
+      + Use new path for status file (LP: #1261088)
