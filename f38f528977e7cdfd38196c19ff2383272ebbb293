@@ -1,0 +1,4 @@
+  * Sync with Debian. Remaining changes:
+    - debian/openvpn@.service: Add "--script-security 2" similar to what got
+      added to debian/openvpn.init.d ages ago (LP: #1454725)
+    - Demote easy-rsa to Suggests (universe package).
