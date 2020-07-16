@@ -1,0 +1,8 @@
+  * fix FTBFS on kfreebsd
+  * Adjust debian openvpn@.service to be closer to the upstream
+    ones (Closes: #858558, #864031):
+    - adjust Documentation URL to OpenVPN 2.4
+    - use systemd READY signalling (Type=notify)
+    - add ProtectHome=true
+    - add After/Wants network-online.target
+    - adjust CapabililtyBoundingSet
