@@ -1,0 +1,2 @@
+  * Fix NCP behaviour on TLS reconnect, causing "AEAD Decrypt error: cipher
+    final failed" errors (Closes: #909430, #910937)
