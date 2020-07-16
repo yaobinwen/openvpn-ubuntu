@@ -1,0 +1,11 @@
+  * New upstream version
+  * Add --no-block to if-up.d script to avoid hanging boot on
+    interfaces with openvpn instances. (Closes: #787090, #785200)
+  * Add ProtectSystem=yes to systemd's service file. (Closes: #771626)
+  * Removed upstream applied patches:
+     - 0001-Drop-too-short-control-channel-packets-instead-of-as.patch
+     - update_sample_certs.patch
+  * New upstream release. Removed patches applied upstream:
+    client_connect_tmp_files.patch 
+    better_systemd_detection.patch
+  * Add Build-Depends on libsystemd-daemon-dev.
