@@ -1,0 +1,4 @@
+  * The iproute fiasco release.
+  * Remove --enable-iproute2 dependency since it's only available in Linux.
+    Write that in the changelog so I don't forget _again_ why iproute is not
+    set... (Closes: #652702)
