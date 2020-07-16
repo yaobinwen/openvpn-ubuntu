@@ -1,0 +1,4 @@
+  * New upstream release
+  * init.d script: added soft-restart to the options output. (Closes: #558174)
+  * debian/control: Promoted net-tools from Recommends to Depends.
+    (Closes: #557906)
