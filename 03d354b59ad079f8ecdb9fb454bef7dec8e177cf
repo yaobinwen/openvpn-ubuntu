@@ -1,0 +1,2 @@
+  * openvpn.service. Remove ExecStop, add ExecReload.
+    Fixes reload of openvpn service. (Closes: #763411)
