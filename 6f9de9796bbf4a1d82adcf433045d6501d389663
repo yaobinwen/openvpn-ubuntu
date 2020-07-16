@@ -1,0 +1,10 @@
+  * New upstream version
+    - Fixes TLS negotiation problems (Closes: #496649)
+  * Patched options.c, socket.c and socket.h to correctly check
+    for MAC addresses on lladdr parm. (Closes: #496141)
+    Thanks hoverhell@gmail.com for the patch.
+  * init.d script: exit with 0 status when trying to start
+    an already running VPN. (Closes: #499247)
+  * New upstream version.
+    - Fixed calls to external commands with arguments.
+      (Closes: #495964, #496314, #497411)
