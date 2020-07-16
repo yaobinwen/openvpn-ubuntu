@@ -1,0 +1,3 @@
+  * Fixed init.d script to depend on $remote_fs and $syslog (Closes: #539764)
+  * Added debian/README.source
+  * Bumped Standards-Version to 3.8.3
