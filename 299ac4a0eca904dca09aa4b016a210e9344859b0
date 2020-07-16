@@ -1,0 +1,4 @@
+  * debian/openvpn.init.d:
+    - Revert fix from #454371 that was merged at 2.1~rc7-4 to prevent
+      openvpn prompts from blocking the boot (LP: #280428)
+    - Fix VPNs always reported started [ OK ]
