@@ -1,0 +1,3 @@
+  * Run openvpn@.service before systemd-user-sessions.service to avoid gettys
+    and lightdm starting on top of possible password prompts. This provides
+    the equivalent of the init.d script's X-Start-Before:.
