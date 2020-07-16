@@ -1,0 +1,8 @@
+  * Upload to unstable.
+  * New upstream release. (Closes: #752568)
+  * Add Turkish debconf translation. (Closes: #759879)
+  * Replace openvpn-systemd-helper with a systemd generator.
+    Thanks Ondřej Surý, Ansgar Burchardt and postgresql-common for
+    the ideas, help and inspiration.
+  * Bumped Standards-Version to 3.9.5
+  * debian/control: Add Vcs-*
