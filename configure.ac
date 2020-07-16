@@ -25,7 +25,8 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.50)
 
-AC_INIT([OpenVPN], [2.0.9], [openvpn-users@lists.sourceforge.net], [openvpn])
+m4_include(version.m4)
+AC_INIT([OpenVPN], [PRODUCT_VERSION], [openvpn-users@lists.sourceforge.net], [openvpn])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(syshead.h)
 
@@ -71,6 +72,12 @@ AC_ARG_ENABLE(management,
    [MANAGEMENT="yes"]
 )
 
+AC_ARG_ENABLE(pkcs11,
+   [  --disable-pkcs11        Disable pkcs11 support],
+   [PKCS11="$enableval"],
+   [PKCS11="yes"]
+)
+
 AC_ARG_ENABLE(socks,
    [  --disable-socks         Disable Socks support],
    [SOCKS="$enableval"],
@@ -87,6 +94,18 @@ AC_ARG_ENABLE(fragment,
    [  --disable-fragment      Disable internal fragmentation support (--fragment)],
    [FRAGMENT="$enableval"],
    [FRAGMENT="yes"]
+)
+
+AC_ARG_ENABLE(multihome,
+   [  --disable-multihome     Disable multi-homed UDP server support (--multihome)],
+   [MULTIHOME="$enableval"],
+   [MULTIHOME="yes"]
+)
+
+AC_ARG_ENABLE(port-share,
+   [  --disable-port-share    Disable TCP server port-share support (--port-share)],
+   [PORT_SHARE="$enableval"],
+   [PORT_SHARE="yes"]
 )
 
 AC_ARG_ENABLE(debug,
@@ -266,12 +285,44 @@ AC_CHECK_HEADERS(sys/time.h sys/socket.h sys/ioctl.h sys/stat.h dnl
 		 sys/mman.h fcntl.h sys/file.h stdlib.h stdint.h dnl
 		 stdarg.h unistd.h signal.h stdio.h string.h dnl
 		 strings.h ctype.h errno.h syslog.h pwd.h grp.h dnl
-		 net/if_tun.h net/if.h stropts.h sys/sockio.h dnl
-		 netinet/in.h netinet/in_systm.h netinet/ip.h dnl
-		 netinet/if_ether.h netinet/tcp.h resolv.h arpa/inet.h dnl
+		 net/if_tun.h stropts.h sys/sockio.h dnl
+		 netinet/in.h netinet/in_systm.h dnl
+		 netinet/tcp.h arpa/inet.h dnl
 		 netdb.h sys/uio.h linux/if_tun.h linux/sockios.h dnl
-		 linux/types.h sys/poll.h sys/epoll.h dnl
+		 linux/types.h sys/poll.h sys/epoll.h err.h dnl
 )
+AC_CHECK_HEADERS(net/if.h,,,
+		 [#ifdef HAVE_SYS_SOCKET_H 
+		  # include <sys/socket.h>
+		  #endif
+		 ])
+AC_CHECK_HEADERS(netinet/ip.h,,,
+		 [#ifdef HAVE_SYS_TYPES_H
+		  # include <sys/types.h>
+		  #endif
+		  #ifdef HAVE_NETINET_IN_H
+		  # include <netinet/in.h>
+		  #endif
+		  #ifdef HAVE_NETINET_IN_SYSTM_H
+		  # include <netinet/in_systm.h>
+		  #endif
+		 ])
+AC_CHECK_HEADERS(netinet/if_ether.h,,,
+		 [#ifdef HAVE_SYS_TYPES_H
+		  # include <sys/types.h>
+		  #endif
+		  #ifdef HAVE_SYS_SOCKET_H
+		  # include <sys/socket.h>
+		  #endif
+		  #ifdef HAVE_NETINET_IN_H
+		  # include <netinet/in.h>
+		  #endif
+		 ])
+AC_CHECK_HEADERS(resolv.h,,,
+		 [#ifdef HAVE_NETINET_IN_H 
+		  # include <netinet/in.h>
+		  #endif
+		 ])
 AC_CHECK_HEADERS(linux/errqueue.h,,,
 	[#ifdef HAVE_LINUX_TYPES_H
 	 # include <linux/types.h>
@@ -336,6 +387,11 @@ AC_CHECK_TYPE(
 	[AC_DEFINE(HAVE_CMSGHDR, 1, [struct cmsghdr needed for extended socket error support])],
 	[],
 	[#include "syshead.h"])
+AC_CHECK_TYPE(
+	[struct in_pktinfo],
+	[AC_DEFINE(HAVE_IN_PKTINFO, 1, [struct in_pktinfo needed for IP_PKTINFO support])],
+	[],
+	[#include "syshead.h"])
 
 AC_CHECK_SIZEOF(unsigned int)
 AC_CHECK_SIZEOF(unsigned long)
@@ -361,7 +417,7 @@ AC_CHECK_FUNCS(daemon chroot getpwnam setuid nice system getpid dup dup2 dnl
 	       getpass strerror syslog openlog mlockall getgrnam setgid dnl
 	       setgroups stat flock readv writev setsockopt getsockopt dnl
 	       setsid chdir gettimeofday putenv getpeername unlink dnl
-               poll chsize ftruncate)
+               poll chsize ftruncate sendmsg recvmsg getsockname)
 AC_CACHE_SAVE
 
 dnl Required library functions
@@ -369,7 +425,7 @@ AC_FUNC_MEMCMP
 
 AC_CHECK_FUNCS(socket recv recvfrom send sendto listen dnl
 	       accept connect bind select gethostbyname dnl
-               inet_ntoa time ctime memset vsnprintf, [],
+               inet_ntoa time ctime memset vsnprintf strdup, [],
 	       [AC_MSG_ERROR([Required library function not found])])
 
 dnl
@@ -449,7 +505,7 @@ fi
 dnl
 dnl Check for dlopen -- first try libc then libdl.
 dnl
-if test "$PLUGINS" = "yes"; then
+if test "$PLUGINS" = "yes" || test "$PKCS11" = "yes"; then
    AC_CHECKING([for libdl Library and Header files])
    AC_CHECK_HEADER(dlfcn.h,
         [AC_CHECK_FUNC(dlopen,
@@ -489,6 +545,7 @@ if test "$LZO" = "yes"; then
           [
 	    OPENVPN_ADD_LIBS(-l$i)
 	    AC_DEFINE(USE_LZO, 1, [Use LZO compression library])
+	    AC_DEFINE_UNQUOTED(LZO_VERSION_NUM, "$LZO_H", [LZO version number])
 	    havelzolib=1
 	  ]
         )
@@ -583,6 +640,11 @@ if test "$MANAGEMENT" = "yes"; then
    AC_DEFINE(ENABLE_MANAGEMENT, 1, [Enable management server capability])
 fi
 
+dnl enable pkcs11 capability
+if test "$PKCS11" = "yes"; then
+   AC_DEFINE(USE_PKCS11, 1, [Enable PKCS11 capability])
+fi
+
 dnl enable socks 
 if test "$SOCKS" = "yes"; then
    AC_DEFINE(ENABLE_SOCKS, 1, [Enable Socks proxy support])
@@ -591,6 +653,11 @@ fi
 dnl enable HTTP proxy
 if test "$HTTP_PROXY" = "yes"; then
    AC_DEFINE(ENABLE_HTTP_PROXY, 1, [Enable HTTP proxy support])
+fi
+
+dnl compile --multihome option
+if test "$MULTIHOME" = "yes"; then
+   AC_DEFINE(ENABLE_MULTIHOME, 1, [Enable multi-homed UDP server capability])
 fi
 
 dnl enable debugging
@@ -606,6 +673,11 @@ fi
 dnl enable --fragment
 if test "$FRAGMENT" = "yes"; then
    AC_DEFINE(ENABLE_FRAGMENT, 1, [Enable internal fragmentation support])
+fi
+
+dnl enable --port-share
+if test "$PORT_SHARE" = "yes"; then
+   AC_DEFINE(ENABLE_PORT_SHARE, 1, [Enable TCP Server port sharing])
 fi
 
 dnl enable strict compiler warnings
@@ -633,4 +705,4 @@ if test "$PASSWORD_SAVE" = "yes"; then
    AC_DEFINE(ENABLE_PASSWORD_SAVE, 1, [Allow --askpass and --auth-user-pass passwords to be read from a file])
 fi
 
-AC_OUTPUT(Makefile openvpn.spec config-win32.h install-win32/openvpn.nsi)
+AC_OUTPUT(Makefile openvpn.spec)

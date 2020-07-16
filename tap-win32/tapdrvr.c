@@ -1,15 +1,15 @@
 /*
- *  TAP-Win32 -- A kernel driver to provide virtual tap device
- *               functionality on Windows.  Originally derived
- *               from the CIPE-Win32 project by Damion K. Wilson,
- *               with extensive modifications by James Yonan.
+ *  TAP-Win32/TAP-Win64 -- A kernel driver to provide virtual tap
+ *                         device functionality on Windows.
  *
- *  All source code which derives from the CIPE-Win32 project is
- *  Copyright (C) Damion K. Wilson, 2003, and is released under the
- *  GPL version 2 (see below).
+ *  This code was inspired by the CIPE-Win32 driver by Damion K. Wilson.
  *
- *  All other source code is Copyright (C) 2002-2006 OpenVPN Solutions LLC,
- *  and is released under the GPL version 2 (see below).
+ *  This source code is Copyright (C) 2002-2007 OpenVPN Solutions LLC,
+ *  and is released under the GPL version 2 (see below), however due
+ *  to the extra costs of supporting Windows Vista, OpenVPN Solutions
+ *  LLC reserves the right to change the terms of the TAP-Win32/TAP-Win64
+ *  license for versions 9.1 and higher prior to the official release of
+ *  OpenVPN 2.1.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -39,6 +39,11 @@
 // TAP_IOCTL_CONFIG_TUN ioctl.
 //======================================================
 
+#include "../../autodefs/defs.h"
+#ifndef DDKVER
+#error DDKVER must be defined to the DDK Version as in c:\WinDDK\[DDKVER]\...
+#endif
+
 #define NDIS_MINIPORT_DRIVER
 #define BINARY_COMPATIBLE 0
 #define NDIS50_MINIPORT 1
@@ -53,7 +58,7 @@
 //========================================================
 // Check for truncated IPv4 packets, log errors if found.
 //========================================================
-#define PACKET_TRUNCATION_CHECK 1 // JYFIXME
+#define PACKET_TRUNCATION_CHECK 0
 
 //========================================================
 // EXPERIMENTAL -- Configure TAP device object to be
@@ -63,11 +68,17 @@
 // Duplicates the functionality of OpenVPN's
 // --allow-nonadmin directive.
 //========================================================
-#define ENABLE_NONADMIN 1         // JYFIXME
+#define ENABLE_NONADMIN 1
 
+#if DDKVER < 5600
 #include <ndis.h>
 #include <ntstrsafe.h>
 #include <ntddk.h>
+#else
+#include <ntifs.h>
+#include <ndis.h>
+#include <ntstrsafe.h>
+#endif
 
 #include "lock.h"
 #include "constants.h"
@@ -408,6 +419,7 @@ NDIS_STATUS AdapterCreate
 		}
 	    }
 	} else {
+#if DDKVER < 5600
 	  /* "MiniportName" is available only XP and above.  Not on Windows 2000. */
 	  NDIS_STRING key = NDIS_STRING_CONST("NdisVersion");
 	  NdisReadConfiguration (&status, &parm, configHandle, &key, NdisParameterInteger);
@@ -428,7 +440,8 @@ NDIS_STATUS AdapterCreate
 		    }
 		}
 	    }
-	}
+#endif
+      }
     }
 
     /* Can't continue without name (see macro 'NAME') */
@@ -613,7 +626,7 @@ AdapterFreeResources (TapAdapterPointer p_Adapter)
     NdisMDeregisterAdapterShutdownHandler (p_Adapter->m_MiniportAdapterHandle);
 
   if (p_Adapter->m_MCLockAllocated)
-    NdisFreeSpinLock (&l_Adapter->m_MCLock);
+    NdisFreeSpinLock (&p_Adapter->m_MCLock);
 }
 
 VOID
@@ -1400,7 +1413,8 @@ AdapterTransmit (IN NDIS_HANDLE p_AdapterContext,
 		 IN UINT p_Flags)
 {
   TapAdapterPointer l_Adapter = (TapAdapterPointer) p_AdapterContext;
-  ULONG l_Index = 0, l_BufferLength = 0, l_PacketLength = 0;
+  ULONG l_Index = 0, l_PacketLength = 0;
+  UINT l_BufferLength = 0;
   PIRP l_IRP;
   TapPacketPointer l_PacketBuffer;
   PNDIS_BUFFER l_NDIS_Buffer;
