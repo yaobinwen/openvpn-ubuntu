@@ -1,0 +1,61 @@
+  * The 'Three Wise Men' release.
+  * New upstream release.
+  * Update README.Debian with comments on changed string remapping.
+    Thanks ron@debian.org for noting this first. (Closes: #288669)
+  * New upstream release.
+  * Updated README.Debian with info on plugins.
+  * Built and installed plugins. Thanks Michael Renner for noticing.
+    (Closes: #284224)
+  * Added Build-Depends on libpam0g-dev, required by auth-pam plugin.
+  * New upstream release. Corrects --mssfix behaviour (Closes: #280893)
+  * Included Czech debconf translation. (Closes: #282995)
+  * Updated (German|Danish|French|Japanese) debconf translations.
+    (Closes: #281235, #282095, #282216, #282881)
+  * New upstream version. Includes fix for the --key-method 1 bug.
+  * WARNING: This version changes the default port (5000 previously)
+    to 1194 (assigned by INANA). This will affect you if you don't
+    have a 'port' option specified in your configuration files.
+    Added a debconf note about it.
+  * Updated es.po.
+  * Patched ssl.c to fix bug in --key-method 1, that prevented 
+    OpenVPN 2.x from working with 1.x using that method.
+    Thanks James for the prompt answer & patch.
+    Thanks weasel for finding it out.
+  * New upstream releases. Fixes the "Assertion failed at crypto.c"
+    (Closes: #265632, #270005)
+  * Updated README.Debian with clearer 2.x vs 1.x interoperability
+    instructions.
+  * Put if-{up,down}.d scripts back in place, this time they work.
+    Just remember to quote shell vars when checking if they are empty.
+    [ -n "$VAR" ] -> Good     [ -n $VAR ] -> BAD
+    Note to self, don't trust people's patches even if they are DD.
+  * Removed if-{up,down}.d scripts until I get to know how they work.
+  * Corrected names of if-{up,down}.d scripts. Duh!
+  * New upstream release.
+  * Renamed package to 1.99 to make it clearer that we're using
+    version 2.0 and not 1.6. Some people rather talk about this on IRC
+    and not tell the maintainer directly.
+  * Added Brazilian Portuguese debconf templates. (Closes: #279351)
+  * Modified init.d script so that specifying a daemon option in a
+    VPN configuration won't make it fail. 
+    Thanks Christoph Biedl for the patch. (Closes: #278302)
+  * Added scripts to allow specifying 'openvpn name' in
+    /etc/network/interfaces to have the tunnel created and destroyed with
+    the device it runs over. Thanks Joachim Breitner for the patch.
+    (Closes: #273481)
+  * Modified init.d script so that multiple VPNs can be started or stopped
+    with a single command. (See README.Debian)
+  * New upstream release.
+  * New upstream release.
+  * Added comments about compatibility issues between openvpn 2.x and 1.x
+    to README.Debian (Closes: #276799)
+  * Changed maintainer email address.
+  * New upstream release. (Closes: #269631)
+  * I decided to get OpenVPN 2 into sid, and hopefully into Sarge since
+    the current beta works pretty well and adds important features I don't
+    want missing in Sarge.
+  * Updated README.Debian
+  * Added German and Japanese debconf templates.
+    (Closes: #266927, #270477)
+  * Updated French and Danish debconf templates
+    (Closes: #254064, #256053)
