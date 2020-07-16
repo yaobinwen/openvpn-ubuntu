@@ -1,0 +1,3 @@
+  * update-resolv-conf: Correctly handle multiple dns search domains,
+    using the same logic as nameservers.  Patch courtesy of Jeremy 
+    Zawodny. (LP: #662847)
