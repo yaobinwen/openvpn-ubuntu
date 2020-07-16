@@ -1,0 +1,3 @@
+  * New upstream version.
+    - Fixes redirect-gateway option parsing. (Closes: #541450)
+  * Changed init.d Provides from 'vpn' to 'openvpn'. (Closes: #497563)
