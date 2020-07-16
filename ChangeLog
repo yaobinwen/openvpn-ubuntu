@@ -1,7 +1,60 @@
 OpenVPN
 Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
 
-$Id: ChangeLog,v 1.138 2005/08/24 09:08:54 jimyonan Exp $
+$Id: ChangeLog 765 2005-11-03 01:21:44Z james $
+
+2005.11.02 -- Version 2.0.5
+
+* Fixed bug in Linux get_default_gateway function
+  introduced in 2.0.4, which would cause redirect-gateway
+  on Linux clients to fail.
+* Restored easy-rsa/2.0 tree (backported from 2.1 beta
+  series) which accidentally disappeared in
+  2.0.2 -> 2.0.4 transition.
+
+2005.11.01 -- Version 2.0.4
+
+* Security fix -- Affects non-Windows OpenVPN clients of
+  version 2.0 or higher which connect to a malicious or
+  compromised server.  A format string vulnerability
+  in the foreign_option function in options.c could
+  potentially allow a malicious or compromised server
+  to execute arbitrary code on the client.  Only
+  non-Windows clients are affected.  The vulnerability
+  only exists if (a) the client's TLS negotiation with
+  the server succeeds, (b) the server is malicious or
+  has been compromised such that it is configured to
+  push a maliciously crafted options string to the client,
+  and (c) the client indicates its willingness to accept
+  pushed options from the server by having "pull" or
+  "client" in its configuration file (Credit: Vade79).
+  CVE-2005-3393
+* Security fix -- Potential DoS vulnerability on the
+  server in TCP mode.  If the TCP server accept() call
+  returns an error status, the resulting exception handler
+  may attempt to indirect through a NULL pointer, causing
+  a segfault.  Affects all OpenVPN 2.0 versions.
+  CVE-2005-3409
+* Fix attempt of assertion at multi.c:1586 (note that
+  this precise line number will vary across different
+  versions of OpenVPN).
+* Added ".PHONY: plugin" to Makefile.am to work around
+  "make dist" issue.
+* Fixed double fork issue that occurs when --management-hold
+  is used.
+* Moved TUN/TAP read/write log messages from --verb 8 to 6.
+* Warn when multiple clients having the same common name or
+  username usurp each other when --duplicate-cn is not used.
+* Modified Windows and Linux versions of get_default_gateway
+  to return the route with the smallest metric
+  if multiple 0.0.0.0/0.0.0.0 entries are present.
+
+2005.09.25 -- Version 2.0.3-rc1	
+
+* openvpn_plugin_abort_v1 function wasn't being properly
+  registered on Windows.
+* Fixed a bug where --mode server --proto tcp-server --cipher none
+  operation could cause tunnel packet truncation.
 
 2005.08.25 -- Version 2.0.2
 
