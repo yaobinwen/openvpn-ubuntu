@@ -1,0 +1,8 @@
+  * The 'Translators, translators, translators' release.
+  * New upstream version.
+  * Added Dutch debconf translation. (Closes: #370073)
+    Thanks Kurt De Bree
+  * Updated Danish debconf translation. (Closes: #369772, #376704)
+    Thanks Claus Hindsgaul
+  * Updated French debconf translation. (Closes: #373191)
+    Thanks Michel Grentzinger
