@@ -1,0 +1,4 @@
+  * New upstream release.
+  * Refresh debian/patches to new upstream coding style.
+  * debian/NEWS.Debian. Add note on removed tls-remote option
+    (Closes: #848062)
