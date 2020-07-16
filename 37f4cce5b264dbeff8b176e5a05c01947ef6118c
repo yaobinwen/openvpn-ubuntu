@@ -1,0 +1,5 @@
+  * New upstream version.
+    Less messages about script security (Closes: #573129)
+  * Add --enable-pkcs11 to configure to avoid losing PKCS11.
+    Thanks Jaak Pruulmann-Vengerfeldt for noticing before the
+    upload! (Closes: #710085)
