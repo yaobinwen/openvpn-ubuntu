@@ -1,0 +1,40 @@
+  * Automated backport upload; no source changes.
+  * postinst: call 'restart' when 'cond-restart' fails due to user
+    not upgrading the init.d script. (Closes: #308926)
+  * Added '-f' to rm when deleting the status file. This eliminates
+    the need to test if it exists and saves the init.d script from
+    failing.  (Closes: #306588)
+  * Modified pam plugin to load libpam.so.0 instead of libpam.so.
+    (Closes: #306335)
+  * The 'This-is-the-real-2.0' release
+  * New upstream version.
+  * openvpn.8: s/--/\\-\\-/g a.k.a escaped dashes to make it possible
+    to search for options with UTF charsets. (Closes: #296133)
+  * Improved init.d script output.  (Closes: #297997)
+    Thanks Thomas Hood for the patch.
+  * debian/control. Rewrote Description: field.
+    Now it's more useful and complete. (Closes: #304895)
+  * init.d script: 
+     - Fixed restarting of multiple VPNs
+     - Fixed TAB converted to spaces.
+     - Remove status file on VPN stop
+     - Respect 'status' option if given in the config file
+     - New /etc/default/openvpn configuration file that allows
+       control on which VPNs are automatically started and also
+       controls status file refresh interval
+     Thanks Philipp A. Hartmann for the nice patch. (Closes: #294332)
+   * init.d script: Added cond-restart to only restart VPNs in use.
+     postint: Call init.d script with cond-restart instead of restart.
+     (Closes: #280464)
+   * init.d script: change order of --config and --cd to permit
+     nested 'configs'. (Closes: #299082)
+  * New upstream release
+  * New upstream release (Closes: #301949)
+  * New upstream release
+  * New upstream release
+  * Added --enable-password-save to configure call to allow 
+    --askpass and --auth-user-pass passwords to be read from a file.
+  * New upstream release
+  * Added --status line to init.d script (Closes: #293144)
+  * New upstream release
+  * Updated pt_BR debconf translation (Closes: #292079)
