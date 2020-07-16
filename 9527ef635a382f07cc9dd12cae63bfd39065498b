@@ -1,0 +1,3 @@
+  * ssl.c: applied fix from upstream to fix extract_x509_field_ssl
+    where the extraction would fail on the first field of
+    the subject name (LP: #265058)
