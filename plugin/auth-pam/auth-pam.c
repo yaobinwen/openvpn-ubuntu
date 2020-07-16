@@ -27,6 +27,13 @@
  * privilege model.
  */
 
+#if DLOPEN_PAM
+#include <dlfcn.h>
+#include "pamdl.h"
+#else
+#include <security/pam_appl.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -37,11 +44,9 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <dlfcn.h>
 #include <syslog.h>
 
 #include "openvpn-plugin.h"
-#include "pamdl.h"
 
 #define DEBUG(verb) ((verb) >= 7)
 
@@ -158,7 +163,10 @@ recv_control (int fd)
   if (size == sizeof (c))
     return c;
   else
-    return -1;
+    {
+      /*fprintf (stderr, "AUTH-PAM: DEBUG recv_control.read=%d\n", (int)size);*/
+      return -1;
+    }
 }
 
 static int
@@ -196,6 +204,33 @@ send_string (int fd, const char *string)
     return (int) size;
   else
     return -1;
+}
+
+/*
+ * Daemonize if "daemon" env var is true.
+ * Preserve stderr across daemonization if
+ * "daemon_log_redirect" env var is true.
+ */
+static void
+daemonize (const char *envp[])
+{
+  const char *daemon_string = get_env ("daemon", envp);
+  if (daemon_string && daemon_string[0] == '1')
+    {
+      const char *log_redirect = get_env ("daemon_log_redirect", envp);
+      int fd = -1;
+      if (log_redirect && log_redirect[0] == '1')
+	fd = dup (2);
+      if (daemon (0, 0) < 0)
+	{
+	  fprintf (stderr, "AUTH-PAM: daemonization failed\n");
+	}
+      else if (fd >= 3)
+	{
+	  dup2 (fd, 2);
+	  close (fd);
+	}
+    }
 }
 
 /*
@@ -370,6 +405,9 @@ openvpn_plugin_open_v1 (unsigned int *type_mask, const char *argv[], const char 
       /* Ignore most signals (the parent will receive them) */
       set_signals ();
 
+      /* Daemonize if --daemon option is set. */
+      daemonize (envp);
+
       /* execute the event loop */
       pam_server (fd[1], argv[1], context->verb, &name_value_list);
 
@@ -440,6 +478,20 @@ openvpn_plugin_close_v1 (openvpn_plugin_handle_t handle)
     }
 
   free (context);
+}
+
+OPENVPN_EXPORT void
+openvpn_plugin_abort_v1 (openvpn_plugin_handle_t handle)
+{
+  struct auth_pam_context *context = (struct auth_pam_context *) handle;
+
+  /* tell background process to exit */
+  if (context->foreground_fd >= 0)
+    {
+      send_control (context->foreground_fd, COMMAND_EXIT);
+      close (context->foreground_fd);
+      context->foreground_fd = -1;
+    }
 }
 
 /*
@@ -599,7 +651,9 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
 {
   struct user_pass up;
   int command;
+#if DLOPEN_PAM
   static const char pam_so[] = "libpam.so";
+#endif
 
   /*
    * Do initialization
@@ -607,6 +661,7 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
   if (DEBUG (verb))
     fprintf (stderr, "AUTH-PAM: BACKGROUND: INIT service='%s'\n", service);
 
+#if DLOPEN_PAM
   /*
    * Load PAM shared object
    */
@@ -616,6 +671,7 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
       send_control (fd, RESPONSE_INIT_FAILED);
       goto done;
     }
+#endif
 
   /*
    * Tell foreground that we initialized successfully
@@ -679,7 +735,7 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
 
 	case -1:
 	  fprintf (stderr, "AUTH-PAM: BACKGROUND: read error on command channel\n");
-	  break;
+	  goto done;
 
 	default:
 	  fprintf (stderr, "AUTH-PAM: BACKGROUND: unknown command code: code=%d, exiting\n",
@@ -689,7 +745,9 @@ pam_server (int fd, const char *service, int verb, const struct name_value_list 
     }
  done:
 
+#if DLOPEN_PAM
   dlclose_pam ();
+#endif
   if (DEBUG (verb))
     fprintf (stderr, "AUTH-PAM: BACKGROUND: EXIT\n");
 

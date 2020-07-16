@@ -8,12 +8,15 @@
 # Disable PAM plugin
 #   rpmbuild -tb [openvpn.x.tar.gz] --define 'without_pam 1'
 #
+# Allow passwords to be read from files
+#   rpmbuild -tb [openvpn.x.tar.gz] --define 'with_password_save 1'
+#
 # Use this on RH9 and RHEL3
 #   rpmbuild -tb [openvpn.x.tar.gz] --define 'with_kerberos 1'
 
 Summary:	OpenVPN is a robust and highly flexible VPN daemon by James Yonan.
 Name:           openvpn
-Version:        2.0
+Version:        2.0.2
 Release:	1
 URL:		http://openvpn.net/
 Source0:	http://prdownloads.sourceforge.net/openvpn/%{name}-%{version}.tar.gz
@@ -33,12 +36,17 @@ AutoReq: 0
 BuildRequires: openssl-devel >= 0.9.6
 Requires:      openssl       >= 0.9.6
 
+%if "%{_vendor}" == "Mandrakesoft"
+%{!?without_lzo:BuildRequires: liblzo1-devel >= 1.07}
+%{!?without_lzo:Requires:      liblzo1       >= 1.07}
+%else
 %if "%{_vendor}" == "MandrakeSoft"
 %{!?without_lzo:BuildRequires: liblzo1-devel >= 1.07}
 %{!?without_lzo:Requires:      liblzo1       >= 1.07}
 %else
 %{!?without_lzo:BuildRequires: lzo-devel >= 1.07}
 %{!?without_lzo:Requires:      lzo       >= 1.07}
+%endif
 %endif
 
 %{!?without_pam:BuildRequires: pam-devel}
@@ -88,7 +96,7 @@ and portability to most major OS platforms.
 %setup -q
 
 %build
-%configure --disable-dependency-tracking %{?without_lzo:--disable-lzo} %{?with_kerberos:--with-ssl-headers=/usr/kerberos/include}
+%configure --disable-dependency-tracking %{?with_password_save:--enable-password-save} %{?without_lzo:--disable-lzo} %{?with_kerberos:--with-ssl-headers=/usr/kerberos/include}
 %__make
 %__strip %{name}
 
@@ -147,7 +155,9 @@ popd
 
 for pi in auth-pam down-root; do
   %__mv -f plugin/$pi/README plugin/README.$pi
-  %__install -c -m 755 plugin/$pi/openvpn-$pi.so %{buildroot}%{_datadir}/openvpn/plugin/lib/openvpn-$pi.so
+  if [ -e plugin/$pi/openvpn-$pi.so ]; then
+    %__install -c -m 755 plugin/$pi/openvpn-$pi.so %{buildroot}%{_datadir}/openvpn/plugin/lib/openvpn-$pi.so
+  fi
 done
 
 %__mv -f plugin/README plugin/README.plugins
@@ -213,6 +223,9 @@ fi
 %doc contrib/ easy-rsa/ management/ sample-*/ plugin/README.*
 
 %changelog
+
+* Mon Aug 2 2005 James Yonan
+- Fixed build problem with --define 'without_pam 1'
 
 * Mon Apr 4 2005 James Yonan
 - Moved some files from /usr/share/openvpn to %doc for compatibility

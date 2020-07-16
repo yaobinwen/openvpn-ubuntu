@@ -49,10 +49,10 @@ typedef unsigned long in_addr_t;
 #endif
 
 /* Append a label to program startup title */
-//#define DEBUG_LABEL "DEBUG1"
+/*#define DEBUG_LABEL "DEBUG1"*/
 
 /* Should we print debug info from driver? */
-//#define TAP_WIN32_DEBUG
+/*#define TAP_WIN32_DEBUG*/
 
 /*
  * Minimum TAP-Win32 version number expected by userspace
@@ -221,7 +221,7 @@ typedef unsigned long in_addr_t;
 #define PACKAGE_TARNAME "openvpn"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.0" /* AUTO_VERSION */
+#define PACKAGE_VERSION "2.0.2" /* AUTO_VERSION */
 
 /* Define to the full name and version of this package. */
 #ifdef DEBUG_LABEL

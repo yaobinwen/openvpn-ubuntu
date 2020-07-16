@@ -42,7 +42,7 @@
 
 #include "forward-inline.h"
 
-//#define MULTI_DEBUG_EVENT_LOOP
+/*#define MULTI_DEBUG_EVENT_LOOP*/
 
 #ifdef MULTI_DEBUG_EVENT_LOOP
 static const char *
@@ -282,13 +282,15 @@ multi_init (struct multi_context *m, struct context *t, bool tcp_mode, int threa
 	{
 	  m->ifconfig_pool = ifconfig_pool_init (IFCONFIG_POOL_INDIV,
 						 t->options.ifconfig_pool_start,
-						 t->options.ifconfig_pool_end);
+						 t->options.ifconfig_pool_end,
+						 t->options.duplicate_cn);
 	}
       else if (dev == DEV_TYPE_TUN)
 	{
 	  m->ifconfig_pool = ifconfig_pool_init (IFCONFIG_POOL_30NET,
 						 t->options.ifconfig_pool_start,
-						 t->options.ifconfig_pool_end);
+						 t->options.ifconfig_pool_end,
+						 t->options.duplicate_cn);
 	}
       else
 	{
@@ -318,7 +320,7 @@ multi_init (struct multi_context *m, struct context *t, bool tcp_mode, int threa
   mroute_extract_in_addr_t (&m->local, t->c1.tuntap->local);
 
   /*
-   * Limit total number of clients
+   * Per-client limits
    */
   m->max_clients = t->options.max_clients;
 
@@ -337,7 +339,7 @@ multi_init (struct multi_context *m, struct context *t, bool tcp_mode, int threa
 }
 
 const char *
-multi_instance_string (struct multi_instance *mi, bool null, struct gc_arena *gc)
+multi_instance_string (const struct multi_instance *mi, bool null, struct gc_arena *gc)
 {
   if (mi)
     {
@@ -379,8 +381,11 @@ multi_del_iroutes (struct multi_context *m,
 		   struct multi_instance *mi)
 {
   const struct iroute *ir;
-  for (ir = mi->context.options.iroutes; ir != NULL; ir = ir->next)
-    mroute_helper_del_iroute (m->route_helper, ir);
+  if (TUNNEL_TYPE (mi->context.c1.tuntap) == DEV_TYPE_TUN)
+    {
+      for (ir = mi->context.options.iroutes; ir != NULL; ir = ir->next)
+	mroute_helper_del_iroute (m->route_helper, ir);
+    }
 }
 
 static void
@@ -400,7 +405,7 @@ static void
 multi_client_disconnect_script (struct multi_context *m,
 				struct multi_instance *mi)
 {
-  if (mi->context.c2.context_auth == CAS_SUCCEEDED)
+  if (mi->context.c2.context_auth == CAS_SUCCEEDED || mi->context.c2.context_auth == CAS_PARTIAL)
     {
       multi_client_disconnect_setenv (m, mi);
 
@@ -458,8 +463,12 @@ multi_close_instance (struct multi_context *m,
       schedule_remove_entry (m->schedule, (struct schedule_entry *) mi);
 
       ifconfig_pool_release (m->ifconfig_pool, mi->vaddr_handle, false);
-
-      multi_del_iroutes (m, mi);
+      
+      if (mi->did_iroutes)
+        {
+          multi_del_iroutes (m, mi);
+          mi->did_iroutes = false;
+        }
 
       if (m->mtcp)
 	multi_tcp_dereference_instance (m->mtcp, mi);
@@ -623,7 +632,7 @@ multi_print_status (struct multi_context *m, struct status_output *so, const int
 
       status_reset (so);
 
-      if (version == 1) // WAS: m->status_file_version
+      if (version == 1) /* WAS: m->status_file_version */
 	{
 	  /*
 	   * Status file version 1
@@ -806,11 +815,12 @@ multi_learn_addr (struct multi_context *m,
 
       if (oldroute) /* route already exists? */
 	{
-	  if (learn_address_script (m, mi, "update", &newroute->addr))
+	  if (route_quota_test (m, mi) && learn_address_script (m, mi, "update", &newroute->addr))
 	    {
 	      learn_succeeded = true;
 	      owner = mi;
 	      multi_instance_inc_refcount (mi);
+	      route_quota_inc (mi);
 
 	      /* delete old route */
 	      multi_route_del (oldroute);
@@ -822,11 +832,12 @@ multi_learn_addr (struct multi_context *m,
 	}
       else
 	{
-	  if (learn_address_script (m, mi, "add", &newroute->addr))
+	  if (route_quota_test (m, mi) && learn_address_script (m, mi, "add", &newroute->addr))
 	    {
 	      learn_succeeded = true;
 	      owner = mi;
 	      multi_instance_inc_refcount (mi);
+	      route_quota_inc (mi);
 
 	      /* add new route */
 	      hash_add_fast (m->vhash, bucket, &newroute->addr, hv, newroute);
@@ -964,21 +975,25 @@ multi_add_iroutes (struct multi_context *m,
 {
   struct gc_arena gc = gc_new ();
   const struct iroute *ir;
-  for (ir = mi->context.options.iroutes; ir != NULL; ir = ir->next)
+  if (TUNNEL_TYPE (mi->context.c1.tuntap) == DEV_TYPE_TUN)
     {
-      if (ir->netbits >= 0)
-	msg (D_MULTI_LOW, "MULTI: internal route %s/%d -> %s",
-	     print_in_addr_t (ir->network, 0, &gc),
-	     ir->netbits,
-	     multi_instance_string (mi, false, &gc));
-      else
-	msg (D_MULTI_LOW, "MULTI: internal route %s -> %s",
-	     print_in_addr_t (ir->network, 0, &gc),
-	     multi_instance_string (mi, false, &gc));
+      mi->did_iroutes = true;
+      for (ir = mi->context.options.iroutes; ir != NULL; ir = ir->next)
+	{
+	  if (ir->netbits >= 0)
+	    msg (D_MULTI_LOW, "MULTI: internal route %s/%d -> %s",
+		 print_in_addr_t (ir->network, 0, &gc),
+		 ir->netbits,
+		 multi_instance_string (mi, false, &gc));
+	  else
+	    msg (D_MULTI_LOW, "MULTI: internal route %s -> %s",
+		 print_in_addr_t (ir->network, 0, &gc),
+		 multi_instance_string (mi, false, &gc));
 
-      mroute_helper_add_iroute (m->route_helper, ir);
+	  mroute_helper_add_iroute (m->route_helper, ir);
       
-      multi_learn_in_addr_t (m, mi, ir->network, ir->netbits);
+	  multi_learn_in_addr_t (m, mi, ir->network, ir->netbits);
+	}
     }
   gc_free (&gc);
 }
@@ -1172,8 +1187,9 @@ multi_connection_established (struct multi_context *m, struct multi_instance *mi
     {
       struct gc_arena gc = gc_new ();
       unsigned int option_types_found = 0;
-      const unsigned int option_permissions_mask = OPT_P_PUSH|OPT_P_INSTANCE|OPT_P_TIMER|OPT_P_CONFIG|OPT_P_ECHO;
+      const unsigned int option_permissions_mask = OPT_P_INSTANCE|OPT_P_INHERIT|OPT_P_PUSH|OPT_P_TIMER|OPT_P_CONFIG|OPT_P_ECHO;
       int cc_succeeded = true; /* client connect script status */
+      int cc_succeeded_count = 0;
 
       ASSERT (mi->context.c1.tuntap);
 
@@ -1260,7 +1276,10 @@ multi_connection_established (struct multi_context *m, struct multi_instance *mi
 	      cc_succeeded = false;
 	    }
 	  else
-	    multi_client_connect_post (m, mi, dc_file, option_permissions_mask, &option_types_found);
+	    {
+	      multi_client_connect_post (m, mi, dc_file, option_permissions_mask, &option_types_found);
+	      ++cc_succeeded_count;
+	    }
 	}
 
       /*
@@ -1282,7 +1301,10 @@ multi_connection_established (struct multi_context *m, struct multi_instance *mi
 		      dc_file);
 
 	  if (system_check (BSTR (&cmd), mi->context.c2.es, S_SCRIPT, "client-connect command failed"))
-	    multi_client_connect_post (m, mi, dc_file, option_permissions_mask, &option_types_found);
+	    {
+	      multi_client_connect_post (m, mi, dc_file, option_permissions_mask, &option_types_found);
+	      ++cc_succeeded_count;
+	    }
 	  else
 	    cc_succeeded = false;
 	}
@@ -1353,7 +1375,7 @@ multi_connection_established (struct multi_context *m, struct multi_instance *mi
       else
 	{
 	  /* set context-level authentication flag */
-	  mi->context.c2.context_auth = CAS_FAILED;
+	  mi->context.c2.context_auth = cc_succeeded_count ? CAS_PARTIAL : CAS_FAILED;
 	}
 
       /* set flag so we don't get called again */
@@ -1845,6 +1867,20 @@ multi_process_drop_outgoing_tun (struct multi_context *m, const unsigned int mpp
 
   multi_process_post (m, mi, mpp_flags);
   clear_prefix ();
+}
+
+/*
+ * Per-client route quota management
+ */
+
+void
+route_quota_exceeded (const struct multi_context *m, const struct multi_instance *mi)
+{
+  struct gc_arena gc = gc_new ();
+  msg (D_ROUTE_QUOTA, "MULTI ROUTE: route quota (%d) exceeded for %s (see --max-routes-per-client option)",
+	mi->context.options.max_routes_per_client,
+	multi_instance_string (mi, false, &gc));
+  gc_free (&gc);
 }
 
 #ifdef ENABLE_DEBUG
