@@ -1,0 +1,6 @@
+  * Install /etc/openvpn/update-resolv-conf with correct permissions
+  * Added script to update resolv.conf with server's settings.
+    The script is located in the /etc/openvpn/ directory.
+    Thanks a lot Christof Lauber for the script.
+    Added resolvconf to Suggests.
+  * Added LSB section to the init.d script.
