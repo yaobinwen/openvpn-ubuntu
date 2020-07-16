@@ -1,0 +1,3 @@
+  * Add pkg-config to Build-Depends while waiting for libpkcs11-helper1-dev's
+    maintainter to decide if he includes pkg-config as a Depends.
+    Thanks Roland Stigge for finding out. (Closes: #711076)
