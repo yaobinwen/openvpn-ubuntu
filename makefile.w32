@@ -1,0 +1,65 @@
+# This makefile builds the user-mode component
+# of OpenVPN for WIN32 in the mingw environment.
+#
+# Build Dependencies:
+#	mingw		(GNU C compiler for windows)
+#	msys		(GNU utilities and shell for windows)
+#	OpenSSL		(SSL/TLS/crypto library)
+#	LZO		(real-time compression library)
+#
+# Targets:
+#	static -- link statically with OpenSSL
+#       dynamic -- link dynamically with OpenSSL 
+#
+# Note that LZO is always linked statically.
+
+# Change these to point to your OpenSSL and LZO top-level
+# directories.
+
+# To build openssl-0.9.7x, remember to edit ms\mw.bat
+# adding '--win32' flag to make command:
+#
+#   make --win32 -f ms/mingw32a.mak
+
+OPENSSL = /c/src/openssl-0.9.7d
+
+LZO = /c/src/lzo-1.08
+
+CC = gcc -g -O2 -Wall -Wno-unused-function -Wno-unused-variable -mno-cygwin
+
+# Stuff below this point usually doesn't need to be changed
+
+INCLUDE_DIRS = -I${OPENSSL}/include -I${LZO}/include
+
+LIBS = -llzo -lws2_32 -lgdi32 -liphlpapi
+
+LIB_DIRS = -L${OPENSSL}/out -L${LZO}/src/.libs
+
+EXE = openvpn.exe
+
+HEADERS = basic.h buffer.h circ_list.h common.h \
+	config-win32.h crypto.h encrypt_sign.h \
+        errlevel.h error.h io.h fdmisc.h \
+	fragment.h gremlin.h integer.h interval.h lzo.h \
+	memdbg.h misc.h mss.h mtu.h win32.h openvpn.h \
+	options.h packet_id.h proto.h proxy.h reliable.h route.h \
+        session_id.h shaper.h socket.h socks.h ssl.h syshead.h \
+	thread.h tun.h tap-win32/common.h
+
+OBJS =	buffer.o crypto.o error.o fdmisc.o fragment.o \
+	gremlin.o inet_aton.o io.o lzo.o misc.o mss.o mtu.o \
+	win32.o openvpn.o options.o packet_id.o proxy.o \
+	reliable.o route.o session_id.o shaper.o socket.o \
+        socks.o ssl.o thread.o tun.o
+
+dynamic : ${OBJS}
+	${CC} -o ${EXE} ${OBJS} ${LIB_DIRS} -lssl32 -leay32 ${LIBS}
+
+static : ${OBJS}
+	${CC} -o ${EXE} ${OBJS} ${LIB_DIRS} -lssl -lcrypto ${LIBS}
+
+clean :
+	rm -f ${OBJS} ${EXE}
+
+%.o : %.c ${HEADERS}
+	${CC} ${INCLUDE_DIRS} -c $< -o $@
