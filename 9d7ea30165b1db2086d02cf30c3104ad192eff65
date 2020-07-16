@@ -1,0 +1,12 @@
+  * Upload to unstable. New upstream fixes:
+     - Bug with: Assertion failed at multi.c. (Closes: #411633)
+     - Hangs with tcp clients goin down with new option:
+       --connect-timeout. (Closes: #296834)
+  * Use rm -f to remove PIDFILE, in case rm wants to ask.
+    (Closes: #429932)
+  * Updated Vietnamese debconf templates. (Closes: #427048)
+    Thanks Clytie Siddall.
+  * Added note on resolvconf use with openvpn. (Closes: #451319)
+  * New upstream release
+  * Just forward-push the Debian patches to the new version,
+    and upload to experimental (with permission of the maintainer).
