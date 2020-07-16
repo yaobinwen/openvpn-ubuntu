@@ -1,0 +1,9 @@
+  * Merge with Debian unstable. Remaining Ubuntu changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
+    - Demote easy-rsa to Suggests
+    - Run openvpn@.service before systemd-user-sessions.service to avoid
+      gettys and lightdm starting on top of possible password prompts. This
+      provides the equivalent of the init.d script's X-Start-Before:.
