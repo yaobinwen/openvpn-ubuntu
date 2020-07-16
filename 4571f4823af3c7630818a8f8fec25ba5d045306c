@@ -1,0 +1,8 @@
+  * New upstream release
+  * Update close_socket_before_scripts.patch to upstream's version
+  * Add /etc/openvpn/client & /etc/openvpn/server directories for
+    upstream's systemd units.
+  * New upstream release
+  * Change Build-Dep on libssl-dev to libssl1.0-dev since upstream is not
+    transitioning to libssl1.1 yet.
+  * Moved to debhelper compat 9.
