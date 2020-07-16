@@ -1,0 +1,6 @@
+  * Use dpkg-buildflags to fill CFLAGS in ./configure. (Closes: #655130)
+  * debian/rules: Moved to dh.
+  * debian/rules: Changed DEB_BUILD_ARCH_OS with DEB_HOST_ARCH_OS.
+  * Removed quilt Build-Depends.
+  * debian/openvpn.default: Clarify what "vpn name" refers to.
+    (Closes: #657610)
