@@ -1,0 +1,4 @@
+  * SECURITY UPDATE: timing attack when using UDP mode
+    - debian/patches/CVE-2013-2061.patch: use constant time memcmp when
+      comparing HMACs in crypto.c, added warning to buffer.h.
+    - CVE-2013-2061
