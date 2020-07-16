@@ -1,0 +1,4 @@
+  * The 'happy birthday to me' release
+  * Fixed client hang when server does not push anything. (Closes: #587414)
+    Thanks Thierry Carrez for the heads up.
+  * Document possible problems when using 'chroot' option
