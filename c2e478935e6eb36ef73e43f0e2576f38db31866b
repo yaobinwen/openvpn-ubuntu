@@ -1,0 +1,11 @@
+  * New upstream release. No changes in *NIX source code.
+    Updating to avoid 'New upstream, blah, blah'.
+  * debian/control: Fixed spelling error in description
+    (Closes: #390242)
+  * debian/copyright: Updated project's homepage and author's
+    email address. (Closes: #388466)
+  * debian/copyright: Updated the FSF address.
+  * Updated Dutch debconf translation. (Closes: #389982, 379802)
+    Thanks Kurt De Bree
+  * Updated Czech debconf translation. (Closes: #384755)
+    Thanks Miroslav Kure
