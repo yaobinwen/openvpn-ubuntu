@@ -1,0 +1,13 @@
+  * Fixed init.d script to avoid running multiple instances of the
+    same VPN. Thanks Keith Kyzivat for pushing me into looking
+    again into this issue. (Closes: #326080)
+  * Included patch to README.Debian from Peter Rabbitson describing
+    /etc/network/interfaces integration. (Closes: #413732)
+  * Also included joeyh's suggestion on the previous subject.
+    (Closes: 419797)
+  * Avoid restarting a vpn instead of reloading it due to wrong 
+    detection of 'user' option in init.d script. Thanks Josip Rodin.
+    (Closes: 403503)
+  * Added Russian debconf translation. (Closes: #414088)
+    Thanks Yuriy Talakan.
+  * Built against liblzo2 instead of liblzo. (Closes: #423366)
