@@ -1,0 +1,5 @@
+  * Merge from Debian unstable. Remaining changes:
+    - debian/openvpn.init.d:
+      + Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      + Show per-VPN result messages.
+      + Add "--script-security 2" by default for backwards compatabliity.
