@@ -1,0 +1,2 @@
+  * debian/patches: Added eurephia.patch to support eurephia plug-in.
+  * debian/patches: updated openvpn over ipv6 support to v0.4.10
