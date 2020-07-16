@@ -1,0 +1,3 @@
+  * d/p/lp992012-detect-openssl-properly.patch: fix "openssl.cnf file
+    could be found" error using easy-rsa by parsing openssl version
+    properly. (LP: #992012)
