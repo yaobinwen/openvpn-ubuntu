@@ -1,0 +1,2 @@
+  * Enable lz4 compression (Closes: #849563).
+    Thanks Laurent Bigonville for noticing.
