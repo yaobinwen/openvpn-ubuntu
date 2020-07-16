@@ -1,0 +1,3 @@
+  [Alexander Zielke]
+  * fix bug where '--script-security 2' would be passed for all
+    daemons after the first. (LP: #794916)
