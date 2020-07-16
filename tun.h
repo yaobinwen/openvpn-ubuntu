@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -230,8 +230,6 @@ void do_ifconfig (struct tuntap *tt,
 		  const char *actual,    /* actual device name */
 		  int tun_mtu,
 		  const struct env_set *es);
-
-const char *dev_component_in_dev_node (const char *dev_node);
 
 bool is_dev_type (const char *dev, const char *dev_type, const char *match_type);
 int dev_type_enum (const char *dev, const char *dev_type);

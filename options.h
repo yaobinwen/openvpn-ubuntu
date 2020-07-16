@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2008 Telethra, Inc. <sales@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Technologies, Inc. <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -149,6 +149,9 @@ struct options
 # define MODE_POINT_TO_POINT 0
 # define MODE_SERVER         1
   int mode;
+
+  /* enable forward compatibility for post-2.1 features */
+  bool forward_compatible;
 
   /* persist parms */
   bool persist_config;
@@ -319,6 +322,9 @@ struct options
   int management_state_buffer_size;
   const char *management_write_peer_info_file;
 
+  const char *management_client_user;
+  const char *management_client_group;
+
   /* Mask of MF_ values of manage.h */
   unsigned int management_flags;
 #endif
@@ -340,6 +346,7 @@ struct options
   in_addr_t server_netmask;
 
 # define SF_NOPOOL (1<<0)
+# define SF_TCP_NODELAY_HELPER (1<<1)
   unsigned int server_flags;
 
   bool server_bridge_proxy_dhcp;
@@ -382,10 +389,9 @@ struct options
   int max_clients;
   int max_routes_per_client;
 
-  bool client_cert_not_required;
-  bool username_as_common_name;
   const char *auth_user_pass_verify_script;
   bool auth_user_pass_verify_script_via_file;
+  unsigned int ssl_flags; /* set to SSLF_x flags from ssl.h */
 #if PORT_SHARE
   char *port_share_host;
   int port_share_port;
@@ -413,6 +419,8 @@ struct options
   bool authname_defined;
   const char *authname;
   int keysize;
+  const char *prng_hash;
+  int prng_nonce_secret_len;
   const char *engine;
   bool replay;
   bool mute_replay_warnings;
@@ -610,9 +618,9 @@ char *options_string (const struct options *o,
 		      bool remote,
 		      struct gc_arena *gc);
 
-int options_cmp_equal_safe (char *actual, const char *expected, size_t actual_n);
+bool options_cmp_equal_safe (char *actual, const char *expected, size_t actual_n);
 void options_warning_safe (char *actual, const char *expected, size_t actual_n);
-int options_cmp_equal (char *actual, const char *expected);
+bool options_cmp_equal (char *actual, const char *expected);
 void options_warning (char *actual, const char *expected);
 
 #endif
