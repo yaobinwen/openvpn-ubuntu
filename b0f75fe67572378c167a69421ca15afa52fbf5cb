@@ -1,0 +1,8 @@
+  * Make lintian happy:
+    - Update debian/watch
+    - Remove .gitignore file from samples
+    - Add Depends on lsb-base
+    - Move bash completion file to /usr/share
+    - Remove unneeded dot in manpage
+    - Bump Standards-Version
+  * debian/patches/kfreebsd_support: Update patch for 2.4 series.
