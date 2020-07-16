@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -21,12 +21,6 @@
  *  distribution); if not, write to the Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
 
 #include "syshead.h"
 
@@ -206,13 +200,13 @@ run_up_down (const char *command,
       ASSERT (arg);
 
       buf_printf (&cmd,
-		  "%s %d %d %s %s %s",
+		  "\"%s\" %d %d %s %s %s",
 		  arg,
 		  tun_mtu, link_mtu,
 		  ifconfig_local, ifconfig_remote,
 		  context);
 
-      if (plugin_call (plugins, plugin_type, BSTR (&cmd), NULL, es))
+      if (plugin_call (plugins, plugin_type, BSTR (&cmd), NULL, es) != OPENVPN_PLUGIN_FUNC_SUCCESS)
 	msg (M_FATAL, "ERROR: up/down plugin call failed");
     }
 
@@ -225,7 +219,7 @@ run_up_down (const char *command,
       setenv_str (es, "script_type", script_type);
 
       buf_printf (&cmd,
-		  "%s %s %d %d %s %s %s",
+		  "%s \"%s\" %d %d %s %s %s",
 		  command,
 		  arg,
 		  tun_mtu, link_mtu,
@@ -438,6 +432,7 @@ openvpn_system (const char *command, const struct env_set *es, unsigned int flag
 void
 warn_if_group_others_accessible (const char* filename)
 {
+#ifndef WIN32
 #ifdef HAVE_STAT
 #if ENABLE_INLINE_FILES
   if (strcmp (filename, INLINE_FILE_TAG))
@@ -454,6 +449,7 @@ warn_if_group_others_accessible (const char* filename)
 	    msg (M_WARN, "WARNING: file '%s' is group or others accessible", filename);
 	}
     }
+#endif
 #endif
 }
 
@@ -944,6 +940,7 @@ setenv_str_ex (struct env_set *es,
 	{
 	  const char *str = construct_name_value (name_tmp, val_tmp, &gc);
 	  env_set_add (es, str);
+	  /*msg (M_INFO, "SETENV_ES '%s'", str);*/
 	}
       else
 	env_set_del (es, name_tmp);
@@ -975,6 +972,38 @@ setenv_str_ex (struct env_set *es,
 #endif
     }
 
+  gc_free (&gc);
+}
+
+/*
+ * Setenv functions that append an integer index to the name
+ */
+static const char *
+setenv_format_indexed_name (const char *name, const int i, struct gc_arena *gc)
+{
+  struct buffer out = alloc_buf_gc (strlen (name) + 16, gc);
+  if (i >= 0)
+    buf_printf (&out, "%s_%d", name, i);
+  else
+    buf_printf (&out, "%s", name);
+  return BSTR (&out);
+}
+
+void
+setenv_int_i (struct env_set *es, const char *name, const int value, const int i)
+{
+  struct gc_arena gc = gc_new ();
+  const char *name_str = setenv_format_indexed_name (name, i, &gc);
+  setenv_int (es, name_str, value);
+  gc_free (&gc);
+}
+
+void
+setenv_str_i (struct env_set *es, const char *name, const char *value, const int i)
+{
+  struct gc_arena gc = gc_new ();
+  const char *name_str = setenv_format_indexed_name (name, i, &gc);
+  setenv_str (es, name_str, value);
   gc_free (&gc);
 }
 
@@ -1057,7 +1086,7 @@ test_file (const char *filename)
 
 /* create a temporary filename in directory */
 const char *
-create_temp_filename (const char *directory, struct gc_arena *gc)
+create_temp_filename (const char *directory, const char *prefix, struct gc_arena *gc)
 {
   static unsigned int counter;
   struct buffer fname = alloc_buf_gc (256, gc);
@@ -1066,9 +1095,11 @@ create_temp_filename (const char *directory, struct gc_arena *gc)
   ++counter;
   mutex_unlock_static (L_CREATE_TEMP);
 
-  buf_printf (&fname, PACKAGE "_%u_%u.tmp",
+  buf_printf (&fname, PACKAGE "_%s_%u_%u_%u.tmp",
+	      prefix,
 	      openvpn_getpid (),
-	      counter);
+	      counter,
+	      (unsigned int)now);
 
   return gen_path (directory, BSTR (&fname), gc);
 }
@@ -1230,7 +1261,7 @@ get_user_pass (struct user_pass *up,
 	      if ((flags & GET_USER_PASS_NOFATAL) != 0)
 		return false;
 	      else
-		msg (M_FATAL, "ERROR: could not read %s username/password/ok from management interface", prefix);
+		msg (M_FATAL, "ERROR: could not read %s username/password/ok/string from management interface", prefix);
 	    }
 	}
       else

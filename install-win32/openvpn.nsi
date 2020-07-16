@@ -1,5 +1,5 @@
 ; ****************************************************************************
-; * Copyright (C) 2002-2005 OpenVPN Solutions LLC                            *
+; * Copyright (C) 2002-2008 OpenVPN Solutions LLC                            *
 ; *  This program is free software; you can redistribute it and/or modify    *
 ; *  it under the terms of the GNU General Public License version 2          *
 ; *  as published by the Free Software Foundation.                           *
@@ -11,19 +11,41 @@
 
 !include "${HOME}\autodefs\defs.nsi"
 !include "${HOME}\autodefs\guidefs.nsi"
+!include "${HOME}\autodefs\xguidefs.nsi"
 !include "MUI.nsh"
 !include "setpath.nsi"
 !include "GetWindowsVersion.nsi"
 
-!define BIN "${HOME}\bin"
+; Which GUI to use (XGUI has priority).
+; We will define either USE_XGUI (XML-based version) or
+; USE_GUI (Mathias Sundman version) but not both.
+!ifdef OPENVPN_XGUI_DEFINED
+!define USE_XGUI
+!else
+!ifdef OPENVPN_GUI_DEFINED
+!define USE_GUI
+!endif
+!endif
+
+!define GEN "${HOME}\${GENOUT}"
+!define BIN "${GEN}\bin"
+!define LIB "${GEN}\lib"
 
 !define PRODUCT_ICON "icon.ico"
 
-!ifdef PRODUCT_TAP_DEBUG
-!define VERSION "${PRODUCT_VERSION}-DBG"
+!ifdef USE_XGUI
+!define XGUI_POSTFIX "X"
 !else
-!define VERSION "${PRODUCT_VERSION}"
+!define XGUI_POSTFIX ""
 !endif
+
+!ifdef PRODUCT_TAP_DEBUG
+!define DBG_POSTFIX "-DBG"
+!else
+!define DBG_POSTFIX ""
+!endif
+
+!define VERSION "${PRODUCT_VERSION}${XGUI_POSTFIX}${DBG_POSTFIX}"
 
 !define TAP "${PRODUCT_TAP_ID}"
 !define TAPDRV "${TAP}.sys"
@@ -35,6 +57,15 @@
 !define SERV_LOG_DIR      "$INSTDIR\log"
 !define SERV_PRIORITY     "NORMAL_PRIORITY_CLASS"
 !define SERV_LOG_APPEND   "0"
+
+; XGUI variables
+!define XGUI_EXE      ovpn-xgui-en.exe
+!define XGUI_TRAY     ovpn-tray.exe
+!define XGUI_XMLSERV  ovpn-xmlserv.exe
+!define XGUI_HTDOCS   htdocs
+
+!define XGUI_AJAX_GUI_NAME       "${PRODUCT_NAME} Ajax GUI"
+!define XGUI_TRANSITION_GUI_NAME "${PRODUCT_NAME} Transitional GUI"
 
 ;--------------------------------
 ;Configuration
@@ -64,9 +95,13 @@
   !define MUI_COMPONENTSPAGE_TEXT_TOP "Select the components to install/upgrade.  Stop any ${PRODUCT_NAME} processes or the ${PRODUCT_NAME} service if it is running.  All DLLs are installed locally."
 
   !define MUI_COMPONENTSPAGE_SMALLDESC
-  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\INSTALL-win32.txt"
+  !ifdef USE_XGUI
+    !define MUI_FINISHPAGE_SHOWREADME "http://openvpn.net/"
+    !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+  !else
+    !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\INSTALL-win32.txt"
+  !endif
   !define MUI_FINISHPAGE_NOAUTOCLOSE
-#  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_ABORTWARNING
   !define MUI_ICON "${HOME}\images\${PRODUCT_ICON}"
   !define MUI_UNICON "${HOME}\images\${PRODUCT_ICON}"
@@ -75,7 +110,7 @@
   !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
   !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_LICENSE "${HOME}\install-win32\license.txt"
+  !insertmacro MUI_PAGE_LICENSE "${GEN}\text\license.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -96,8 +131,12 @@
 
   LangString DESC_SecOpenVPNUserSpace ${LANG_ENGLISH} "Install ${PRODUCT_NAME} user-space components, including ${PRODUCT_UNIX_NAME}.exe."
 
-!ifdef OPENVPN_GUI_DEFINED
+!ifdef USE_GUI
   LangString DESC_SecOpenVPNGUI ${LANG_ENGLISH} "Install ${PRODUCT_NAME} GUI by Mathias Sundman"
+!endif
+
+!ifdef USE_XGUI
+  LangString DESC_SecOpenVPNXGUI ${LANG_ENGLISH} "Install ${PRODUCT_NAME} XML-based GUI"
 !endif
 
   LangString DESC_SecOpenVPNEasyRSA ${LANG_ENGLISH} "Install ${PRODUCT_NAME} RSA scripts for X509 certificate management."
@@ -106,7 +145,7 @@
 
   LangString DESC_SecPKCS11DLLs ${LANG_ENGLISH} "Install PKCS#11 helper DLLs locally (may be omitted if DLLs are already installed globally)."
 
-  LangString DESC_SecTAP ${LANG_ENGLISH} "Install/Upgrade the TAP-Win32 virtual device driver.  Will not interfere with CIPE."
+  LangString DESC_SecTAP ${LANG_ENGLISH} "Install/Upgrade the TAP virtual device driver.  Will not interfere with CIPE."
 
   LangString DESC_SecService ${LANG_ENGLISH} "Install the ${PRODUCT_NAME} service wrapper (${PRODUCT_UNIX_NAME}serv.exe)"
 
@@ -225,6 +264,26 @@ FunctionEnd
 
 !define SF_SELECTED 1
 
+;--------------------
+;Pre-install section
+
+Section -pre
+
+  ; Stop OpenVPN if currently running
+  DetailPrint "Previous Service REMOVE (if exists)"
+  nsExec::ExecToLog '"$INSTDIR\bin\${PRODUCT_UNIX_NAME}serv.exe" -remove'
+  Pop $R0 # return value/error/timeout
+
+!ifdef USE_XGUI
+  DetailPrint "Previous XML Service REMOVE (if exists)"
+  nsExec::ExecToLog '"$INSTDIR\bin\${XGUI_XMLSERV}" -remove'
+  Pop $R0 # return value/error/timeout
+!endif
+
+  Sleep 3000
+
+SectionEnd
+
 Section "${PRODUCT_NAME} User-Space Components" SecOpenVPNUserSpace
 
   SetOverwrite on
@@ -234,7 +293,7 @@ Section "${PRODUCT_NAME} User-Space Components" SecOpenVPNUserSpace
 
 SectionEnd
 
-!ifdef OPENVPN_GUI_DEFINED
+!ifdef USE_GUI
 Section "${PRODUCT_NAME} GUI" SecOpenVPNGUI
 
   SetOverwrite on
@@ -245,12 +304,28 @@ Section "${PRODUCT_NAME} GUI" SecOpenVPNGUI
 SectionEnd
 !endif
 
+!ifdef USE_XGUI
+Section "${PRODUCT_NAME} XML-based GUI" SecOpenVPNXGUI
+
+  SetOverwrite on
+
+  SetOutPath "$INSTDIR\bin"
+  File "${BIN}\${XGUI_EXE}"
+  File "${BIN}\${XGUI_TRAY}"
+  File "${BIN}\${XGUI_XMLSERV}"
+
+  SetOutPath "$INSTDIR\${XGUI_HTDOCS}"
+  File "${GEN}\${XGUI_HTDOCS}\*.*"
+
+SectionEnd
+!endif
+
 Section "${PRODUCT_NAME} RSA Certificate Management Scripts" SecOpenVPNEasyRSA
 
   SetOverwrite on
   SetOutPath "$INSTDIR\easy-rsa"
 
-  File "${HOME}\samples\openssl.cnf.sample"
+  File "${GEN}\samples\openssl.cnf.sample"
   File "${HOME}\easy-rsa\Windows\vars.bat.sample"
 
   File "${HOME}\easy-rsa\Windows\init-config.bat"
@@ -286,9 +361,9 @@ Section "${PRODUCT_NAME} Service" SecService
   FileClose $R0
 
   SetOutPath "$INSTDIR\sample-config"
-  File "${HOME}\samples\sample.${SERV_CONFIG_EXT}"
-  File "${HOME}\samples\client.${SERV_CONFIG_EXT}"
-  File "${HOME}\samples\server.${SERV_CONFIG_EXT}"
+  File "${GEN}\samples\sample.${SERV_CONFIG_EXT}"
+  File "${GEN}\samples\client.${SERV_CONFIG_EXT}"
+  File "${GEN}\samples\server.${SERV_CONFIG_EXT}"
 
   CreateDirectory "$INSTDIR\log"
   FileOpen $R0 "$INSTDIR\log\README.txt" w
@@ -305,8 +380,8 @@ Section "OpenSSL DLLs" SecOpenSSLDLLs
 
   SetOverwrite on
   SetOutPath "$INSTDIR\bin"
-  File "${BIN}\libeay32.dll"
-  File "${BIN}\libssl32.dll"
+  File "${LIB}\libeay32.dll"
+  File "${LIB}\libssl32.dll"
 
 SectionEnd
 
@@ -322,22 +397,22 @@ Section "PKCS#11 DLLs" SecPKCS11DLLs
 
   SetOverwrite on
   SetOutPath "$INSTDIR\bin"
-  File "${BIN}\libpkcs11-helper-1.dll"
+  File "${LIB}\libpkcs11-helper-1.dll"
 
 SectionEnd
 
-Section "TAP-Win32 Virtual Ethernet Adapter" SecTAP
+Section "TAP Virtual Ethernet Adapter" SecTAP
 
   SetOverwrite on
 
   FileOpen $R0 "$INSTDIR\bin\addtap.bat" w
-  FileWrite $R0 "rem Add a new TAP-Win32 virtual ethernet adapter$\r$\n"
+  FileWrite $R0 "rem Add a new TAP virtual ethernet adapter$\r$\n"
   FileWrite $R0 '"$INSTDIR\bin\tapinstall.exe" install "$INSTDIR\driver\OemWin2k.inf" ${TAP}$\r$\n'
   FileWrite $R0 "pause$\r$\n"
   FileClose $R0
 
   FileOpen $R0 "$INSTDIR\bin\deltapall.bat" w
-  FileWrite $R0 "echo WARNING: this script will delete ALL TAP-Win32 virtual adapters (use the device manager to delete adapters one at a time)$\r$\n"
+  FileWrite $R0 "echo WARNING: this script will delete ALL TAP virtual adapters (use the device manager to delete adapters one at a time)$\r$\n"
   FileWrite $R0 "pause$\r$\n"
   FileWrite $R0 '"$INSTDIR\bin\tapinstall.exe" remove ${TAP}$\r$\n'
   FileWrite $R0 "pause$\r$\n"
@@ -354,13 +429,13 @@ Section "TAP-Win32 Virtual Ethernet Adapter" SecTAP
 
   SetOutPath "$INSTDIR\bin"
 
-  File "${BIN}\tapinstall\amd64\tapinstall.exe"
+  File "${GEN}\tapinstall\amd64\tapinstall.exe"
 
   SetOutPath "$INSTDIR\driver"
 
-  File "${BIN}\driver\amd64\OemWin2k.inf"
-  File "${BIN}\driver\amd64\${PRODUCT_TAP_ID}.cat"
-  File "${BIN}\driver\amd64\${TAPDRV}"
+  File "${GEN}\driver\amd64\OemWin2k.inf"
+  File "${GEN}\driver\amd64\${PRODUCT_TAP_ID}.cat"
+  File "${GEN}\driver\amd64\${TAPDRV}"
 
 goto tapend
 
@@ -369,12 +444,12 @@ tap-32bit:
   DetailPrint "We are running on a 32-bit system."
 
   SetOutPath "$INSTDIR\bin"
-  File "${BIN}\tapinstall\i386\tapinstall.exe"
+  File "${GEN}\tapinstall\i386\tapinstall.exe"
 
   SetOutPath "$INSTDIR\driver"
-  File "${BIN}\driver\i386\OemWin2k.inf"
-  File "${BIN}\driver\i386\${PRODUCT_TAP_ID}.cat"
-  File "${BIN}\driver\i386\${TAPDRV}"
+  File "${GEN}\driver\i386\OemWin2k.inf"
+  File "${GEN}\driver\i386\${PRODUCT_TAP_ID}.cat"
+  File "${GEN}\driver\i386\${TAPDRV}"
 
   tapend:
 
@@ -410,11 +485,37 @@ SectionEnd
 
 Section -post
 
+  SetOverwrite on
+
   ; delete old devcon.exe
   Delete "$INSTDIR\bin\devcon.exe"
 
+  ; Store README, license, icon
+  SetOverwrite on
+  SetOutPath $INSTDIR
+  !ifndef USE_XGUI
+    File "${GEN}\text\INSTALL-win32.txt"
+  !endif
+  File "${GEN}\text\license.txt"
+  File "${HOME}\images\${PRODUCT_ICON}"
+
+  ; store sample config files
+  !ifdef SAMPCONF_DIR
+    SetOverwrite on
+    SetOutPath "$INSTDIR\config"
+  !ifdef SAMPCONF_CONF
+    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_CONF}"
+  !endif
+  !ifdef SAMPCONF_P12
+    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_P12}"
+  !endif
+  !ifdef SAMPCONF_TA
+    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_TA}"
+  !endif
+  !endif
+
   ;
-  ; install/upgrade TAP-Win32 driver if selected, using tapinstall.exe
+  ; install/upgrade TAP driver if selected, using tapinstall.exe
   ;
   SectionGetFlags ${SecTAP} $R0
   IntOp $R0 $R0 & ${SF_SELECTED}
@@ -440,7 +541,7 @@ Section -post
     IntCmp $R0 -1 tapinstall
 
  ;tapupdate:
-    DetailPrint "TAP-Win32 UPDATE"
+    DetailPrint "TAP UPDATE"
     nsExec::ExecToLog '"$INSTDIR\bin\tapinstall.exe" update "$INSTDIR\driver\OemWin2k.inf" ${TAP}'
     Pop $R0 # return value/error/timeout
     Call CheckReboot
@@ -449,13 +550,13 @@ Section -post
     Goto tapinstall_check_error
 
  tapinstall:
-    DetailPrint "TAP-Win32 REMOVE OLD TAP"
+    DetailPrint "TAP REMOVE OLD TAP"
 
     nsExec::ExecToLog '"$INSTDIR\bin\tapinstall.exe" remove TAP0801'
     Pop $R0 # return value/error/timeout
     DetailPrint "tapinstall remove TAP0801 returned: $R0"
 
-    DetailPrint "TAP-Win32 INSTALL (${TAP})"
+    DetailPrint "TAP INSTALL (${TAP})"
     nsExec::ExecToLog '"$INSTDIR\bin\tapinstall.exe" install "$INSTDIR\driver\OemWin2k.inf" ${TAP}'
     Pop $R0 # return value/error/timeout
     Call CheckReboot
@@ -465,7 +566,7 @@ Section -post
  tapinstall_check_error:
     DetailPrint "tapinstall cumulative status: $5"
     IntCmp $5 0 notap
-    MessageBox MB_OK "An error occurred installing the TAP-Win32 device driver."
+    MessageBox MB_OK "An error occurred installing the TAP device driver."
 
  notap:
 
@@ -485,38 +586,29 @@ Section -post
     !insertmacro WriteRegStringIfUndef HKLM "SOFTWARE\${PRODUCT_NAME}" "priority"    "${SERV_PRIORITY}"
     !insertmacro WriteRegStringIfUndef HKLM "SOFTWARE\${PRODUCT_NAME}" "log_append"  "${SERV_LOG_APPEND}"
 
-    ; install openvpnserv as a service
-    DetailPrint "Previous Service REMOVE (if exists)"
-    nsExec::ExecToLog '"$INSTDIR\bin\${PRODUCT_UNIX_NAME}serv.exe" -remove'
-    Pop $R0 # return value/error/timeout
+    ; install openvpnserv as a service (to be started manually from service control manager)
     DetailPrint "Service INSTALL"
     nsExec::ExecToLog '"$INSTDIR\bin\${PRODUCT_UNIX_NAME}serv.exe" -install'
     Pop $R0 # return value/error/timeout
 
  noserv:
-  ; Store README, license, icon
-  SetOverwrite on
-  SetOutPath $INSTDIR
-  File "${HOME}\install-win32\INSTALL-win32.txt"
-  File "${HOME}\install-win32\license.txt"
-  File "${HOME}\images\${PRODUCT_ICON}"
+  !ifdef USE_XGUI
+    IfFileExists "$INSTDIR\bin\${XGUI_XMLSERV}" "" fileass
+      ; install and automatically start XML service
+      DetailPrint "XML Service INSTALL"
+      nsExec::ExecToLog '"$INSTDIR\bin\${XGUI_XMLSERV}" -install'
+      Pop $R0 # return value/error/timeout
 
-  ; store sample config files
-  !ifdef SAMPCONF_DIR
-    SetOverwrite on
-    SetOutPath "$INSTDIR\config"
-  !ifdef SAMPCONF_CONF
-    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_CONF}"
-  !endif
-  !ifdef SAMPCONF_P12
-    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_P12}"
-  !endif
-  !ifdef SAMPCONF_TA
-    File "${HOME}\..\${SAMPCONF_DIR}\${SAMPCONF_TA}"
-  !endif
+      Sleep 2000
+
+      DetailPrint "XML Service START"
+      nsExec::ExecToLog '"$INSTDIR\bin\${XGUI_XMLSERV}" -start'
+      Pop $R0 # return value/error/timeout
+
   !endif
 
   ; Create file association if requested
+ fileass:
   SectionGetFlags ${SecFileAssociation} $R0
   IntOp $R0 $R0 & ${SF_SELECTED}
   IntCmp $R0 ${SF_SELECTED} "" noass noass
@@ -533,21 +625,33 @@ Section -post
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}\Utilities"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}\Shortcuts"
 
-    ; Create start menu and desktop shortcuts to OpenVPN GUI
-  !ifdef OPENVPN_GUI_DEFINED
-    IfFileExists "$INSTDIR\bin\${OPENVPN_GUI}" "" tryaddtap
+  ; Create start menu and desktop shortcuts to OpenVPN GUI
+  !ifdef USE_GUI
+    IfFileExists "$INSTDIR\bin\${OPENVPN_GUI}" "" tryaddxgui
       CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} GUI.lnk" "$INSTDIR\bin\${OPENVPN_GUI}" ""
       CreateShortcut "$DESKTOP\${PRODUCT_NAME} GUI.lnk" "$INSTDIR\bin\${OPENVPN_GUI}"
+  !endif
+
+  ; Create start menu and desktop shortcuts to OpenVPN XGUI
+ tryaddxgui:
+  !ifdef USE_XGUI
+    IfFileExists "$INSTDIR\bin\${XGUI_EXE}" "" tryaddtray
+      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${XGUI_TRANSITION_GUI_NAME}.lnk" "$INSTDIR\bin\${XGUI_EXE}" ""
+#      CreateShortcut "$DESKTOP\${XGUI_TRANSITION_GUI_NAME}.lnk" "$INSTDIR\bin\${XGUI_EXE}"
+ tryaddtray:
+    IfFileExists "$INSTDIR\bin\${XGUI_TRAY}" "" tryaddtap
+      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${XGUI_AJAX_GUI_NAME}.lnk" "$INSTDIR\bin\${XGUI_EXE}" ""
+      CreateShortcut "$DESKTOP\${XGUI_AJAX_GUI_NAME}.lnk" "$INSTDIR\bin\${XGUI_TRAY}"
   !endif
 
     ; Create start menu shortcuts to addtap.bat and deltapall.bat
  tryaddtap:
     IfFileExists "$INSTDIR\bin\addtap.bat" "" trydeltap
-      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Utilities\Add a new TAP-Win32 virtual ethernet adapter.lnk" "$INSTDIR\bin\addtap.bat" ""
+      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Utilities\Add a new TAP virtual ethernet adapter.lnk" "$INSTDIR\bin\addtap.bat" ""
 
  trydeltap:
     IfFileExists "$INSTDIR\bin\deltapall.bat" "" config_shortcut
-      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Utilities\Delete ALL TAP-Win32 virtual ethernet adapters.lnk" "$INSTDIR\bin\deltapall.bat" ""
+      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Utilities\Delete ALL TAP virtual ethernet adapters.lnk" "$INSTDIR\bin\deltapall.bat" ""
 
     ; Create start menu shortcuts for config and log directories
  config_shortcut:
@@ -578,7 +682,7 @@ Section -post
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayVersion" "${VERSION}"
 
   ; Advise a reboot
-  ;Messagebox MB_OK "IMPORTANT: Rebooting the system is advised in order to finalize TAP-Win32 driver installation/upgrade (this is an informational message only, pressing OK will not reboot)."
+  ;Messagebox MB_OK "IMPORTANT: Rebooting the system is advised in order to finalize TAP driver installation/upgrade (this is an informational message only, pressing OK will not reboot)."
 
 SectionEnd
 
@@ -587,8 +691,11 @@ SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOpenVPNUserSpace} $(DESC_SecOpenVPNUserSpace)
-  !ifdef OPENVPN_GUI_DEFINED
+  !ifdef USE_GUI
     !insertmacro MUI_DESCRIPTION_TEXT ${SecOpenVPNGUI} $(DESC_SecOpenVPNGUI)
+  !endif
+  !ifdef USE_XGUI
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecOpenVPNXGUI} $(DESC_SecOpenVPNXGUI)
   !endif
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOpenVPNEasyRSA} $(DESC_SecOpenVPNEasyRSA)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecTAP} $(DESC_SecTAP)
@@ -619,13 +726,20 @@ FunctionEnd
 
 Section "Uninstall"
 
+!ifdef USE_XGUI
+  DetailPrint "XML Service REMOVE"
+  nsExec::ExecToLog '"$INSTDIR\bin\${XGUI_XMLSERV}" -remove'
+  Pop $R0 # return value/error/timeout
+!endif
+
+  ; Stop OpenVPN if currently running
   DetailPrint "Service REMOVE"
   nsExec::ExecToLog '"$INSTDIR\bin\${PRODUCT_UNIX_NAME}serv.exe" -remove'
   Pop $R0 # return value/error/timeout
 
-  Sleep 2000
+  Sleep 3000
 
-  DetailPrint "TAP-Win32 REMOVE"
+  DetailPrint "TAP REMOVE"
   nsExec::ExecToLog '"$INSTDIR\bin\tapinstall.exe" remove ${TAP}'
   Pop $R0 # return value/error/timeout
   DetailPrint "tapinstall remove returned: $R0"
@@ -648,9 +762,18 @@ Section "Uninstall"
   !endif
   !endif
 
-  !ifdef OPENVPN_GUI_DEFINED
+  !ifdef USE_GUI
     Delete "$INSTDIR\bin\${OPENVPN_GUI}"
     Delete "$DESKTOP\${PRODUCT_NAME} GUI.lnk"
+  !endif
+
+  !ifdef USE_XGUI
+    Delete "$INSTDIR\bin\${XGUI_EXE}"
+    Delete "$INSTDIR\bin\${XGUI_TRAY}"
+    Delete "$INSTDIR\bin\${XGUI_XMLSERV}"
+    RMDir /r "$INSTDIR\${XGUI_HTDOCS}"
+    Delete "$DESKTOP\${XGUI_AJAX_GUI_NAME}.lnk"
+    Delete "$DESKTOP\${XGUI_TRANSITION_GUI_NAME}.lnk"
   !endif
 
   Delete "$INSTDIR\bin\${PRODUCT_UNIX_NAME}.exe"

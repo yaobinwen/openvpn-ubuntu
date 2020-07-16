@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -29,12 +29,6 @@
  * This file is based on the TUN/TAP driver interface routines
  * from VTun by Maxim Krasnyansky <max_mk@yahoo.com>.
  */
-
-#ifdef WIN32
-#include "config-win32.h"
-#else
-#include "config.h"
-#endif
 
 #include "syshead.h"
 
@@ -799,7 +793,7 @@ do_ifconfig (struct tuntap *tt,
 	  add_route (&r, tt, 0, es);
 	}
 
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD)||defined(TARGET_DRAGONFLY)
 
       /* example: ifconfig tun2 10.2.0.2 10.2.0.1 mtu 1450 netmask 255.255.255.255 up */
       if (tun)
@@ -1220,26 +1214,44 @@ close_tun (struct tuntap *tt)
 {
   if (tt)
     {
-#ifdef CONFIG_FEATURE_IPROUTE
 	if (tt->type != DEV_TYPE_NULL && tt->did_ifconfig)
 	  {
 	    char command_line[256];
 	    struct gc_arena gc = gc_new ();
 
+#ifdef CONFIG_FEATURE_IPROUTE
+	    if (is_tun_p2p (tt))
+	      {
+		openvpn_snprintf (command_line, sizeof (command_line),
+			"%s addr del dev %s local %s peer %s",
+			iproute_path,
+			tt->actual_name,
+			print_in_addr_t (tt->local, 0, &gc),
+			print_in_addr_t (tt->remote_netmask, 0, &gc)
+			);
+	      }
+	    else
+	      {
+		openvpn_snprintf (command_line, sizeof (command_line),
+			"%s addr del dev %s %s/%d",
+			iproute_path,
+			tt->actual_name,
+			print_in_addr_t (tt->local, 0, &gc),
+			count_netmask_bits(print_in_addr_t (tt->remote_netmask, 0, &gc))
+			);
+	      }
+#else
 	    openvpn_snprintf (command_line, sizeof (command_line),
-			  "%s addr del dev %s local %s peer %s",
-			  iproute_path,
-			  tt->actual_name,
-			  print_in_addr_t (tt->local, 0, &gc),
-			  print_in_addr_t (tt->remote_netmask, 0, &gc)
-			  );
+			IFCONFIG_PATH " %s 0.0.0.0",
+			tt->actual_name
+			);
+#endif
 
 	    msg (M_INFO, "%s", command_line);
-	    system_check (command_line, NULL, S_FATAL, "Linux ip addr del failed");
+	    system_check (command_line, NULL, 0, "Linux ip addr del failed");
 
 	    gc_free (&gc);
 	  }
-#endif
       close_tun_generic (tt);
       free (tt);
     }
@@ -1730,6 +1742,89 @@ read_tun (struct tuntap* tt, uint8_t *buf, int len)
       iv[1].iov_len = len;
 
       return freebsd_modify_read_write_return (readv (tt->fd, iv, 2));
+    }
+  else
+    return read (tt->fd, buf, len);
+}
+
+#elif defined(TARGET_DRAGONFLY)
+
+static inline int
+dragonfly_modify_read_write_return (int len)
+{
+  if (len > 0)
+    return len > sizeof (u_int32_t) ? len - sizeof (u_int32_t) : 0;
+  else
+    return len;
+}
+
+void
+open_tun (const char *dev, const char *dev_type, const char *dev_node, bool ipv6, struct tuntap *tt)
+{
+  open_tun_generic (dev, dev_type, dev_node, ipv6, true, true, tt);
+
+  if (tt->fd >= 0)
+    {
+      int i = 0;
+
+      /* Disable extended modes */
+      ioctl (tt->fd, TUNSLMODE, &i);
+      i = 1;
+      ioctl (tt->fd, TUNSIFHEAD, &i);
+    }
+}
+
+void
+close_tun (struct tuntap *tt)
+{
+  if (tt)
+    {
+      close_tun_generic (tt);
+      free (tt);
+    }
+}
+
+int
+write_tun (struct tuntap* tt, uint8_t *buf, int len)
+{
+  if (tt->type == DEV_TYPE_TUN)
+    {
+      u_int32_t type;
+      struct iovec iv[2];
+      struct ip *iph;
+
+      iph = (struct ip *) buf;
+
+      if (tt->ipv6 && iph->ip_v == 6)
+        type = htonl (AF_INET6);
+      else 
+        type = htonl (AF_INET);
+
+      iv[0].iov_base = (char *)&type;
+      iv[0].iov_len = sizeof (type);
+      iv[1].iov_base = buf;
+      iv[1].iov_len = len;
+
+      return dragonfly_modify_read_write_return (writev (tt->fd, iv, 2));
+    }
+  else
+    return write (tt->fd, buf, len);
+}
+
+int
+read_tun (struct tuntap* tt, uint8_t *buf, int len)
+{
+  if (tt->type == DEV_TYPE_TUN)
+    {
+      u_int32_t type;
+      struct iovec iv[2];
+
+      iv[0].iov_base = (char *)&type;
+      iv[0].iov_len = sizeof (type);
+      iv[1].iov_base = buf;
+      iv[1].iov_len = len;
+
+      return dragonfly_modify_read_write_return (readv (tt->fd, iv, 2));
     }
   else
     return read (tt->fd, buf, len);

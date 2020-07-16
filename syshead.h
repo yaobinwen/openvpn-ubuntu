@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
+ *  Copyright (C) 2002-2008 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -24,6 +24,28 @@
 
 #ifndef SYSHEAD_H
 #define SYSHEAD_H
+
+/*
+ * Only include if not during configure
+ */
+#ifndef PACKAGE_NAME
+#ifdef _MSC_VER
+#include "config-win32.h"
+#else
+#include "config.h"
+#endif
+#endif
+
+#if defined(_WIN32) && !defined(WIN32)
+#define WIN32
+#endif
+
+#ifdef WIN32
+#include <windows.h>
+#define sleep(x) Sleep((x)*1000)
+#define random rand
+#define srandom srand
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -131,6 +153,10 @@
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#ifdef HAVE_RESOLV_H
+#include <resolv.h>
 #endif
 
 #ifdef HAVE_SYS_POLL_H
@@ -272,9 +298,29 @@
 
 #endif /* TARGET_NETBSD */
 
+#ifdef TARGET_DRAGONFLY
+
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+
+#ifdef HAVE_NET_TUN_IF_TUN_H
+#include <net/tun/if_tun.h>
+#endif
+
+#endif /* TARGET_DRAGONFLY */
+
 #ifdef WIN32
 #include <iphlpapi.h>
-#include <WinInet.h>
+#include <wininet.h>
 #endif
 
 #ifdef HAVE_SYS_MMAN_H
@@ -425,6 +471,41 @@ socket_defined (const socket_descriptor_t sd)
 #endif
 
 /*
+ * Enable deferred authentication?
+ */
+#define CONFIGURE_DEF_AUTH /* this should be set by autoconf and config.h */
+#if defined(CONFIGURE_DEF_AUTH) && defined(P2MP_SERVER) && defined(ENABLE_PLUGIN)
+#define PLUGIN_DEF_AUTH
+#endif
+#if defined(CONFIGURE_DEF_AUTH) && defined(P2MP_SERVER) && defined(ENABLE_MANAGEMENT)
+#define MANAGEMENT_DEF_AUTH
+#endif
+#if defined(PLUGIN_DEF_AUTH) || defined(MANAGEMENT_DEF_AUTH)
+#define ENABLE_DEF_AUTH
+#endif
+
+/*
+ * Enable packet filter?
+ */
+#define CONFIGURE_PF /* this should be set by autoconf and config.h */
+#if defined(CONFIGURE_PF) && defined(P2MP_SERVER) && defined(ENABLE_PLUGIN) && defined(HAVE_STAT)
+#define PLUGIN_PF
+#endif
+#if defined(CONFIGURE_PF) && defined(P2MP_SERVER) && defined(MANAGEMENT_DEF_AUTH)
+#define MANAGEMENT_PF
+#endif
+#if defined(PLUGIN_PF) || defined(MANAGEMENT_PF)
+#define ENABLE_PF
+#endif
+
+/*
+ * Don't compile the struct buffer_list code unless something needs it
+ */
+#if defined(ENABLE_MANAGEMENT) || defined(ENABLE_PF)
+#define ENABLE_BUFFER_LIST
+#endif
+
+/*
  * Do we have pthread capability?
  */
 #ifdef USE_PTHREAD
@@ -522,6 +603,13 @@ socket_defined (const socket_descriptor_t sd)
 #define AUTO_USERID 1
 #else
 #define AUTO_USERID 0
+#endif
+
+/*
+ * Support "connection" directive
+ */
+#if ENABLE_INLINE_FILES
+#define ENABLE_CONNECTION 1
 #endif
 
 #endif
