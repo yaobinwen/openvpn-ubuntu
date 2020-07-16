@@ -1,0 +1,2 @@
+  * Add support for systemd. (Closes: #700888)
+    Add openvpn@.service and --enable-systemd to ./configure.
