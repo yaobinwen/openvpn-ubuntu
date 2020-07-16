@@ -1,0 +1,2 @@
+  * Fix postinst when no *.pid files exist in /run/sendsigs.omit.d/.
+    (Closes: #730679)
