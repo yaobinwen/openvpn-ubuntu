@@ -1,0 +1,2 @@
+  * Applied upstream patch to solve random routes added when using
+    'remote_host'. (Closes: #600166)
