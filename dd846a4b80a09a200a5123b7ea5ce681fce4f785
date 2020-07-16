@@ -1,0 +1,9 @@
+  * Merge from Debian testing.  Remaining changes:
+   + debian/openvpn.init.d:
+      - Do not use start-stop-daemon and </dev/null to avoid blocking boot.
+      - Show per-VPN result messages.
+      - Add "--script-security 2" by default for backwards compatabliity.
+    + debian/control: Add lsb-base >= 3.2-14 to allow status_of_proc()
+    + debian/update-resolv-conf: Support multiple domains.
+    + fix bug where '--script-security 2' would be passed for all
+      daemons after the first. (LP: #794916)
