@@ -1,0 +1,8 @@
+  * Add dpkg-buildflags call on plugins built too.
+    Thanks Simon Ruderich for finding out, the nice patch and
+    clarification. (Closes: #655130)
+  * /run transition: Replaced usage of /dev/.udev with /run/udev,
+    when checking for the usage of udev. Depend on initscripts
+    (>= 2.88dsf-13.3) to guarantee the existence of /run/udev
+    in case udev is being used. (Closes: #644321)
+    Patch by Pieter du Preez.
