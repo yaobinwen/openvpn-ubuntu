@@ -1,0 +1,13 @@
+  * New upstream release. (Closes: #804368)
+    Drop password_prompt_in_systemd.patch. Applied upstream.
+  * Unify pidfile path on systemd and sysV. (Closes: #811010)
+    Thanks Guillem Jover for noticing.
+  * Increase start-stop-daemon timeout on stop to let openvpn
+    tear down the connection properly in some cases.
+    (Closes: #799592, #796914)
+  * Add CAP_AUDIT_WRITE to openvpn@.service CapabilityBoundingSet
+    to fix auth-pam plugin. (Closes: #795313)
+  * Patch from Martin Pitt to start OpenVPN before user sessions
+    to avoid hidding possible password prompts. (Closes: #803032)
+  * Make another copy of t_client.sh to help keeping the build
+    environment clean. (Closes: #765447)
