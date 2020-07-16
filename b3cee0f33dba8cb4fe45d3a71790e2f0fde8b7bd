@@ -1,0 +1,28 @@
+  [ Jörg Frings-Fürst ]
+  * New Upstream release:
+    - Fix bounds check in read_key() (CVE-2017-12166) (Closes: #877089).
+  * Declare compliance with Debian Policy 4.1.1. (No changes needed).
+  * Drop dh-systemd from both Build-Depends and dh command line as
+    it is enabled by default for dh compat level 10.
+  * New debian/openvpn.lintian-overrides:
+    - Override duplicate upstream changelog warning.
+  * Remote obsolete directory /usr/lib/openvpn (The plugins directory are now
+      /usr/lib/*/openvpn/plugins):
+    - Remove /usr/lib/openvpn from debian/dirs.
+    - Add debian/postrm to remove /usr/lib/openvpn on purge and remove.
+    - Rewrite plugin section at README.Debian
+  * Use pathfind() instead hard coded path for invoke-rc.d at debian/prerm
+    and debian/postinst.
+  * Remove outdated debian/README.source.
+  * Remove obsolete syslog.target from debian/openvpn@.service.
+  * Update Catalan translation (Closes: #870351).
+    - Thanks to Alytidae <alytidae@riseup.net>.
+  * New directory /var/log/openvpn for log and status files
+      (Closes: #444431, #553303):
+    - Add var/log/openvpn into debian/dirs.
+    - New debian/patches/move_log_dir.patch to change the conf files
+      to the new log directory.
+  [ Bernhard Schmidt ]
+  * Further changes to debian/openvpn@.service copied from upstream
+    - Enable Restart=on-failure
+    - Use KillMode=process
