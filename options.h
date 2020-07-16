@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,6 +31,7 @@
 #define OPTIONS_H
 
 #include "basic.h"
+#include "common.h"
 #include "mtu.h"
 #include "route.h"
 #include "tun.h"
@@ -46,6 +46,12 @@
  */
 #define MAX_PARMS 16
 
+/*
+ * Max size of options line and parameter.
+ */
+#define OPTION_PARM_SIZE 256
+#define OPTION_LINE_SIZE 256
+
 extern const char title_string[];
 
 #if P2MP
@@ -53,7 +59,7 @@ extern const char title_string[];
 #if P2MP_SERVER
 /* parameters to be pushed to peer */
 
-#define MAX_PUSH_LIST_LEN 1024 /* This parm is related to PLAINTEXT_BUFFER_SIZE in ssl.h */
+#define MAX_PUSH_LIST_LEN TLS_CHANNEL_BUF_SIZE /* This parm is related to PLAINTEXT_BUFFER_SIZE in ssl.h */
 
 struct push_list {
   /* newline delimited options, like config file */
@@ -299,6 +305,7 @@ struct options
   const char *tmp_dir;
   const char *client_config_dir;
   bool ccd_exclusive;
+  bool disable;
   int n_bcast_buf;
   int tcp_queue_limit;
   struct iroute *iroutes;

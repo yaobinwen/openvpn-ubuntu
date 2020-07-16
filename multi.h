@@ -5,12 +5,11 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2004 James Yonan <jim@yonan.net>
+ *  Copyright (C) 2002-2005 OpenVPN Solutions LLC <info@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  it under the terms of the GNU General Public License version 2
+ *  as published by the Free Software Foundation.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -82,25 +81,6 @@ struct multi_instance {
   struct context context;
 };
 
-#ifdef USE_PTHREAD
-
-struct multi_context_thread_shared
-{
-  struct sparse_mutex read;
-  struct sparse_mutex write_link;
-  struct sparse_mutex write_tun;
-};
-
-struct multi_context_thread_local
-{
-  bool read_owned;
-  bool write_link_owned;
-  bool write_tun_owned;
-  struct multi_instance *held;
-};
-
-#endif
-
 /*
  * One multi_context object per server daemon thread.
  */
@@ -128,11 +108,6 @@ struct multi_context {
   int max_clients;
   int tcp_queue_limit;
   int status_file_version;
-
-#ifdef USE_PTHREAD
-  struct multi_context_thread_shared *thread_shared;
-  struct multi_context_thread_local thread_local;
-#endif
 
   struct multi_instance *pending;
   struct multi_instance *earliest_wakeup;
@@ -414,31 +389,10 @@ multi_process_outgoing_link_dowork (struct multi_context *m, struct multi_instan
   return ret;
 }
 
-#ifndef USE_PTHREAD
-
-#endif
-
 /*
  * Check for signals.
  */
 #define MULTI_CHECK_SIG(m) EVENT_LOOP_CHECK_SIGNAL (&(m)->top, multi_process_signal, (m))
-
-/*
- * Multithreading support
- */
-#ifdef USE_PTHREAD
-
-void inherit_multi_context (struct multi_context *dest, const struct multi_context *src, const unsigned int thread_mode);
-
-void multi_acquire_io_lock (struct multi_context *m, const unsigned int iow_flags);
-void multi_release_io_lock (struct multi_context *m);
-
-void thread_shared_init (struct multi_context_thread_shared *ts);
-void thread_shared_uninit (struct multi_context_thread_shared *ts);
-
-void multi_set_pending (struct multi_context *m, struct multi_instance *mi);
-
-#else
 
 static inline void
 multi_set_pending (struct multi_context *m, struct multi_instance *mi)
@@ -450,8 +404,6 @@ static inline void
 multi_release_io_lock (struct multi_context *m)
 {
 }
-
-#endif /* USE_PTHREAD */
 
 #endif /* P2MP_SERVER */
 #endif /* MULTI_H */
