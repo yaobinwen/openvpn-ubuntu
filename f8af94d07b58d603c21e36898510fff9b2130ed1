@@ -1,0 +1,4 @@
+  * Patch init script to fix race conditions on restarts.
+    (Closes: #716794). Thanks Simon Deziel for the patch.
+  * Improve update-resolv-conf script. Thanks Thomas Hood
+    for the patch. (Closes: #721082)
