@@ -1,0 +1,4 @@
+  * Revert changes from 2.1~rc7-1ubuntu3.4 since verification could never be
+    done on that bug and it is blocking another much-needed SRU.
+  * debian/openvpn.init.d: Fix initscript exit status 127 when starting
+    openvpn while it's already started (LP: #271777)
