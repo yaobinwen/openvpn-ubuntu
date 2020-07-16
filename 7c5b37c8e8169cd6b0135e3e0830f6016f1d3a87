@@ -1,0 +1,2 @@
+  * More init script LSB compliance. (LP: #134210)
+  * Added warning about max-locked-memory-limit to Readme.Debian. (LP: #154696) 
