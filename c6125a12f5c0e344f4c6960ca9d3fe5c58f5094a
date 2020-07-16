@@ -1,0 +1,3 @@
+  * debian/rules: Force path to 'ip' command so that it's set correctly even
+    if not present (in the buildd). (Closes: #652702)
+  * Fix OMIT_SENDSIGS logic on init.d script. (Closes: #652703)
