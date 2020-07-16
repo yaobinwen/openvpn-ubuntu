@@ -1,0 +1,2 @@
+  * debian/openvpn@.service: Add --script-security similar to what got added
+    to debian/openvpn.init.d ages ago (see LP #260291). (LP: #1454725)
