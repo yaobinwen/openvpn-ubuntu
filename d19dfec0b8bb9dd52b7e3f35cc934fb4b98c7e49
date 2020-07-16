@@ -1,0 +1,7 @@
+  * Added Galician debconf translation. (Closes: #412492)
+    Thanks Jacobo Tarrio
+  * Updated Swedish debconf translation. (Closes: #407851)
+    Thanks Andreas Henriksson
+  * Fixed type in Portuguese debconf translation.
+  * debian/templates. Changed default value for init.d change
+    question to false. (Closes: #403317)
