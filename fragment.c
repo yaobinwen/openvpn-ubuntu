@@ -29,9 +29,10 @@
 #include "config.h"
 #endif
 
-#ifdef FRAGMENT_ENABLE
-
 #include "syshead.h"
+
+#ifdef ENABLE_FRAGMENT
+
 #include "misc.h"
 #include "fragment.h"
 #include "integer.h"
@@ -86,10 +87,9 @@ fragment_init (struct frame *frame)
 {
   struct fragment_master *ret;
 
-  ret = (struct fragment_master *) malloc (sizeof (struct fragment_master));
-  ASSERT (ret);
-  CLEAR (*ret); /* code that initializes other parts of
-		   fragment_master assume an initial CLEAR */
+  /* code that initializes other parts of
+     fragment_master assume an initial CLEAR */
+  ALLOC_OBJ_CLEAR (ret, struct fragment_master);
 
   /* add in the size of our contribution to the expanded frame size */
   frame_add_to_extra_frame (frame, sizeof(fragment_header_type));
@@ -104,7 +104,7 @@ fragment_init (struct frame *frame)
    */
   ret->outgoing_seq_id = (int)get_random() & (N_SEQ_ID - 1);
 
-  event_timeout_init (&ret->wakeup, 0, FRAG_WAKEUP_INTERVAL);
+  event_timeout_init (&ret->wakeup, FRAG_WAKEUP_INTERVAL, now);
 
   return ret;
 }
@@ -115,6 +115,7 @@ fragment_free (struct fragment_master *f)
   fragment_list_buf_free (&f->incoming);
   free_buf (&f->outgoing);
   free_buf (&f->outgoing_return);
+  free (f);
 }
 
 void
@@ -133,7 +134,7 @@ fragment_frame_init (struct fragment_master *f, const struct frame *frame)
  */
 void
 fragment_incoming (struct fragment_master *f, struct buffer *buf,
-		   const struct frame* frame, const time_t current)
+		   const struct frame* frame)
 {
   const char *errmsg = NULL;
   fragment_header_type flags = 0;
@@ -162,7 +163,7 @@ fragment_incoming (struct fragment_master *f, struct buffer *buf,
       /* handle the fragment type */
       if (frag_type == FRAG_WHOLE)
 	{
-	  msg (D_FRAG_DEBUG,
+	  dmsg (D_FRAG_DEBUG,
 	       "FRAG_IN buf->len=%d type=FRAG_WHOLE flags="
 	       fragment_header_format,
 	       buf->len,
@@ -182,7 +183,7 @@ fragment_incoming (struct fragment_master *f, struct buffer *buf,
 	  /* get the appropriate fragment buffer based on received seq_id */
 	  struct fragment *frag = fragment_list_get_buf (&f->incoming, seq_id);
 
-	  msg (D_FRAG_DEBUG,
+	  dmsg (D_FRAG_DEBUG,
 	       "FRAG_IN len=%d type=%d seq_id=%d frag_id=%d size=%d flags="
 	       fragment_header_format,
 	       buf->len,
@@ -202,7 +203,7 @@ fragment_incoming (struct fragment_master *f, struct buffer *buf,
 	      frag->defined = true;
 	      frag->max_frag_size = size;
 	      frag->map = 0;
-	      ASSERT (buf_init (&frag->buf, FRAME_HEADROOM (frame)));
+	      ASSERT (buf_init (&frag->buf, FRAME_HEADROOM_ADJ (frame, FRAME_HEADROOM_MARKER_FRAGMENT)));
 	    }
 
 	  /* copy the data to fragment buffer */
@@ -213,7 +214,7 @@ fragment_incoming (struct fragment_master *f, struct buffer *buf,
 	  frag->map |= (((frag_type == FRAG_YES_LAST) ? FRAG_MAP_MASK : 1) << n);
 
 	  /* update timestamp on partially built datagram */
-	  frag->timestamp = current;
+	  frag->timestamp = now;
 
 	  /* received full datagram? */
 	  if ((frag->map & FRAG_MAP_MASK) == FRAG_MAP_MASK)
@@ -263,7 +264,7 @@ fragment_prepend_flags (struct buffer *buf,
        * If you want to set FRAG_EXTRA_MASK/FRAG_EXTRA_SHIFT bits,
        * do it here.
        */
-      msg (D_FRAG_DEBUG,
+      dmsg (D_FRAG_DEBUG,
 	   "FRAG_OUT len=%d type=%d seq_id=%d frag_id=%d frag_size=%d flags="
 	   fragment_header_format,
 	   buf->len, type, seq_id, frag_id, frag_size, flags);
@@ -272,7 +273,7 @@ fragment_prepend_flags (struct buffer *buf,
     {
       flags |= (((frag_size >> FRAG_SIZE_ROUND_SHIFT) & FRAG_SIZE_MASK) << FRAG_SIZE_SHIFT);
 
-      msg (D_FRAG_DEBUG,
+      dmsg (D_FRAG_DEBUG,
 	   "FRAG_OUT len=%d type=%d seq_id=%d frag_id=%d frag_size=%d flags="
 	   fragment_header_format,
 	   buf->len, type, seq_id, frag_id, frag_size, flags);
@@ -304,7 +305,7 @@ optimal_fragment_size (int len, int max_frag_size)
 /* process an outgoing datagram, possibly breaking it up into fragments */
 void
 fragment_outgoing (struct fragment_master *f, struct buffer *buf,
-		   const struct frame* frame, const time_t current)
+		   const struct frame* frame)
 {
   const char *errmsg = NULL;
   if (buf->len > 0)
@@ -350,9 +351,9 @@ fragment_outgoing (struct fragment_master *f, struct buffer *buf,
 /* return true (and set buf) if we have an outgoing fragment which is ready to send */
 bool
 fragment_ready_to_send (struct fragment_master *f, struct buffer *buf,
-			     const struct frame* frame)
+			const struct frame* frame)
 {
-  if (f->outgoing.len)
+  if (fragment_outgoing_defined (f))
     {
       /* get fragment size, and determine if it is the last fragment */
       int size = f->outgoing_frag_size;
@@ -384,13 +385,13 @@ fragment_ready_to_send (struct fragment_master *f, struct buffer *buf,
 }
 
 static void
-fragment_ttl_reap (struct fragment_master *f, time_t current)
+fragment_ttl_reap (struct fragment_master *f)
 {
   int i;
   for (i = 0; i < N_FRAG_BUF; ++i)
     {
       struct fragment *frag = &f->incoming.fragments[i];
-      if (frag->defined && frag->timestamp + FRAG_TTL_SEC <= current)
+      if (frag->defined && frag->timestamp + FRAG_TTL_SEC <= now)
 	{
 	  msg (D_FRAG_ERRORS, "FRAG TTL expired i=%d", i);
 	  frag->defined = false;
@@ -400,12 +401,12 @@ fragment_ttl_reap (struct fragment_master *f, time_t current)
 
 /* called every FRAG_WAKEUP_INTERVAL seconds */
 void
-fragment_wakeup (struct fragment_master *f, struct frame *frame, time_t current)
+fragment_wakeup (struct fragment_master *f, struct frame *frame)
 {
   /* delete fragments with expired TTLs */
-  fragment_ttl_reap (f, current);
+  fragment_ttl_reap (f);
 }
 
 #else
 static void dummy(void) {}
-#endif /* FRAGMENT_ENABLE */
+#endif

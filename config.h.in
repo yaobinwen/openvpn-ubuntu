@@ -9,8 +9,35 @@
 /* Use dmalloc memory debugging library */
 #undef DMALLOC
 
-/* Enable dynamic MTU capability */
-#undef FRAGMENT_ENABLE
+/* Dimension to use for empty array declaration */
+#undef EMPTY_ARRAY_SIZE
+
+/* Enable client capability only */
+#undef ENABLE_CLIENT_ONLY
+
+/* Enable client/server capability */
+#undef ENABLE_CLIENT_SERVER
+
+/* Enable debugging support */
+#undef ENABLE_DEBUG
+
+/* Enable internal fragmentation support */
+#undef ENABLE_FRAGMENT
+
+/* Enable HTTP proxy support */
+#undef ENABLE_HTTP_PROXY
+
+/* Enable management server capability */
+#undef ENABLE_MANAGEMENT
+
+/* Allow --askpass and --auth-user-pass passwords to be read from a file */
+#undef ENABLE_PASSWORD_SAVE
+
+/* Enable smaller executable size */
+#undef ENABLE_SMALL
+
+/* Enable Socks proxy support */
+#undef ENABLE_SOCKS
 
 /* Define to 1 if you have the `accept' function. */
 #undef HAVE_ACCEPT
@@ -26,6 +53,9 @@
 
 /* Define to 1 if you have the `chroot' function. */
 #undef HAVE_CHROOT
+
+/* Define to 1 if you have the `chsize' function. */
+#undef HAVE_CHSIZE
 
 /* struct cmsghdr needed for extended socket error support */
 #undef HAVE_CMSGHDR
@@ -54,6 +84,18 @@
 /* Define to 1 if you have the `dup2' function. */
 #undef HAVE_DUP2
 
+/* Define to 1 if you have the `ENGINE_cleanup' function. */
+#undef HAVE_ENGINE_CLEANUP
+
+/* Define to 1 if you have the `ENGINE_load_builtin_engines' function. */
+#undef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
+
+/* Define to 1 if you have the `ENGINE_register_all_complete' function. */
+#undef HAVE_ENGINE_REGISTER_ALL_COMPLETE
+
+/* Define to 1 if you have the `epoll_create' function. */
+#undef HAVE_EPOLL_CREATE
+
 /* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
 
@@ -68,6 +110,9 @@
 
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
+
+/* Define to 1 if you have the `ftruncate' function. */
+#undef HAVE_FTRUNCATE
 
 /* Define to 1 if you have the `getgrnam' function. */
 #undef HAVE_GETGRNAM
@@ -95,9 +140,6 @@
 
 /* Define to 1 if you have the <grp.h> header file. */
 #undef HAVE_GRP_H
-
-/* Define to 1 if you have the `inet_aton' function. */
-#undef HAVE_INET_ATON
 
 /* Define to 1 if you have the `inet_ntoa' function. */
 #undef HAVE_INET_NTOA
@@ -167,6 +209,12 @@
 
 /* Define to 1 if you have the `openlog' function. */
 #undef HAVE_OPENLOG
+
+/* Define to 1 if you have the <openssl/engine.h> header file. */
+#undef HAVE_OPENSSL_ENGINE_H
+
+/* Define to 1 if you have the `poll' function. */
+#undef HAVE_POLL
 
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
@@ -258,6 +306,9 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
+/* Define to 1 if you have the <sys/epoll.h> header file. */
+#undef HAVE_SYS_EPOLL_H
+
 /* Define to 1 if you have the <sys/file.h> header file. */
 #undef HAVE_SYS_FILE_H
 
@@ -266,6 +317,9 @@
 
 /* Define to 1 if you have the <sys/mman.h> header file. */
 #undef HAVE_SYS_MMAN_H
+
+/* Define to 1 if you have the <sys/poll.h> header file. */
+#undef HAVE_SYS_POLL_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
@@ -296,6 +350,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `unlink' function. */
+#undef HAVE_UNLINK
 
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
@@ -388,6 +445,9 @@
 /* Use OpenSSL crypto library */
 #undef USE_CRYPTO
 
+/* Use libdl for dynamic library loading */
+#undef USE_LIBDL
+
 /* Use LZO compression library */
 #undef USE_LZO
 
@@ -396,6 +456,9 @@
 
 /* Use OpenSSL SSL library */
 #undef USE_SSL
+
+/* Use valgrind memory debugging library */
+#undef USE_VALGRIND
 
 /* Version number of package */
 #undef VERSION
@@ -409,9 +472,11 @@
 /* Some systems don't define in_addr_t */
 #undef in_addr_t
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
 #undef inline
+#endif
 
 /* Define to `long' if <sys/types.h> does not define. */
 #undef off_t
