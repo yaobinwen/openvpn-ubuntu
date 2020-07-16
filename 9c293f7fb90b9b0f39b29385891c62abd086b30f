@@ -1,0 +1,3 @@
+  * Updated debian_openssl_vulnkeys.patch to fix false vulnerable
+    key detection. (Closes: #483139).
+    Thanks a lot Kees Cook and Jamie Strandboge for working on this!
