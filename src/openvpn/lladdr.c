@@ -11,6 +11,8 @@
 #include "syshead.h"
 #include "error.h"
 #include "misc.h"
+#include "run_command.h"
+#include "lladdr.h"
 
 int
 set_lladdr(const char *ifname, const char *lladdr,
@@ -50,7 +52,7 @@ set_lladdr(const char *ifname, const char *lladdr,
                 "%s %s lladdr %s",
                 IFCONFIG_PATH,
                 ifname, lladdr);
-#elif defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
+#elif defined(TARGET_FREEBSD)
     argv_printf(&argv,
                 "%s %s ether %s",
                 IFCONFIG_PATH,
@@ -67,6 +69,6 @@ set_lladdr(const char *ifname, const char *lladdr,
         msg(M_INFO, "TUN/TAP link layer address set to %s", lladdr);
     }
 
-    argv_reset(&argv);
+    argv_free(&argv);
     return r;
 }
