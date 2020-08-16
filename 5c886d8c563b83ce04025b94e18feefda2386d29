@@ -1,0 +1,4 @@
+  * d/gbp.conf for experimental 2.5 branch
+  * New upstream version 2.5~beta1
+  * Adjust patches for new major upstream version
+  * Add python3-docutils to build-depends for manpage generation
