@@ -1,0 +1,3 @@
+  * Disable iproute2 support in favour of the new netlink based default.
+    Thanks to Fabio Pedretti
+  * Set Build-Conflicts: systemctl, see Bug#959828
