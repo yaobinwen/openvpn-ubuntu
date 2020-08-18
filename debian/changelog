@@ -1,3 +1,23 @@
+openvpn (2.4.9-3ubuntu1) groovy; urgency=medium
+
+  * Merge with Debian unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+    - d/p/openvpn-fips-2.4.patch: Allow MD5 for PRF in FIPS mode openssl.
+    - d/tests: add two DEP-8 test cases
+      + d/t/server-setup-with-static-key: test the OpenVPN server side setup
+        using a static key.
+      + d/t/server-setup-with-ca: test the OpenVPN server side setup using a
+        CA built with easy-rsa.
+    - d/openvpn*.service: Drop reload support from systemd unit files
+      (LP #1868127).  The current reload implementation (sending a SIGHUP
+      signal to the process) fails, and the difference between reload and
+      restart is not clear. Systemd does not require an implementation for
+      reload.
+
+ -- Lucas Kanashiro <kanashiro@ubuntu.com>  Tue, 18 Aug 2020 08:42:11 -0300
+
 openvpn (2.4.9-3) unstable; urgency=medium
 
   [ Jörg Frings-Fürst ]
