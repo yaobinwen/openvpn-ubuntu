@@ -1,0 +1,9 @@
+  * Release to unstable.
+  [ Lucas Kanashiro ]
+  * Add two DEP-8 test cases for the server side
+  * Drop reload support from systemd unit files (LP: #1868127)
+  * Add two DEP-8 test cases for the server side
+  * Drop reload support from systemd unit files (LP: #1868127)
+  [ Bernhard Schmidt ]
+  * Revert "d/gbp.conf for experimental 2.5 branch"
+  * New upstream version 2.5~beta3
