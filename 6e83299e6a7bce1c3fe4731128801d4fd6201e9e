@@ -1,0 +1,2 @@
+  * Downgrade debhelper-compat to 12 for easier backports
+  * New upstream version 2.5~rc2
