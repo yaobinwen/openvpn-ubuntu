@@ -6,11 +6,9 @@ Bug: https://community.openvpn.net/openvpn/ticket/725
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/1807439
 Author: Stephan Mueller <stephan.mueller@atsec.com>
 
-diff --git a/src/openvpn/crypto.c b/src/openvpn/crypto.c
-index 03e880e..25e8fc4 100644
 --- a/src/openvpn/crypto.c
 +++ b/src/openvpn/crypto.c
-@@ -876,7 +876,7 @@ init_key_ctx(struct key_ctx *ctx, struct key *key,
+@@ -849,7 +849,7 @@ init_key_ctx(struct key_ctx *ctx, const
      if (kt->digest && kt->hmac_length > 0)
      {
          ctx->hmac = hmac_ctx_new();
@@ -19,11 +17,9 @@ index 03e880e..25e8fc4 100644
  
          msg(D_HANDSHAKE,
              "%s: Using %d bit message hash '%s' for HMAC authentication",
-diff --git a/src/openvpn/crypto_backend.h b/src/openvpn/crypto_backend.h
-index b7f519b..8662600 100644
 --- a/src/openvpn/crypto_backend.h
 +++ b/src/openvpn/crypto_backend.h
-@@ -604,10 +604,11 @@ void hmac_ctx_free(hmac_ctx_t *ctx);
+@@ -634,10 +634,11 @@ void hmac_ctx_free(hmac_ctx_t *ctx);
   * @param key           The key to use for the HMAC
   * @param key_len       The key length to use
   * @param kt            Static message digest parameters
@@ -36,11 +32,9 @@ index b7f519b..8662600 100644
  
  /*
   * Free the given HMAC context.
-diff --git a/src/openvpn/crypto_mbedtls.c b/src/openvpn/crypto_mbedtls.c
-index 0cb7f81..d7f931d 100644
 --- a/src/openvpn/crypto_mbedtls.c
 +++ b/src/openvpn/crypto_mbedtls.c
-@@ -857,7 +857,7 @@ hmac_ctx_free(mbedtls_md_context_t *ctx)
+@@ -919,7 +919,7 @@ hmac_ctx_free(mbedtls_md_context_t *ctx)
  
  void
  hmac_ctx_init(mbedtls_md_context_t *ctx, const uint8_t *key, int key_len,
@@ -49,11 +43,9 @@ index 0cb7f81..d7f931d 100644
  {
      ASSERT(NULL != kt && NULL != ctx);
  
-diff --git a/src/openvpn/crypto_openssl.c b/src/openvpn/crypto_openssl.c
-index 9e8d3f3..d5302ae 100644
 --- a/src/openvpn/crypto_openssl.c
 +++ b/src/openvpn/crypto_openssl.c
-@@ -926,11 +926,17 @@ hmac_ctx_free(HMAC_CTX *ctx)
+@@ -1006,11 +1006,17 @@ hmac_ctx_free(HMAC_CTX *ctx)
  
  void
  hmac_ctx_init(HMAC_CTX *ctx, const uint8_t *key, int key_len,
@@ -72,11 +64,9 @@ index 9e8d3f3..d5302ae 100644
      HMAC_Init_ex(ctx, key, key_len, kt, NULL);
  
      /* make sure we used a big enough key */
-diff --git a/src/openvpn/ntlm.c b/src/openvpn/ntlm.c
-index 077fa3e..83585e2 100644
 --- a/src/openvpn/ntlm.c
 +++ b/src/openvpn/ntlm.c
-@@ -88,7 +88,7 @@ gen_hmac_md5(const uint8_t *data, int data_len, const uint8_t *key, int key_len,
+@@ -88,7 +88,7 @@ gen_hmac_md5(const uint8_t *data, int da
      const md_kt_t *md5_kt = md_kt_get("MD5");
      hmac_ctx_t *hmac_ctx = hmac_ctx_new();
  
@@ -85,13 +75,11 @@ index 077fa3e..83585e2 100644
      hmac_ctx_update(hmac_ctx, data, data_len);
      hmac_ctx_final(hmac_ctx, result);
      hmac_ctx_cleanup(hmac_ctx);
-diff --git a/src/openvpn/ssl.c b/src/openvpn/ssl.c
-index c0e1dd6..f929237 100644
 --- a/src/openvpn/ssl.c
 +++ b/src/openvpn/ssl.c
-@@ -1637,8 +1637,8 @@ tls1_P_hash(const md_kt_t *md_kt,
-     chunk = md_kt_size(md_kt);
-     A1_len = md_kt_size(md_kt);
+@@ -1632,8 +1632,8 @@ tls1_P_hash(const md_kt_t *md_kt,
+     int chunk = md_kt_size(md_kt);
+     unsigned int A1_len = md_kt_size(md_kt);
  
 -    hmac_ctx_init(ctx, sec, sec_len, md_kt);
 -    hmac_ctx_init(ctx_tmp, sec, sec_len, md_kt);
