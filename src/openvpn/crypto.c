@@ -849,7 +849,7 @@ init_key_ctx(struct key_ctx *ctx, const struct key *key,
     if (kt->digest && kt->hmac_length > 0)
     {
         ctx->hmac = hmac_ctx_new();
-        hmac_ctx_init(ctx->hmac, key->hmac, kt->hmac_length, kt->digest);
+        hmac_ctx_init(ctx->hmac, key->hmac, kt->hmac_length, kt->digest, 0);
 
         msg(D_HANDSHAKE,
             "%s: Using %d bit message hash '%s' for HMAC authentication",
