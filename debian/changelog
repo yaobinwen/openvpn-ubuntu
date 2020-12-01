@@ -5,6 +5,7 @@ openvpn (2.5.0-1ubuntu1) hirsute; urgency=medium
     - debian/openvpn@.service: Add '--script-security 2' similar to what
       got added to debian/openvpn.init.d ages ago (LP #1454725)
     - d/p/openvpn-fips-2.4.patch: Allow MD5 for PRF in FIPS mode openssl.
+      [updated to match 2.5.0]
   * Dropped changes [in Debian since 2.5~beta3-1]
     - d/tests: add two DEP-8 test cases
       + d/t/server-setup-with-static-key: test the OpenVPN server side setup
