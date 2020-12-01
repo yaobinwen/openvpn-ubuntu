@@ -44,7 +44,7 @@ openvpn (2.5~beta3-1) unstable; urgency=medium
 
   [ Lucas Kanashiro ]
   * Add two DEP-8 test cases for the server side
-  * Drop reload support from systemd unit files (LP: #1868127)
+  * Drop reload support from systemd unit files (LP 1868127)
 
   [ Bernhard Schmidt ]
   * Revert "d/gbp.conf for experimental 2.5 branch"
