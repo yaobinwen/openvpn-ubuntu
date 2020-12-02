@@ -17,6 +17,8 @@ openvpn (2.5.0-1ubuntu1) hirsute; urgency=medium
       signal to the process) fails, and the difference between reload and
       restart is not clear. Systemd does not require an implementation for
       reload.
+  * Added Changes:
+    - d/t/server-setup-*: adapt tests to output of v2.5.0
 
  -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 01 Dec 2020 16:15:12 +0100
 
