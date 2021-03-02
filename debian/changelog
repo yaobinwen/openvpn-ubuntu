@@ -1,3 +1,14 @@
+openvpn (2.5.1-1ubuntu1) hirsute; urgency=medium
+
+  * Merge with Debian unstable (LP: #1917438). Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+    - d/p/openvpn-fips-2.4.patch: Allow MD5 for PRF in FIPS mode openssl.
+      + d/t/server-setup-*: adapt tests to output of v2.5.0
+
+ -- Utkarsh Gupta <utkarsh.gupta@canonical.com>  Tue, 02 Mar 2021 16:35:37 +0530
+
 openvpn (2.5.1-1) unstable; urgency=medium
 
   * New upstream version 2.5.1 (bugfix release)
