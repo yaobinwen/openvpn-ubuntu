@@ -2270,7 +2270,7 @@ push_peer_info(struct buffer *buf, struct tls_session *session)
         buf_printf(&out, "IV_PLAT=mac\n");
 #elif defined(TARGET_NETBSD)
         buf_printf(&out, "IV_PLAT=netbsd\n");
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
         buf_printf(&out, "IV_PLAT=freebsd\n");
 #elif defined(TARGET_ANDROID)
         buf_printf(&out, "IV_PLAT=android\n");
