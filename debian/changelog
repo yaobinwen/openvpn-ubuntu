@@ -1,3 +1,24 @@
+openvpn (2.5.1-1ubuntu1.1) hirsute-security; urgency=medium
+
+  * SECURITY UPDATE: Authentication bypass with deferred authentication
+    - debian/patches/CVE-2020-15078-pre1.patch: move context_auth from
+      context_2 to tls_multi and name it multi_state in
+      src/openvpn/forward.c, src/openvpn/multi.c, src/openvpn/openvpn.h,
+      src/openvpn/push.c, src/openvpn/ssl_common.h.
+    - debian/patches/CVE-2020-15078-pre2.patch: fix condition to generate
+      session keys in src/openvpn/ssl.c.
+    - debian/patches/CVE-2020-15078-1.patch: move auth_token_state from
+      multi to key_state in src/openvpn/auth_token.c,
+      src/openvpn/ssl_common.h, src/openvpn/ssl_verify.c,
+      tests/unit_tests/openvpn/test_auth_token.c.
+    - debian/patches/CVE-2020-15078-2.patch: ensure auth-token is only sent
+      on a fully authenticated session in src/openvpn/ssl_verify.c.
+    - debian/patches/CVE-2020-15078-3.patch: ensure key state is
+      authenticated before sending push reply in src/openvpn/push.c.
+    - CVE-2020-15078
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 27 Apr 2021 10:03:40 -0400
+
 openvpn (2.5.1-1ubuntu1) hirsute; urgency=medium
 
   * Merge with Debian unstable (LP: #1917438). Remaining changes:
