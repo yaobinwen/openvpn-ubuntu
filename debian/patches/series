@@ -8,3 +8,4 @@ spelling_errors.patch
 systemd.patch
 fix-openssl-error.patch
 openvpn-fips-2.4.patch
+CVE-2020-15078.patch

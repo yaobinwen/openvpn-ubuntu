@@ -1,3 +1,12 @@
+openvpn (2.4.9-3ubuntu1.1) groovy-security; urgency=medium
+
+  * SECURITY UPDATE: Authentication bypass with deferred authentication
+    - debian/patches/CVE-2020-15078.patch: ensure key state is
+      authenticated before sending push reply in src/openvpn/push.c.
+    - CVE-2020-15078
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 27 Apr 2021 10:49:50 -0400
+
 openvpn (2.4.9-3ubuntu1) groovy; urgency=medium
 
   * Merge with Debian unstable. Remaining changes:
