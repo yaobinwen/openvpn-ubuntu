@@ -857,7 +857,7 @@ hmac_ctx_free(mbedtls_md_context_t *ctx)
 
 void
 hmac_ctx_init(mbedtls_md_context_t *ctx, const uint8_t *key, int key_len,
-              const mbedtls_md_info_t *kt)
+              const mbedtls_md_info_t *kt, bool prf_use)
 {
     ASSERT(NULL != kt && NULL != ctx);
 
