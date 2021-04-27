@@ -6,3 +6,5 @@ kfreebsd_support.patch
 match-manpage-and-command-help.patch
 openvpn-fips-2.4.patch
 lp-1828771-CapabilityBoundingSet-for-auth_pam.patch
+CVE-2020-11810.patch
+CVE-2020-15078.patch
