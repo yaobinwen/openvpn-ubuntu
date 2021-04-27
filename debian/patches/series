@@ -6,3 +6,8 @@ openvpn-pkcs11warn.patch
 match-manpage-and-command-help.patch
 systemd.patch
 openvpn-fips-2.4.patch
+CVE-2020-15078-pre1.patch
+CVE-2020-15078-pre2.patch
+CVE-2020-15078-1.patch
+CVE-2020-15078-2.patch
+CVE-2020-15078-3.patch
