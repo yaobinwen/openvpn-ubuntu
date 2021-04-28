@@ -7,3 +7,6 @@ match-manpage-and-command-help.patch
 spelling_errors.patch
 systemd.patch
 fix-pkcs11-helper-hang.patch
+CVE-2020-11810.patch
+CVE-2020-15078.patch
+increase-tcp-backlog.patch
