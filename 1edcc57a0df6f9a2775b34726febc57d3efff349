@@ -1,0 +1,9 @@
+  * SECURITY UPDATE: Pre-authentication remote crash/information disclosure
+    for clients
+    - debian/patches/CVE-2017-7520.patch: prevent two kinds of stack buffer
+      OOB reads and a crash for invalid input data in src/openvpn/ntlm.c.
+    - CVE-2017-7520
+  * SECURITY UPDATE: DoS in establish_http_proxy_passthru()
+    - debian/patches/establish_http_proxy_passthru_dos.patch: fix
+      null-pointer dereference in src/openvpn/proxy.c.
+    - NO CVE number
