@@ -1,0 +1,8 @@
+  * SECURITY UPDATE: data channel v2 packet injection
+    - debian/patches/CVE-2020-11810.patch: fix illegal client float in
+      src/openvpn/multi.c.
+    - CVE-2020-11810
+  * SECURITY UPDATE: Authentication bypass with deferred authentication
+    - debian/patches/CVE-2020-15078.patch: ensure key state is
+      authenticated before sending push reply in src/openvpn/push.c.
+    - CVE-2020-15078
