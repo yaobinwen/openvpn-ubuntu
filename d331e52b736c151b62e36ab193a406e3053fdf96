@@ -1,0 +1,4 @@
+  * Fix autopkgtest (Closes: #983662)
+    - adapt autopkgtest output to 2.5 (from Ubuntu)
+    - Fix easyrsa batch mode invocation
+  * Cherry-Pick "Fix condition to generate session keys" (Closes: #988478)
