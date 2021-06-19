@@ -1,0 +1,3 @@
+  * Cherry-Pick upstream patches for CVE-2020-11810 and CVE-2020-15078
+    (Closes: #987380)
+  * Cherry-Pick upstream fix to increase TCP socket backlog (Closes: #968942)
