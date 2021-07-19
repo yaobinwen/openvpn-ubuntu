@@ -1,0 +1,51 @@
+From 6d8380c78bf77766454b93b49ab2ebf713b0be48 Mon Sep 17 00:00:00 2001
+From: Gert Doering <gert@greenie.muc.de>
+Date: Thu, 15 Aug 2019 17:53:19 +0200
+Subject: [PATCH] Increase listen() backlog queue to 32
+
+For reasons historically unknown, OpenVPN sets the listen() backlog
+queue to "1", which signals the kernel "while there is one TCP connect
+waiting for OpenVPN to handle it, refuse all others" - which, on
+restarting a busy TCP server, will create connection issues.
+
+The exact "best" value of the backlog queue is subject of discussion,
+but for a server that is not extremely busy with many connections
+coming in in parallel, there is no real difference between "10" or "500",
+as long as it's "more than 1".
+
+Found and debugged by "mjo" in Trac.
+
+Trac: #1208
+
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+Acked-by: Antonio Quartulli <antonio@openvpn.net>
+Acked-by: David Sommerseth <davids@openvpn.net>
+Message-Id: <20190815155319.28249-1-gert@greenie.muc.de>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg18758.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+
+Origin: upstream, https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg18758.html
+Bug: https://community.openvpn.net/openvpn/ticket/1208
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=968942
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/1934781
+Last-Update: 2021-07-19
+---
+ src/openvpn/socket.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/openvpn/socket.c b/src/openvpn/socket.c
+index c472cf1b..983ed38a 100644
+--- a/src/openvpn/socket.c
++++ b/src/openvpn/socket.c
+@@ -1175,7 +1175,7 @@ socket_do_listen(socket_descriptor_t sd,
+         ASSERT(local);
+         msg(M_INFO, "Listening for incoming TCP connection on %s",
+             print_sockaddr(local->ai_addr, &gc));
+-        if (listen(sd, 1))
++        if (listen(sd, 32))
+         {
+             msg(M_ERR, "TCP: listen() failed");
+         }
+-- 
+2.25.1
+

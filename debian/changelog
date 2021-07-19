@@ -1,3 +1,10 @@
+openvpn (2.4.4-2ubuntu1.6) bionic; urgency=medium
+
+  * d/p/increase-listen-backlog-queue-to-32.patch: Increase listen backlog queue
+    to 32 (LP: #1934781)
+
+ -- Athos Ribeiro <athos.ribeiro@canonical.com>  Mon, 19 Jul 2021 19:53:26 -0300
+
 openvpn (2.4.4-2ubuntu1.5) bionic-security; urgency=medium
 
   * SECURITY UPDATE: data channel v2 packet injection

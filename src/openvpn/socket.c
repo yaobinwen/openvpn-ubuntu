@@ -1054,7 +1054,7 @@ socket_do_listen(socket_descriptor_t sd,
         ASSERT(local);
         msg(M_INFO, "Listening for incoming TCP connection on %s",
             print_sockaddr(local->ai_addr, &gc));
-        if (listen(sd, 1))
+        if (listen(sd, 32))
         {
             msg(M_ERR, "TCP: listen() failed");
         }
