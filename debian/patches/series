@@ -10,3 +10,4 @@ fix-pkcs11-helper-hang.patch
 openvpn-fips-2.4.patch
 CVE-2020-11810.patch
 CVE-2020-15078.patch
+increase-listen-backlog-queue-to-32.patch
