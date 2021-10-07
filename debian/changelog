@@ -1,3 +1,9 @@
+openvpn (2.5.1-3ubuntu2) impish; urgency=medium
+
+  * No-change rebuild to build packages with zstd compression.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 07 Oct 2021 12:21:59 +0200
+
 openvpn (2.5.1-3ubuntu1) impish; urgency=medium
 
   * Merge with Debian unstable. Remaining changes:
