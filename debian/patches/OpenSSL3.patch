@@ -1,0 +1,73 @@
+From eb450c8f99cc668ff7dd0139d31e139bd9621176 Mon Sep 17 00:00:00 2001
+From: Simon Chopin <simon.chopin@canonical.com>
+Date: Thu, 18 Nov 2021 14:27:56 +0100
+Subject: [PATCH] OpenSSL3: load the legacy provider
+Forwarded: not-needed
+Origin: vendor
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/1945980
+
+Some algorithms still supported by the 2.5 branch of OpenVPN have been
+moved to the "legacy" provider of OpenSSL 3.0. This temporary patch
+explicitly loads said provider in order not to break OpenVPN.
+
+This patch can probably be dropped when we reach the 2.6 branch
+upstream.
+
+---
+ src/openvpn/crypto_openssl.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/src/openvpn/crypto_openssl.c b/src/openvpn/crypto_openssl.c
+index 79fbab40..b3987e20 100644
+--- a/src/openvpn/crypto_openssl.c
++++ b/src/openvpn/crypto_openssl.c
+@@ -51,6 +51,10 @@
+ #include <openssl/rand.h>
+ #include <openssl/ssl.h>
+ 
++#if OPENSSL_VERSION_NUMBER >= 0x30000000L
++#include <openssl/provider.h>
++#endif
++
+ /*
+  * Check for key size creepage.
+  */
+@@ -147,6 +151,11 @@ crypto_init_lib_engine(const char *engine_name)
+  *
+  */
+ 
++#if OPENSSL_VERSION_NUMBER >= 0x30000000L
++static OSSL_PROVIDER *legacy_provider;
++static OSSL_PROVIDER *deflt_provider;
++#endif
++
+ void
+ crypto_init_lib(void)
+ {
+@@ -166,11 +175,23 @@ crypto_init_lib(void)
+ #ifdef CRYPTO_MDEBUG
+     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+ #endif
++
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++    legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
++    ASSERT(legacy_provider);
++    deflt_provider = OSSL_PROVIDER_load(NULL, "default");
++    ASSERT(deflt_provider);
++#endif
+ }
+ 
+ void
+ crypto_uninit_lib(void)
+ {
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++    OSSL_PROVIDER_unload(deflt_provider);
++    OSSL_PROVIDER_unload(legacy_provider);
++#endif
++
+ #ifdef CRYPTO_MDEBUG
+     FILE *fp = fopen("sdlog", "w");
+     ASSERT(fp);
+-- 
+2.32.0
+
