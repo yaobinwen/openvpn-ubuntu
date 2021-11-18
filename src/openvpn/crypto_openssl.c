@@ -51,6 +51,10 @@
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/provider.h>
+#endif
+
 /*
  * Check for key size creepage.
  */
@@ -147,6 +151,11 @@ crypto_init_lib_engine(const char *engine_name)
  *
  */
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+static OSSL_PROVIDER *legacy_provider;
+static OSSL_PROVIDER *deflt_provider;
+#endif
+
 void
 crypto_init_lib(void)
 {
@@ -164,11 +173,23 @@ crypto_init_lib(void)
 #ifdef CRYPTO_MDEBUG
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
 #endif
+
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
+    ASSERT(legacy_provider);
+    deflt_provider = OSSL_PROVIDER_load(NULL, "default");
+    ASSERT(deflt_provider);
+#endif
 }
 
 void
 crypto_uninit_lib(void)
 {
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    OSSL_PROVIDER_unload(deflt_provider);
+    OSSL_PROVIDER_unload(legacy_provider);
+#endif
+
 #ifdef CRYPTO_MDEBUG
     FILE *fp = fopen("sdlog", "w");
     ASSERT(fp);
