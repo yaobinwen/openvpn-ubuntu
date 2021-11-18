@@ -1,3 +1,10 @@
+openvpn (2.5.1-3ubuntu4) jammy; urgency=medium
+
+  * d/p/OpenSSL3.patch: work around the deprecated algorithm mismatch between
+    the OpenSSL3 branch and the OpenVPN 2.5 branch (LP: #1945980)
+
+ -- Simon Chopin <simon.chopin@canonical.com>  Thu, 18 Nov 2021 15:05:21 +0100
+
 openvpn (2.5.1-3ubuntu3) jammy; urgency=medium
 
   * No-change rebuild against openssl3
