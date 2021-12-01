@@ -1,0 +1,2 @@
+  * d/p/OpenSSL3.patch: work around the deprecated algorithm mismatch between
+    the OpenSSL3 branch and the OpenVPN 2.5 branch (LP: #1945980)
