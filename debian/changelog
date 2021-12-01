@@ -1,3 +1,9 @@
+openvpn (2.5.1-3ubuntu3) jammy; urgency=medium
+
+  * No-change rebuild against openssl3
+
+ -- Simon Chopin <simon.chopin@canonical.com>  Wed, 01 Dec 2021 16:09:52 +0000
+
 openvpn (2.5.1-3ubuntu2) impish; urgency=medium
 
   * No-change rebuild to build packages with zstd compression.
