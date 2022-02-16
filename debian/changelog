@@ -1,3 +1,9 @@
+openvpn (2.5.1-3ubuntu5) jammy; urgency=medium
+
+  * No-change rebuild to update maintainer scripts, see LP: 1959054
+
+ -- Dave Jones <dave.jones@canonical.com>  Wed, 16 Feb 2022 17:16:30 +0000
+
 openvpn (2.5.1-3ubuntu4) jammy; urgency=medium
 
   * d/p/OpenSSL3.patch: work around the deprecated algorithm mismatch between
