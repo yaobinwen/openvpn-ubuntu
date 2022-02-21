@@ -5,9 +5,9 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2018 OpenVPN Inc <sales@openvpn.net>
- *  Copyright (C) 2010-2018 Fox Crypto B.V. <openvpn@fox-it.com>
- *  Copyright (C) 2008-2013 David Sommerseth <dazo@users.sourceforge.net>
+ *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
+ *  Copyright (C) 2008-2021 David Sommerseth <dazo@eurephia.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -445,6 +445,12 @@ ssl_set_auth_token(const char *token)
     set_auth_token(&auth_user_pass, &auth_token, token);
 }
 
+void
+ssl_set_auth_token_user(const char *username)
+{
+    set_auth_token_user(&auth_token, username);
+}
+
 /*
  * Cleans an auth token and checks if it was active
  */
@@ -558,7 +564,15 @@ tls_ctx_reload_crl(struct tls_root_ctx *ssl_ctx, const char *crl_file,
     }
     else if (platform_stat(crl_file, &crl_stat) < 0)
     {
-        msg(M_WARN, "WARNING: Failed to stat CRL file, not (re)loading CRL.");
+        /* If crl_last_mtime is zero, the CRL file has not been read before. */
+        if (ssl_ctx->crl_last_mtime == 0)
+        {
+            msg(M_FATAL, "ERROR: Failed to stat CRL file during initialization, exiting.");
+        }
+        else
+        {
+            msg(M_WARN, "WARNING: Failed to stat CRL file, not reloading CRL.");
+        }
         return;
     }
 
@@ -583,7 +597,7 @@ tls_ctx_reload_crl(struct tls_root_ctx *ssl_ctx, const char *crl_file,
  * All files are in PEM format.
  */
 void
-init_ssl(const struct options *options, struct tls_root_ctx *new_ctx)
+init_ssl(const struct options *options, struct tls_root_ctx *new_ctx, bool in_chroot)
 {
     ASSERT(NULL != new_ctx);
 
@@ -701,7 +715,24 @@ init_ssl(const struct options *options, struct tls_root_ctx *new_ctx)
     /* Read CRL */
     if (options->crl_file && !(options->ssl_flags & SSLF_CRL_VERIFY_DIR))
     {
-        tls_ctx_reload_crl(new_ctx, options->crl_file, options->crl_file_inline);
+        /* If we're running with the chroot option, we may run init_ssl() before
+         * and after chroot-ing. We can use the crl_file path as-is if we're
+         * not going to chroot, or if we already are inside the chroot.
+         *
+         * If we're going to chroot later, we need to prefix the path of the
+         * chroot directory to crl_file.
+         */
+        if (!options->chroot_dir || in_chroot || options->crl_file_inline)
+        {
+            tls_ctx_reload_crl(new_ctx, options->crl_file, options->crl_file_inline);
+        }
+        else
+        {
+            struct gc_arena gc = gc_new();
+            struct buffer crl_file_buf = prepend_dir(options->chroot_dir, options->crl_file, &gc);
+            tls_ctx_reload_crl(new_ctx, BSTR(&crl_file_buf), options->crl_file_inline);
+            gc_free(&gc);
+        }
     }
 
     /* Once keys and cert are loaded, load ECDH parameters */
@@ -2328,8 +2359,8 @@ key_method_2_write(struct buffer *buf, struct tls_multi *multi,
         }
     }
 
-    /* write username/password if specified */
-    if (auth_user_pass_enabled)
+    /* write username/password if specified or we are using a auth-token */
+    if (auth_user_pass_enabled || (auth_token.token_defined && auth_token.defined))
     {
 #ifdef ENABLE_MANAGEMENT
         auth_user_pass_setup(session->opt->auth_user_pass_file, session->opt->sci);
@@ -2342,7 +2373,7 @@ key_method_2_write(struct buffer *buf, struct tls_multi *multi,
          * If we have a valid auth-token, send that instead of real
          * username/password
          */
-        if (auth_token.defined)
+        if (auth_token.token_defined && auth_token.defined)
         {
             up = &auth_token;
         }
