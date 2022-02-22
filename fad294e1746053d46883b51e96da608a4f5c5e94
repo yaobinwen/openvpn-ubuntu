@@ -1,0 +1,9 @@
+  [ Jörg Frings-Fürst ]
+  * New upstream version 2.5.5
+  * Declare compliance with Debian Policy 4.6.0.1
+  * d/copyright:
+    - Remove duplicate entries;
+    - Refresh for new upstream release
+    - Add 2021 to myself
+  [ Bernhard Schmidt ]
+  * Refresh patches for new upstream version
