@@ -6,3 +6,4 @@ openvpn-pkcs11warn.patch
 match-manpage-and-command-help.patch
 systemd.patch
 openvpn-fips-2.4.patch
+OpenSSL3.patch
