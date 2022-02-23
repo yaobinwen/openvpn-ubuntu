@@ -55,6 +55,10 @@
 #error Windows build with OPENSSL_NO_EC: disabling EC key is not supported.
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/provider.h>
+#endif
+
 /*
  * Check for key size creepage.
  */
@@ -151,6 +155,11 @@ crypto_init_lib_engine(const char *engine_name)
  *
  */
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+static OSSL_PROVIDER *legacy_provider;
+static OSSL_PROVIDER *deflt_provider;
+#endif
+
 void
 crypto_init_lib(void)
 {
@@ -168,11 +177,23 @@ crypto_init_lib(void)
 #ifdef CRYPTO_MDEBUG
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
 #endif
+
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
+    ASSERT(legacy_provider);
+    deflt_provider = OSSL_PROVIDER_load(NULL, "default");
+    ASSERT(deflt_provider);
+#endif
 }
 
 void
 crypto_uninit_lib(void)
 {
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    OSSL_PROVIDER_unload(deflt_provider);
+    OSSL_PROVIDER_unload(legacy_provider);
+#endif
+
 #ifdef CRYPTO_MDEBUG
     FILE *fp = fopen("sdlog", "w");
     ASSERT(fp);
@@ -1010,11 +1031,17 @@ hmac_ctx_free(HMAC_CTX *ctx)
 
 void
 hmac_ctx_init(HMAC_CTX *ctx, const uint8_t *key, int key_len,
-              const EVP_MD *kt)
+              const EVP_MD *kt, bool prf_use)
 {
     ASSERT(NULL != kt && NULL != ctx);
 
     HMAC_CTX_reset(ctx);
+
+   /* FIPS 140-2 explicitly allows MD5 for the use in PRF although it is not
+    * to be used anywhere else */
+    if(kt == EVP_md5() && prf_use)
+       HMAC_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+
     HMAC_Init_ex(ctx, key, key_len, kt, NULL);
 
     /* make sure we used a big enough key */
