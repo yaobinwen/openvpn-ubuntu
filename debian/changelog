@@ -1,3 +1,10 @@
+openvpn (2.5.5-1ubuntu3) jammy; urgency=medium
+
+  * debian/patches/CVE-2022-0547.patch: updated to properly patch actual
+    manpage file in doc/openvpn.8.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 22 Mar 2022 13:22:27 -0400
+
 openvpn (2.5.5-1ubuntu2) jammy; urgency=medium
 
   * SECURITY UPDATE: authentication bypass via multiple deferred
