@@ -1,3 +1,13 @@
+openvpn (2.5.1-3ubuntu1.1) impish-security; urgency=medium
+
+  * SECURITY UPDATE: authentication bypass via multiple deferred
+    authentication plug-ins
+    - debian/patches/CVE-2022-0547.patch: disallow multiple deferred
+      authentication plug-ins in doc/openvpn.8, src/openvpn/plugin.c.
+    - CVE-2022-0547
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 22 Mar 2022 10:40:24 -0400
+
 openvpn (2.5.1-3ubuntu1) impish; urgency=medium
 
   * Merge with Debian unstable. Remaining changes:
