@@ -2764,6 +2764,17 @@ function (such as tls\-verify, auth\-user\-pass\-verify, or
 client\-connect), then
 every module and script must return success (0) in order for
 the connection to be authenticated.
+
+.B \fBWARNING\fP:
+.in +4
+Plug\-ins may do deferred execution, meaning the plug\-in will
+return the control back to the main OpenVPN process and provide
+the plug\-in result later on via a different thread or process.
+OpenVPN does \fBNOT\fP support multiple authentication plug\-ins
+\fBwhere more than one plugin\fP tries to do deferred authentication.
+If this behaviour is detected, OpenVPN will shut down upon first
+authentication.
+.in -4
 .\"*********************************************************
 .TP
 .B \-\-keying\-material\-exporter label len
