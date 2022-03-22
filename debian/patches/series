@@ -11,3 +11,4 @@ openvpn-fips-2.4.patch
 CVE-2020-11810.patch
 CVE-2020-15078.patch
 increase-listen-backlog-queue-to-32.patch
+CVE-2022-0547.patch

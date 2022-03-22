@@ -1,3 +1,13 @@
+openvpn (2.4.7-1ubuntu2.20.04.4) focal-security; urgency=medium
+
+  * SECURITY UPDATE: authentication bypass via multiple deferred
+    authentication plug-ins
+    - debian/patches/CVE-2022-0547.patch: disallow multiple deferred
+      authentication plug-ins in doc/openvpn.8, src/openvpn/plugin.c.
+    - CVE-2022-0547
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 22 Mar 2022 10:40:54 -0400
+
 openvpn (2.4.7-1ubuntu2.20.04.3) focal; urgency=medium
 
   * d/p/increase-listen-backlog-queue-to-32.patch: Increase listen backlog queue
