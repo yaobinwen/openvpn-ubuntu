@@ -1,0 +1,6 @@
+  * SECURITY UPDATE: authentication bypass via multiple deferred
+    authentication plug-ins
+    - debian/patches/CVE-2022-0547.patch: disallow multiple deferred
+      authentication plug-ins in doc/man-sections/plugin-options.rst,
+      src/openvpn/plugin.c.
+    - CVE-2022-0547
