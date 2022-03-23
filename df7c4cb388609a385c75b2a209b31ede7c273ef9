@@ -1,0 +1,2 @@
+  * debian/patches/CVE-2022-0547.patch: updated to properly patch actual
+    manpage file in doc/openvpn.8.
