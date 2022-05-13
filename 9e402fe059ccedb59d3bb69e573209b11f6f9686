@@ -1,0 +1,5 @@
+  * New upstream version 2.6.0~git20220510+dco
+  * Suggest openvpn-dco-dkms
+  * Drop iproute2, linux builds use netlink
+  * Limit libnl-genl-3-dev build-dep (for dco) to linux-any
+  * Build against OpenSSL 3.0
