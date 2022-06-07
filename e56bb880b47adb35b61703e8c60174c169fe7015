@@ -1,0 +1,11 @@
+  * Merge from Debian unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+  * Drop changes fixed in new upstream release:
+    - d/p/openvpn-fips-2.4.patch: Allow MD5 for PRF in FIPS mode openssl.
+    - d/p/OpenSSL3.patch: work around the deprecated algorithm mismatch between
+      the OpenSSL3 branch and the OpenVPN 2.5 branch (LP #1945980)
+    - debian/patches/CVE-2022-0547.patch: disallow multiple deferred
+      authentication plug-ins in doc/man-sections/plugin-options.rst,
+      src/openvpn/plugin.c.
