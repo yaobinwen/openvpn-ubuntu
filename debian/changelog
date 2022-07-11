@@ -1,3 +1,17 @@
+openvpn (2.6.0~git20220518+dco-2ubuntu2) kinetic; urgency=medium
+
+  * d/t/server-setup-with-static-key: set cipher to be DES-EDE3-CBC. The
+    default BF-CBC is deprecated, also CAST and RC2. For more information
+    check the upstream documentation.
+  * d/t/server-setup-with-static-key: use 'secret' instead of '--secret' when
+    generating a key to fix a deprecation warning.
+  * d/t/server-setup-with-*: use 'set -x' in the test scripts. This will
+    facilitate future debugging.
+  * d/p/openssl-3-support.patch: Translate OpenSSL 3.0 digest names to OpenSSL
+    1.1 digest names (LP: #1975574).
+
+ -- Lucas Kanashiro <kanashiro@ubuntu.com>  Mon, 11 Jul 2022 17:56:18 -0300
+
 openvpn (2.6.0~git20220518+dco-2ubuntu1) kinetic; urgency=low
 
   * Merge from Debian unstable. Remaining changes:
