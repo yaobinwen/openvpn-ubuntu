@@ -1,0 +1,44 @@
+From 1f54811e92c89fe07d7cea8339e928980bfe0536 Mon Sep 17 00:00:00 2001
+From: Arne Schwabe <arne@rfc2549.org>
+Date: Tue, 19 Oct 2021 20:31:22 +0200
+Subject: [PATCH] Add message when decoding PKCS12 file fails.
+
+Currently we never display the OpenSSL error stack when decoding a
+PCKS12 file fails. With LibreSSL defaulting to RC2-40-CBC, the failure
+might not be a wrong password but can actually be an unsupported encoding,
+seeing the error stack is really helpful (example from OpenSSL 3.0):
+
+error:0308010C:digital envelope routines:inner_evp_generic_fetch:
+  unsupported:crypto/evp/evp_fetch.c:346:Global default library
+  context, Algorithm (RC2-40-CBC : 0), Properties ()
+
+to pinpoint the issue
+
+Signed-off-by: Arne Schwabe <arne@rfc2549.org>
+Acked-by: Gert Doering <gert@greenie.muc.de>
+Message-Id: <20211019183127.614175-17-arne@rfc2549.org>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg23017.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+(cherry picked from commit 6ac4e63c577986ec11eae3519fe8516e8ca8ac0f)
+
+Origin: upstream, https://github.com/OpenVPN/openvpn/commit/1f54811e92c89fe07d7cea
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/1975574
+Reviewed-By: Lucas Kanashiro <kanashiro@ubuntu.com>
+Last-Update: 2022-07-14
+---
+ src/openvpn/ssl_openssl.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/openvpn/ssl_openssl.c b/src/openvpn/ssl_openssl.c
+index 016331897f..e0360f75b9 100644
+--- a/src/openvpn/ssl_openssl.c
++++ b/src/openvpn/ssl_openssl.c
+@@ -825,6 +825,8 @@ tls_ctx_load_pkcs12(struct tls_root_ctx *ctx, const char *pkcs12_file,
+         ca = NULL;
+         if (!PKCS12_parse(p12, password, &pkey, &cert, &ca))
+         {
++            crypto_msg(M_WARN, "Decoding PKCS12 failed. Probably wrong password "
++                               "or unsupported/legacy encryption");
+ #ifdef ENABLE_MANAGEMENT
+             if (management && (ERR_GET_REASON(ERR_peek_error()) == PKCS12_R_MAC_VERIFY_FAILURE))
+             {
