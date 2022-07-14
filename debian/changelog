@@ -1,3 +1,10 @@
+openvpn (2.6.0~git20220518+dco-2ubuntu3) kinetic; urgency=medium
+
+  * d/t/control: add allow-stderr restriction. With 'set -x' in place some
+    messages are printed out in stderr.
+
+ -- Lucas Kanashiro <kanashiro@ubuntu.com>  Thu, 14 Jul 2022 11:47:23 -0300
+
 openvpn (2.6.0~git20220518+dco-2ubuntu2) kinetic; urgency=medium
 
   * d/t/server-setup-with-static-key: set cipher to be DES-EDE3-CBC. The
