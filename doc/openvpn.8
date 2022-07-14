@@ -6083,6 +6083,19 @@ the return code of the module/script controls an authentication function
 (such as tls\-verify, auth\-user\-pass\-verify, or client\-connect), then
 every module and script must return success (\fB0\fP) in order for the
 connection to be authenticated.
+
+.INDENT 7.0
+.TP
+.B \fBWARNING\fP:
+Plug\-ins may do deferred execution, meaning the plug\-in will
+return the control back to the main OpenVPN process and provide
+the plug\-in result later on via a different thread or process.
+OpenVPN does \fBNOT\fP support multiple authentication plug\-ins
+\fBwhere more than one plugin\fP tries to do deferred authentication.
+If this behaviour is detected, OpenVPN will shut down upon first
+authentication.
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .SS Windows\-Specific Options
 .INDENT 0.0
