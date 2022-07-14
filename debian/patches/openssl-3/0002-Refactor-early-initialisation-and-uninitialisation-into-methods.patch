@@ -1,0 +1,71 @@
+From 3f25bf7f7c1f32c2d3ef5b52443c97553a6c8977 Mon Sep 17 00:00:00 2001
+From: Arne Schwabe <arne@rfc2549.org>
+Date: Thu, 12 May 2022 14:14:23 +0200
+Subject: [PATCH] Refactor early initialisation and uninitialisation into
+ methods
+
+This put the early initialisation and uninitialisation that needs to
+happen between option parsing and post processing into small methods.
+
+Cherry-pick of 97056dbf9 as prerequirement for the provider patch
+
+Signed-off-by: Arne Schwabe <arne@rfc2549.org>
+Acked-by: Gert Doering <gert@greenie.muc.de>
+Message-Id: <20220512121429.2096164-2-arne@rfc2549.org>
+URL: https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg24328.html
+Signed-off-by: Gert Doering <gert@greenie.muc.de>
+
+Origin: upstream, https://github.com/OpenVPN/openvpn/commit/3f25bf7f7c1f32c2d3ef
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/1975574
+Reviewed-By: Lucas Kanashiro <kanashiro@ubuntu.com>
+Last-Update: 2022-07-14
+---
+ src/openvpn/openvpn.c | 23 ++++++++++++++++++-----
+ 1 file changed, 18 insertions(+), 5 deletions(-)
+
+--- a/src/openvpn/openvpn.c
++++ b/src/openvpn/openvpn.c
+@@ -105,6 +105,20 @@
+ 
+ #undef PROCESS_SIGNAL_P2P
+ 
++void init_early(struct context *c)
++{
++    net_ctx_init(c, &c->net_ctx);
++
++    /* init verbosity and mute levels */
++    init_verb_mute(c, IVM_LEVEL_1);
++
++}
++
++static void uninit_early(struct context *c)
++{
++    net_ctx_free(&c->net_ctx);
++}
++
+ 
+ /**************************************************************************/
+ /**
+@@ -193,10 +207,9 @@
+             open_plugins(&c, true, OPENVPN_PLUGIN_INIT_PRE_CONFIG_PARSE);
+ #endif
+ 
+-            net_ctx_init(&c, &c.net_ctx);
+-
+-            /* init verbosity and mute levels */
+-            init_verb_mute(&c, IVM_LEVEL_1);
++            /* Early initialisation that need to happen before option
++             * post processing and other early startup but after parsing */
++            init_early(&c);
+ 
+             /* set dev options */
+             init_options_dev(&c.options);
+@@ -308,7 +321,7 @@
+             env_set_destroy(c.es);
+             uninit_options(&c.options);
+             gc_reset(&c.gc);
+-            net_ctx_free(&c.net_ctx);
++            uninit_early(&c);
+         }
+         while (c.sig->signal_received == SIGHUP);
+     }

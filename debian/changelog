@@ -1,3 +1,10 @@
+openvpn (2.5.5-1ubuntu3.1) jammy; urgency=medium
+
+  * d/p/openssl-3/*.patch: backport upstream patch set to better support
+    OpenSSL 3 (LP: #1975574)
+
+ -- Lucas Kanashiro <kanashiro@ubuntu.com>  Thu, 14 Jul 2022 11:21:14 -0300
+
 openvpn (2.5.5-1ubuntu3) jammy; urgency=medium
 
   * debian/patches/CVE-2022-0547.patch: updated to properly patch actual
