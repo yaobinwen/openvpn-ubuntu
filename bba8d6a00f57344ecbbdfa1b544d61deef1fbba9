@@ -1,0 +1,3 @@
+  * d/t/server-setup-with-ca:
+    - cherry-pick change in easy-rsa autopkgtests to remove conflicting
+      "vars" file.
