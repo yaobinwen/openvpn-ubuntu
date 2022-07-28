@@ -39,6 +39,7 @@ EOF
 
 info "Setup the CA and the server keys"
 ./easyrsa --batch init-pki
+rm vars
 ./easyrsa --batch build-ca nopass 2>/dev/null
 ./easyrsa --batch build-server-full server nopass 2>/dev/null
 ./easyrsa --batch gen-dh 2>/dev/null
