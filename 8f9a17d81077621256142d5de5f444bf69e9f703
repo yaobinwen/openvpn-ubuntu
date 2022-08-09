@@ -1,0 +1,8 @@
+  [ Gianfranco Costamagna ]
+  * d/t/server-setup-with-ca:
+    - cherry-pick change in easy-rsa autopkgtests to remove conflicting
+      "vars" file.
+  [ Bernhard Schmidt ]
+  * New upstream version 2.6.0~git20220808
+    - switch to master branch now that DCO support has been merged
+  * Drop OpenSSL 3.0 digest name patch applied upstream
