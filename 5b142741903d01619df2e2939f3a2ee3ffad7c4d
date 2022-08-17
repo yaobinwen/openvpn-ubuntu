@@ -1,0 +1,3 @@
+  * Cherry-Pick proposed upstream fix to disable DCO if unable to retain
+    capabilities, fixes network-manager-openvpn together with DCO
+    (Closes: #1017379)
