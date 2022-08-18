@@ -1,0 +1,3 @@
+  * New upstream version 2.6.0~git20220818
+  * Only depend on libcap-ng-dev on Linux
+  * Drop d/p/disable-dco-without-necessary-capabilities applied upstream
