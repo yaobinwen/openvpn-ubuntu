@@ -1,0 +1,2 @@
+  * d/p/openssl-3/*.patch: backport upstream patch set to better support
+    OpenSSL 3 (LP: #1975574)
