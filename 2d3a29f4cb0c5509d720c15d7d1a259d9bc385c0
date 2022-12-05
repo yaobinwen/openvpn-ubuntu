@@ -1,0 +1,4 @@
+  * New upstream version 2.6.0~git20221201, also known as 2.6_beta1
+  * Update d/NEWS to list known backwards compatibility issues
+  * Fix national encoding on d/po/{es,sv}.po
+  * Drop obsolete patches
