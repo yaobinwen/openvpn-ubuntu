@@ -1058,8 +1058,12 @@ link_socket_read(struct link_socket *sock,
                  struct buffer *buf,
                  struct link_socket_actual *from)
 {
+#ifdef _WIN32
     if (proto_is_udp(sock->info.proto)
         || sock->info.lsa->actual.dco_installed)
+#else
+    if (proto_is_udp(sock->info.proto))
+#endif
     /* unified UDPv4 and UDPv6, for DCO the kernel
      * will strip the length header */
     {
