@@ -1,0 +1,4 @@
+  * New upstream version 2.6.0~git20221222
+  * Import pending upstream fix for race conditions in DCO servers
+  * d/openvpn@.service: Replace LimitNPROC=100 with TasksMax=10
+    (see Bug#961923 for discussion)
