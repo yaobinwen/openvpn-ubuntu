@@ -52,8 +52,8 @@ msgid ""
 "If you choose this option, the /dev/net/tun device needed by OpenVPN will be "
 "created."
 msgstr ""
-"Si elije esta opción, se creará el dispositivo «/dev/net/tun» requerido por "
-"OpenVPN."
+"Si elije esta opción, se creará el dispositivo «/dev/net/tun» requerido "
+"por OpenVPN."
 
 #. Type: boolean
 #. Description
@@ -104,7 +104,8 @@ msgstr "No elija esta opción si está utilizando devfs."
 #~ msgstr ""
 #~ "Las versiones antiguas de openvpn arrancaban al mismo tiempo que otros\n"
 #~ "servicios. Esto significa que muchos de estos servicios no podían usar\n"
-#~ "openvpn puesto que éste podía no estar disponible cuando arrancaban. Las\n"
+#~ "openvpn puesto que éste podía no estar disponible cuando arrancaban. "
+#~ "Las\n"
 #~ "versiones recientes de openvpn arrancarán mucho antes. (es decir, un\n"
 #~ "enlace S18openvpn en rc[2345].d en vez de S20openvpn)"
 
@@ -139,7 +140,8 @@ msgstr "No elija esta opción si está utilizando devfs."
 #~ "reiniciara una vez que haya finalizado la actualización."
 
 #~ msgid "This option will take effect for the next upgrade."
-#~ msgstr "Esta opción tomará efecto a partir de la siguiente actualización."
+#~ msgstr ""
+#~ "Esta opción tomará efecto a partir de la siguiente actualización."
 
 #~ msgid "Default port has changed"
 #~ msgstr "El puerto predeterminado ha cambiado"
