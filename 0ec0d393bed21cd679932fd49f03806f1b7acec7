@@ -1,0 +1,2 @@
+  * New upstream version 2.6.0~rc2
+  * Add upstream pending patch to work around dco netlink buffer overflow
