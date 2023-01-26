@@ -1,0 +1,3 @@
+  * New upstream version 2.6.0
+  * Drop dco netlink buffer overflow patch applied upstream
+  * Drop obsolete lsb-base dependency
