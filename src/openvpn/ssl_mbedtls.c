@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *  Copyright (C) 2006-2010, Brainspark B.V.
  *
@@ -330,7 +330,8 @@ tls_ctx_restrict_ciphers(struct tls_root_ctx *ctx, const char *ciphers)
 void
 tls_ctx_set_cert_profile(struct tls_root_ctx *ctx, const char *profile)
 {
-    if (!profile || 0 == strcmp(profile, "legacy"))
+    if (!profile || 0 == strcmp(profile, "legacy")
+        || 0 == strcmp(profile, "insecure"))
     {
         ctx->cert_profile = openvpn_x509_crt_profile_legacy;
     }

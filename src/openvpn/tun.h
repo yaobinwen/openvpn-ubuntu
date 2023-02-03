@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -461,7 +461,7 @@ tuntap_stop(int status)
      */
     if (status < 0)
     {
-        return openvpn_errno() == ERROR_FILE_NOT_FOUND;
+        return GetLastError() == ERROR_FILE_NOT_FOUND;
     }
     return false;
 }
@@ -474,7 +474,7 @@ tuntap_abort(int status)
      */
     if (status < 0)
     {
-        return openvpn_errno() == ERROR_OPERATION_ABORTED;
+        return GetLastError() == ERROR_OPERATION_ABORTED;
     }
     return false;
 }

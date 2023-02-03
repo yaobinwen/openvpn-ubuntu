@@ -1,3 +1,175 @@
+Overview of changes in 2.5.8
+============================
+
+New features
+------------
+- allow running a default configuration with TLS libraries without BF-CBC
+  (even if TLS cipher negotiation would not actually use BF-CBC, the
+  long-term compatibility "default cipher BF-CBC" would trigger an error
+  on such TLS libraries)
+
+User-visible Changes
+--------------------
+- add git branch name + commit ID to OpenVPN version string on
+  MSVC builds (windows)
+
+Testing Enhancements
+--------------------
+- t_client.sh: if fping is found and fping6 is not, assume we have
+  fping 4.0 and up, and call "fping -6" for IPv6 ping tests
+
+- t_client.sh: allow to force FAIL on prerequisite fails, so a CI
+  environment will no longer "silently skip" t_client runs if fping (etc)
+  can not be found, but will error out
+
+Bugfixes
+--------
+- ``--auth-nocache'' was not always correctly clearing username+password
+  after a renegotiation
+
+- ensure that auth-token received from server is cleared if requested
+  by the management interface ("forget password" or automatically
+  via ``--management-forget-disconnect'')
+
+- in a setup without username+password, but with auth-token and
+  auth-token-username pushed by the server, OpenVPN would start asking
+  for username+password on token expiry.  Fix.
+
+- using ``--auth-token`` together with ``--management-client-auth``
+  (on the server) would lead to TLS keys getting out of sync and client
+  being disconnected.  Fix.
+
+- management interface would sometimes get stuck if client and server
+  try to write something simultaneously.  Fix by allowing a limited
+  level of recursion in virtual_output_callback()
+
+- fix management interface not returning ERROR:/SUCCESS: response
+  on "signal SIGxxx" commands when in HOLD state
+
+- tls-crypt-v2: abort connection if client-key is too short
+
+- make man page agree with actual code on replay-window backtrag log message
+
+- remove useless empty line from CR_RESPONSE message
+
+
+Overview of changes in 2.5.7
+============================
+
+New features
+------------
+- Limited OpenSSL 3.0 support
+    OpenSSL 3.0 support has been added. OpenSSL 3.0 support in 2.5 relies
+    on the compatiblity layer and full OpenSSL 3.0 support is coming with
+    OpenVPN 2.6. Only features that impact usage directly have been
+    backported:
+
+    ``--tls-cert-profile insecure``  has been added to allow selecting the
+    lowest  OpenSSL security level (not recommended, use only if you must).
+
+    OpenSSL 3.0 no longer supports the Blowfish (and other deprecated)
+    algorithm by default and the new option ``--providers`` allows loading
+    the legacy provider to renable these algorithms.  Most notably,
+    reading of many PKCS#12 files encrypted with the RC2 algorithm fails
+    unless ``--providers legacy default`` is configured.
+
+    The OpenSSL engine feature ``--engine`` is not enabled by default
+    anymore if OpenSSL 3.0 is detected.
+
+- print OpenSSL error stack if decoding PKCS12 file fails
+
+User-visible Changes
+--------------------
+- windows vcpkg building includes pkcs11-helper 1.29 now
+
+- add MSVC build options to harden windows binaries (HW-enforced
+  stack protection, SHA256 object hashes, SDL).
+
+Bugfixes
+--------
+- fix omission of cipher-negotiation.rst in tarballs
+
+- fix errno handling on Windows (Windows has different classes of
+  error codes, GetLastError() and C runtime errno, these should now
+  be handled correctly)
+
+- fix PATH_MAX build failure in auth-pam.c
+
+- fix t_net.sh self-test leaving around stale "ovpn-dummy0" interface
+
+- fix overlong path names, leading to missing pkcs11-helper patch
+  in tarball
+
+
+Overview of changes in 2.5.6
+============================
+
+User-visible Changes
+--------------------
+- update copyright year to 2022
+
+New features
+------------
+- new plugin (sample-plugin/defer/multi-auth.c) to help testing with
+  multiple parallel plugins that succeed/fail in direct/deferred mode
+
+- various build improvements (github actions etc)
+
+- upgrade pkcs11-helper to release 1.28.4
+
+Bugfixes
+--------
+- CVE-2022-0547
+  see https://community.openvpn.net/openvpn/wiki/SecurityAnnouncements
+
+  If openvpn is configured with multiple authentication plugins and
+  more than one plugin tries to do deferred authentication, the result
+  is not well-defined - creating a possible authentication bypass.
+
+  In this situation the server process will now abort itself with a clear
+  log message.  Only one plugin is allowed to do deferred authentication.
+
+- Fix "--mtu-disc maybe|yes" on Linux
+
+  Due to configure/syshead.h/#ifdef confusion, the code in question was
+  not compiled-in since a long time.  Fixed.  Trac: #1452
+
+- Fix $common_name variable passed to scripts when username-as-common-name
+  is in effect.
+
+  This was not consistently set - sometimes, OpenVPN exported the username,
+  sometimes the common name from the client cert.  Fixed.  Trac: #1434
+
+- Fix potential memory leaks in add_route() and add_route_ipv6().
+
+- Apply connect-retry backoff only to one side of the connection in
+  p2p mode.  Without that fix/enhancement, two sides could end up
+  only sending packets when the other end is not ready.  Trac: #1010, #1384
+
+- remove unused sitnl.h file
+
+- clean up msvc build files, remove unused MSVC build .bat files
+
+- repair "--inactive" handling with a 'bytes' parameter larger than 2 Gbytes
+
+  due to integer overflow, this ended up being "0" on Linux, but on
+  Windows with MSVC it ends up being "always 2 Gbyte", both not doing
+  what is requested. Trac: #1448
+
+- repair handling of EC certificates on Windows with pkcs11-helper
+
+  (wrong compile-time defines for OpenSSL 1.1.1)
+
+Documentation
+-------------
+- documentation improvements related to DynDNS.  Trac: #1417
+
+- clean up documentation for --proto and related options
+
+- rebuild rst docs if input files change (proper dependency handling)
+
+
+
 Overview of changes in 2.5.5
 ============================
 
@@ -18,8 +190,8 @@ New features
 - Windows build: use CFG and Spectre mitigations on MSVC builds
 
 - bring back OpenSSL config loading to Windows builds.
-  OpenSSL config is loaded from %installdir%\SSL\openssl.cfg
-  (typically: c:\program files\openvpn\SSL\openssl.cfg) if it exists.
+  OpenSSL config is loaded from %installdir%\\ssl\\openssl.cnf
+  (typically: c:\\program files\\openvpn\\ssl\\openssl.cnf) if it exists.
 
   This is important for some hardware tokens which need special
   OpenSSL config for correct operation.  Trac #1296
@@ -102,7 +274,7 @@ Overview of changes in 2.5.3
 ============================
 Bugfixes
 --------
-- CVE-2121-3606
+- CVE-2021-3606
   see https://community.openvpn.net/openvpn/wiki/SecurityAnnouncements
 
   OpenVPN windows builds could possibly load OpenSSL Config files from

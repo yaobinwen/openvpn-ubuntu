@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -551,6 +551,10 @@ tls_ctx_set_cert_profile(struct tls_root_ctx *ctx, const char *profile)
     {
         SSL_CTX_set_security_level(ctx->ctx, 1);
     }
+    else if (0 == strcmp(profile, "insecure"))
+    {
+        SSL_CTX_set_security_level(ctx->ctx, 0);
+    }
     else if (0 == strcmp(profile, "preferred"))
     {
         SSL_CTX_set_security_level(ctx->ctx, 2);
@@ -821,6 +825,8 @@ tls_ctx_load_pkcs12(struct tls_root_ctx *ctx, const char *pkcs12_file,
         ca = NULL;
         if (!PKCS12_parse(p12, password, &pkey, &cert, &ca))
         {
+            crypto_msg(M_WARN, "Decoding PKCS12 failed. Probably wrong password "
+                               "or unsupported/legacy encryption");
 #ifdef ENABLE_MANAGEMENT
             if (management && (ERR_GET_REASON(ERR_peek_error()) == PKCS12_R_MAC_VERIFY_FAILURE))
             {

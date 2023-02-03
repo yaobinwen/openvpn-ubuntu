@@ -5,8 +5,8 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
- *  Copyright (C) 2008-2021 David Sommerseth <dazo@eurephia.org>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2008-2022 David Sommerseth <dazo@eurephia.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -125,9 +125,11 @@ static const char usage_message[] =
     "--remote-random-hostname : Add a random string to remote DNS name.\n"
     "--mode m        : Major mode, m = 'p2p' (default, point-to-point) or 'server'.\n"
     "--proto p       : Use protocol p for communicating with peer.\n"
-    "                  p = udp (default), tcp-server, or tcp-client\n"
+    "                  p = udp (default), tcp-server, tcp-client\n"
+    "                      udp4, tcp4-server, tcp4-client\n"
+    "                      udp6, tcp6-server, tcp6-client\n"
     "--proto-force p : only consider protocol p in list of connection profiles.\n"
-    "                  p = udp6, tcp6-server, or tcp6-client (ipv6)\n"
+    "                  p = udp or tcp\n"
     "--connect-retry n [m] : For client, number of seconds to wait between\n"
     "                  connection retries (default=%d). On repeated retries\n"
     "                  the wait time is exponentially increased to a maximum of m\n"
@@ -196,7 +198,7 @@ static const char usage_message[] =
     "                  is established.  Multiple routes can be specified.\n"
     "                  netmask default: 255.255.255.255\n"
     "                  gateway default: taken from --route-gateway or --ifconfig\n"
-    "                  Specify default by leaving blank or setting to \"nil\".\n"
+    "                  Specify default by leaving blank or setting to \"default\".\n"
     "--route-ipv6 network/bits [gateway] [metric] :\n"
     "                  Add IPv6 route to routing table after connection\n"
     "                  is established.  Multiple routes can be specified.\n"
@@ -600,6 +602,7 @@ static const char usage_message[] =
     "                : Use --show-tls to see a list of supported TLS ciphers (suites).\n"
     "--tls-cert-profile p : Set the allowed certificate crypto algorithm profile\n"
     "                  (default=legacy).\n"
+    "--providers l   : A list l of OpenSSL providers to load.\n"
     "--tls-timeout n : Packet retransmit timeout on TLS control channel\n"
     "                  if no ACK from remote within n seconds (default=%d).\n"
     "--reneg-bytes n : Renegotiate data chan. key after n bytes sent and recvd.\n"
@@ -960,6 +963,7 @@ pull_filter_type_name(int type)
                                           "'%s'")
 #define SHOW_INT(var)       SHOW_PARM(var, o->var, "%d")
 #define SHOW_UINT(var)      SHOW_PARM(var, o->var, "%u")
+#define SHOW_INT64(var)     SHOW_PARM(var, o->var, "%" PRIi64)
 #define SHOW_UNSIGNED(var)  SHOW_PARM(var, o->var, "0x%08x")
 #define SHOW_BOOL(var)      SHOW_PARM(var, (o->var ? "ENABLED" : "DISABLED"), "%s");
 
@@ -1131,7 +1135,7 @@ parse_hash_fingerprint(const char *str, int nbytes, int msglevel, struct gc_aren
 #ifndef ENABLE_SMALL
 
 static void
-show_dhcp_option_list(const char *name, const char * const*array, int len)
+show_dhcp_option_list(const char *name, const char *const *array, int len)
 {
     int i;
     for (i = 0; i < len; ++i)
@@ -1576,6 +1580,7 @@ show_settings(const struct options *o)
     SHOW_INT(keepalive_ping);
     SHOW_INT(keepalive_timeout);
     SHOW_INT(inactivity_timeout);
+    SHOW_INT64(inactivity_minimum_bytes);
     SHOW_INT(ping_send_timeout);
     SHOW_INT(ping_rec_timeout);
     SHOW_INT(ping_rec_timeout_action);
@@ -2282,6 +2287,8 @@ options_postprocess_verify_ce(const struct options *options,
      */
     if (options->mode == MODE_SERVER)
     {
+#define USAGE_VALID_SERVER_PROTOS "--mode server currently only supports " \
+    "--proto values of udp, tcp-server, tcp4-server, or tcp6-server"
 #ifdef TARGET_ANDROID
         msg(M_FATAL, "--mode server not supported on Android");
 #endif
@@ -2299,15 +2306,14 @@ options_postprocess_verify_ce(const struct options *options,
         }
         if (!(proto_is_udp(ce->proto) || ce->proto == PROTO_TCP_SERVER))
         {
-            msg(M_USAGE, "--mode server currently only supports "
-                "--proto udp or --proto tcp-server or proto tcp6-server");
+            msg(M_USAGE, USAGE_VALID_SERVER_PROTOS);
         }
 #if PORT_SHARE
         if ((options->port_share_host || options->port_share_port)
             && (ce->proto != PROTO_TCP_SERVER))
         {
             msg(M_USAGE, "--port-share only works in TCP server mode "
-                "(--proto tcp-server or tcp6-server)");
+                "(--proto values of tcp-server, tcp4-server, or tcp6-server)");
         }
 #endif
         if (!options->tls_server)
@@ -2355,9 +2361,7 @@ options_postprocess_verify_ce(const struct options *options,
         }
         if (!(proto_is_dgram(ce->proto) || ce->proto == PROTO_TCP_SERVER))
         {
-            msg(M_USAGE,
-                "--mode server currently only supports --proto udp or --proto "
-                "tcp-server or --proto tcp6-server");
+            msg(M_USAGE, USAGE_VALID_SERVER_PROTOS);
         }
         if (!proto_is_udp(ce->proto) && (options->cf_max || options->cf_per))
         {
@@ -3099,7 +3103,7 @@ options_postprocess_cipher(struct options *o)
         if (!o->ncp_enabled)
         {
             msg(M_USAGE, "--ncp-disable needs an explicit --cipher or "
-                         "--data-ciphers-fallback config option");
+                "--data-ciphers-fallback config option");
         }
 
         msg(M_WARN, "--cipher is not set. Previous OpenVPN version defaulted to "
@@ -3677,9 +3681,30 @@ calc_options_string_link_mtu(const struct options *o, const struct frame *frame)
     {
         struct frame fake_frame = *frame;
         struct key_type fake_kt;
-        init_key_type(&fake_kt, o->ciphername, o->authname, o->keysize, true,
-                      false);
+
         frame_remove_from_extra_frame(&fake_frame, crypto_max_overhead());
+
+
+        /* o->ciphername might be BF-CBC even though the underlying SSL library
+         * does not support it. For this reason we workaround this corner case
+         * by pretending to have no encryption enabled and by manually adding
+         * the required packet overhead to the MTU computation.
+         */
+        const char *ciphername = o->ciphername;
+
+        if (strcmp(o->ciphername, "BF-CBC") == 0)
+        {
+            /* none has no overhead, so use this to later add only --auth
+             * overhead */
+
+            /* overhead of BF-CBC: 64 bit block size, 64 bit IV size */
+            frame_add_to_extra_frame(&fake_frame, 64/8 + 64/8);
+            ciphername = "none";
+        }
+
+        init_key_type(&fake_kt, ciphername, o->authname, o->keysize, true,
+                      false);
+
         crypto_adjust_frame_parameters(&fake_frame, &fake_kt, o->replay,
                                        cipher_kt_mode_ofb_cfb(fake_kt.cipher));
         frame_finalize(&fake_frame, o->ce.link_mtu_defined, o->ce.link_mtu,
@@ -3849,18 +3874,33 @@ options_string(const struct options *o,
                + (TLS_SERVER == true)
                <= 1);
 
-        init_key_type(&kt, o->ciphername, o->authname, o->keysize, true,
-                      false);
+        /* Skip resolving BF-CBC to allow SSL libraries without BF-CBC
+         * to work here in the default configuration */
+        const char *ciphername = o->ciphername;
+        int keysize;
+
+        if (strcmp(o->ciphername, "BF-CBC") == 0)
+        {
+            init_key_type(&kt, "none", o->authname, o->keysize, true,
+                          false);
+            keysize = 128;
+        }
+        else
+        {
+            init_key_type(&kt, o->ciphername, o->authname, o->keysize, true,
+                          false);
+            ciphername = cipher_kt_name(kt.cipher);
+            keysize = kt.cipher_length * 8;
+        }
         /* Only announce the cipher to our peer if we are willing to
          * support it */
-        const char *ciphername = cipher_kt_name(kt.cipher);
         if (p2p_nopull || !o->ncp_enabled
             || tls_item_in_cipher_list(ciphername, o->ncp_ciphers))
         {
             buf_printf(&out, ",cipher %s", ciphername);
         }
         buf_printf(&out, ",auth %s", md_kt_name(kt.digest));
-        buf_printf(&out, ",keysize %d", kt.cipher_length * 8);
+        buf_printf(&out, ",keysize %d", keysize);
         if (o->shared_secret_file)
         {
             buf_printf(&out, ",secret");
@@ -4388,7 +4428,7 @@ usage_version(void)
     show_windows_version( M_INFO|M_NOPREFIX );
 #endif
     msg(M_INFO|M_NOPREFIX, "Originally developed by James Yonan");
-    msg(M_INFO|M_NOPREFIX, "Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>");
+    msg(M_INFO|M_NOPREFIX, "Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>");
 #ifndef ENABLE_SMALL
 #ifdef CONFIGURE_DEFINES
     msg(M_INFO|M_NOPREFIX, "Compile time defines: %s", CONFIGURE_DEFINES);
@@ -6164,9 +6204,9 @@ add_option(struct options *options,
         }
     }
 #ifdef TARGET_LINUX
-    else if (streq (p[0], "bind-dev") && p[1])
+    else if (streq(p[0], "bind-dev") && p[1])
     {
-        VERIFY_PERMISSION (OPT_P_SOCKFLAGS);
+        VERIFY_PERMISSION(OPT_P_SOCKFLAGS);
         options->bind_dev = p[1];
     }
 #endif
@@ -6242,7 +6282,16 @@ add_option(struct options *options,
         options->inactivity_timeout = positive_atoi(p[1]);
         if (p[2])
         {
-            options->inactivity_minimum_bytes = positive_atoi(p[2]);
+            int64_t val = atoll(p[2]);
+            options->inactivity_minimum_bytes = (val < 0) ? 0 : val;
+            if (options->inactivity_minimum_bytes > INT_MAX)
+            {
+                msg(M_WARN, "WARNING: '--inactive' with a 'bytes' value"
+                    " >2 Gbyte was silently ignored in older versions.  If "
+                    " your VPN exits unexpectedly with 'Inactivity timeout'"
+                    " in %d seconds, revisit this value.",
+                    options->inactivity_timeout );
+            }
         }
     }
     else if (streq(p[0], "proto") && p[1] && !p[2])
@@ -8117,6 +8166,13 @@ add_option(struct options *options,
         options->keysize = keysize;
     }
 #endif
+    else if (streq(p[0], "providers") && p[1])
+    {
+        for (size_t j = 1; j < MAX_PARMS && p[j] != NULL; j++)
+        {
+            options->providers.names[j] = p[j];
+        }
+    }
 #ifdef ENABLE_PREDICTION_RESISTANCE
     else if (streq(p[0], "use-prediction-resistance") && !p[1])
     {

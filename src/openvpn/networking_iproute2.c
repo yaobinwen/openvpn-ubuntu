@@ -1,7 +1,7 @@
 /*
  *  Networking API implementation for iproute2
  *
- *  Copyright (C) 2018-2021 Antonio Quartulli <a@unstable.cc>
+ *  Copyright (C) 2018-2022 Antonio Quartulli <a@unstable.cc>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -105,7 +105,7 @@ net_addr_ll_set(openvpn_net_ctx_t *ctx, const openvpn_net_iface_t *iface,
                 iproute_path, MAC_PRINT_ARG(addr), iface);
 
     argv_msg(M_INFO, &argv);
-    if (!openvpn_execve_check(&argv, ctx->es, M_WARN,
+    if (!openvpn_execve_check(&argv, ctx->es, 0,
                               "Linux ip link set addr failed"))
     {
         ret = -1;

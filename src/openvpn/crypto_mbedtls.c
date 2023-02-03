@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -67,6 +67,19 @@ crypto_init_lib_engine(const char *engine_name)
 {
     msg(M_WARN, "Note: mbed TLS hardware crypto engine functionality is not "
         "available");
+}
+
+provider_t *crypto_load_provider(const char *provider)
+{
+    if (provider)
+    {
+        msg(M_WARN, "Note: mbed TLS provider functionality is not available");
+    }
+    return NULL;
+}
+
+void crypto_unload_provider(const char *provname, provider_t *provider)
+{
 }
 
 /*

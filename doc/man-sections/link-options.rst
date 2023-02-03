@@ -249,7 +249,10 @@ the local and the remote host.
 
 --proto p
   Use protocol ``p`` for communicating with remote host. ``p`` can be
-  :code:`udp`, :code:`tcp-client`, or :code:`tcp-server`.
+  :code:`udp`, :code:`tcp-client`, or :code:`tcp-server`. You can also
+  limit OpenVPN to use only IPv4 or only IPv6 by specifying ``p`` as
+  :code:`udp4`, :code:`tcp4-client`, :code:`tcp4-server` or :code:`udp6`,
+  :code:`tcp6-client`, :code:`tcp6-server`, respectively.
 
   The default protocol is :code:`udp` when ``--proto`` is not specified.
 
@@ -327,7 +330,7 @@ the local and the remote host.
   value for ``n``. Satellite links in particular often require this.
 
   If you run OpenVPN at ``--verb 4``, you will see the message
-  "Replay-window backtrack occurred [x]" every time the maximum sequence
+  "PID_ERR replay-window backtrack occurred [x]" every time the maximum sequence
   number backtrack seen thus far increases. This can be used to calibrate
   ``n``.
 

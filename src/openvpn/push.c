@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -224,7 +224,6 @@ receive_cr_response(struct context *c, const struct buffer *buffer)
     struct man_def_auth_context *mda = session->opt->mda_context;
     struct env_set *es = session->opt->es;
     int key_id = session->key[KS_PRIMARY].key_id;
-
 
     management_notify_client_cr_response(key_id, mda, es, m);
 #endif

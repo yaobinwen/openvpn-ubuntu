@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,9 @@ typedef mbedtls_md_context_t md_ctx_t;
 
 /** Generic HMAC %context. */
 typedef mbedtls_md_context_t hmac_ctx_t;
+
+/* Use a dummy type for the provider */
+typedef void provider_t;
 
 /** Maximum length of an IV */
 #define OPENVPN_MAX_IV_LENGTH   MBEDTLS_MAX_IV_LENGTH
