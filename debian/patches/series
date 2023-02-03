@@ -3,16 +3,6 @@ auth-pam_libpam_so_filename.patch
 #debian_nogroup_for_sample_files.patch
 openvpn-pkcs11warn.patch
 #kfreebsd_support.patch
-match-manpage-and-command-help.patch
 systemd.patch
 openvpn-fips-2.4.patch
 OpenSSL3.patch
-CVE-2022-0547.patch
-# Upstream patches to better support OpenSSL 3
-openssl-3/0001-Add-insecure-tls-cert-profile-options.patch
-openssl-3/0002-Refactor-early-initialisation-and-uninitialisation-into-methods.patch
-openssl-3/0003-Allow-loading-of-non-default-providers.patch
-openssl-3/0004-Fix-allowing-showing-unsupported-ciphers-digests.patch
-openssl-3/0005-Add-message-when-decoding-PKCS12-file-fails.patch
-openssl-3/0006-Translate-OpenSSL-3.0-digest-names-to-OpenSSL-1.1-digest-names.patch
-openssl-3/0007-Allow-running-a-default-configuration-with-TLS-libraries-without-BF-CBC.patch

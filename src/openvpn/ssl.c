@@ -5,9 +5,9 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
- *  Copyright (C) 2008-2021 David Sommerseth <dazo@eurephia.org>
+ *  Copyright (C) 2008-2022 David Sommerseth <dazo@eurephia.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -393,9 +393,14 @@ static char *auth_challenge; /* GLOBAL */
 #endif
 
 void
-auth_user_pass_setup(const char *auth_file, const struct static_challenge_info *sci)
+enable_auth_user_pass()
 {
     auth_user_pass_enabled = true;
+}
+
+void
+auth_user_pass_setup(const char *auth_file, const struct static_challenge_info *sci)
+{
     if (!auth_user_pass.defined && !auth_token.defined)
     {
 #ifdef ENABLE_MANAGEMENT
@@ -2386,20 +2391,13 @@ key_method_2_write(struct buffer *buf, struct tls_multi *multi,
         {
             goto error;
         }
-        /* if auth-nocache was specified, the auth_user_pass object reaches
-         * a "complete" state only after having received the push-reply
-         * message. The push message might contain an auth-token that needs
-         * the username of auth_user_pass.
-         *
-         * For this reason, skip the purge operation here if no push-reply
-         * message has been received yet.
-         *
-         * This normally happens upon first negotiation only.
-         */
-        if (!session->opt->pull)
+        /* save username for auth-token which may get pushed later */
+        if (session->opt->pull && up != &auth_token)
         {
-            purge_user_pass(&auth_user_pass, false);
+            strncpynt(auth_token.username, up->username, USER_PASS_LEN);
         }
+        /* respect auth-nocache */
+        purge_user_pass(&auth_user_pass, false);
     }
     else
     {
@@ -4137,10 +4135,4 @@ print_data:
 
 done:
     return BSTR(&out);
-}
-
-void
-ssl_clean_user_pass(void)
-{
-    purge_user_pass(&auth_user_pass, false);
 }

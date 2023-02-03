@@ -5,8 +5,8 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
- *  Copyright (C) 2016-2021 Selva Nair <selva.nair@gmail.com>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2016-2022 Selva Nair <selva.nair@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
@@ -47,6 +47,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <syslog.h>
+#include <limits.h>
 #include "utils.h"
 
 #include <openvpn-plugin.h>

@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2021 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2022 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1397,7 +1397,14 @@ verify_user_pass(struct user_pass *up, struct tls_multi *multi,
 #ifdef MANAGEMENT_DEF_AUTH
         if (man_def_auth != KMDA_UNDEF)
         {
-            ks->authenticated = KS_AUTH_DEFERRED;
+            if (skip_auth)
+            {
+                ks->mda_status = ACF_DISABLED;
+            }
+            else
+            {
+                ks->authenticated = KS_AUTH_DEFERRED;
+            }
         }
 #endif
         if ((session->opt->ssl_flags & SSLF_USERNAME_AS_COMMON_NAME))
