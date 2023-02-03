@@ -1666,8 +1666,8 @@ tls1_P_hash(const md_kt_t *md_kt,
     int chunk = md_kt_size(md_kt);
     unsigned int A1_len = md_kt_size(md_kt);
 
-    hmac_ctx_init(ctx, sec, sec_len, md_kt);
-    hmac_ctx_init(ctx_tmp, sec, sec_len, md_kt);
+    hmac_ctx_init(ctx, sec, sec_len, md_kt, 1);
+    hmac_ctx_init(ctx_tmp, sec, sec_len, md_kt, 1);
 
     hmac_ctx_update(ctx,seed,seed_len);
     hmac_ctx_final(ctx, A1);
