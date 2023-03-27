@@ -1,0 +1,9 @@
+  * Merge from Debian unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+  * Upload to unstable targetting bookworm
+  * Cherry-Pick upstream commits from 2.6.2
+    - fix rare ASSERT in tls-crypt
+    - fix memory leaks in HMAC initial packet generation
+    - set netlink socket to be non-blocking
