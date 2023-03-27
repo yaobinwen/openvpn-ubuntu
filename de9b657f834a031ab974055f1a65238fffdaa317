@@ -1,0 +1,5 @@
+  * Upload to unstable targetting bookworm
+  * Cherry-Pick upstream commits from 2.6.2
+    - fix rare ASSERT in tls-crypt
+    - fix memory leaks in HMAC initial packet generation
+    - set netlink socket to be non-blocking
