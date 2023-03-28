@@ -1,3 +1,9 @@
+openvpn (2.6.2-1~exp2) experimental; urgency=medium
+
+  * Cherry-pick upstream commit to fix segfault in dco_get_peer_stats()
+
+ -- Bernhard Schmidt <berni@debian.org>  Tue, 28 Mar 2023 23:13:15 +0200
+
 openvpn (2.6.2-1~exp1) experimental; urgency=medium
 
   * New upstream version 2.6.2
@@ -7,6 +13,16 @@ openvpn (2.6.2-1~exp1) experimental; urgency=medium
       "wrong" version and run unaccelerated.
 
  -- Bernhard Schmidt <berni@debian.org>  Fri, 24 Mar 2023 23:52:11 +0100
+
+openvpn (2.6.1-1) unstable; urgency=medium
+
+  * Upload to unstable targetting bookworm
+  * Cherry-Pick upstream commits from 2.6.2
+    - fix rare ASSERT in tls-crypt
+    - fix memory leaks in HMAC initial packet generation
+    - set netlink socket to be non-blocking
+
+ -- Bernhard Schmidt <berni@debian.org>  Sun, 26 Mar 2023 11:14:26 +0200
 
 openvpn (2.6.1-1~exp1) experimental; urgency=medium
 
