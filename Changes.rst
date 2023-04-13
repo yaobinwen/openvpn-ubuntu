@@ -1,3 +1,102 @@
+Overview of changes in 2.6.3
+============================
+
+New features
+------------
+- Windows: support setting DNS domain in configurations without DHCP
+  (typically wintun or windco drivers), see GH OpenVPN/openvpn#306.
+
+Bug fixes
+---------
+- fix possible crash with Linux client on reconnect on TLS errors
+  (needs either "--status file" or active management interface to trigger)
+
+- fix incorrect formatting in .rst documents
+
+- Windows .msi installer: ensure interactive service stays enabled after
+  silent reinstall, see GH OpenVPN/openvpn-build#348, #349 and #351
+
+- Windows installer: repair querying install path info for easyrsa-start.bat
+  on some Windows language versions, see GH OpenVPN/openvpn-build#352.
+
+- Windows DCO driver: use correct crypto library so it loads on x86,
+  see GH OpenVPN/ovpn-dco-win#43
+  
+
+
+Overview of changes in 2.6.2
+============================
+
+New features
+------------
+- implement byte counter statistics for DCO Linux (p2mp server and client)
+
+- implement byte counter statistics for DCO Windows (client only)
+
+- '--dns server <n> address ...' now permits up to 8 v4 or v6 addresses
+
+- fix a few cases of possibly undefined behaviour detected by ASAN
+
+- add more unit tests for Windows cryptoapi interface
+
+
+Bug fixes
+---------
+- sending of AUTH_PENDING and INFO_PRE messages fixed (OpenVPN/openvpn#256)
+
+- Windows: do not treat "setting IPv6 interface metric failed" as fatal
+  error on "block-dns" install - this can happen if IPv6 is disabled on
+  the interface and is not harmful in itself (GH #294)
+
+- fix '--inactive' if DCO is in use
+  NOTE: on FreeBSD, this is not working yet (missing per-peer stats)
+
+- DCO-Linux: do not print errno on netlink errors (errno is not set by NL)
+
+- SOCKS client: improve error reporting on server disconnects
+
+- DCO-Linux: fix lockups due to netlink buffer overflows on high
+  client connect/disconnect activity.  See "User visible changes" for
+  more details of this.
+
+- fix some uses of the OpenSSL3 API for non-default providers
+  (enable use of quantum-crypto OpenSSL provider)
+
+- fix memory leak of approx. 1600 bytes per incoming initial TLS packet
+
+- fix bug when using ECDSA signatures with OpenSSL 3.0.x and pkcs11-helper
+  (data format conversion was not done properly)
+
+- fix 'make distcheck' - unexpected side effect of 'subdir-objects'
+
+- fix ASSERT() with dynamic tls-crypt and --tls-crypt-v2 (GH #272)
+
+
+User visible changes
+--------------------
+- print (kernel) DCO version on startup - helpful for getting a more
+  complete picture of the environment in use.
+
+- New control packets flow for data channel offloading on Linux.
+  2.6.2+ changes the way OpenVPN control packets are handled on
+  Linux when DCO is active, fixing the lockups observed with 2.6.0/2.6.1
+  under high client connect/disconnect activity.
+  This is an *INCOMPATIBLE* change and therefore an ovpn-dco kernel
+  module older than v0.2.20230323 (commit ID 726fdfe0fa21) will not
+  work anymore and must be upgraded.  The kernel module was renamed to
+  "ovpn-dco-v2.ko" in order to highlight this change and ensure that
+  users and userspace software could easily understand which version
+  is loaded.  Attempting to use the old ovpn-dco with 2.6.2+ will
+  lead to disabling DCO at runtime.
+
+- The ``client-pending-auth`` management command now requires also the
+  key id. The management version has been changed to 5 to indicate this change.
+
+- A client will now refuse a connection if pushed compression settings
+  will contradict the setting of ``allow-compression`` as this almost
+  always results in a non-working connection.
+
+
 Overview of changes in 2.6.1
 ============================
 
