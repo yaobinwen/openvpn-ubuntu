@@ -1,0 +1,31 @@
+  * New upstream releases 2.5.6-2.5.8 (LP: #2004676):
+    - The version is being updated to the latest in 2.5.x rather than 2.6.x to
+      avoid feature releases and focus on bug fixes
+    - Updates:
+      + OpenSSL3 support
+      + pkcs11-helper upgrade to 1.28.4
+      + allow running a default configuration with TLS libraries without BF-CBC
+    - Bug Fixes Include:
+      + CVE-2022-0547
+      + Fix potential memory leaks in add_route() and add_route_ipv6()
+      + Fix PATH_MAX build failure in auth-pam.c
+      + Fix using --auth-token together with --management-client-auth
+      + Fix clearing of username+password when using --auth-nocache
+      + See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn25 for
+        additional bug fixes and information
+  * Remove patches fixed upstream:
+    - d/p/CVE-2022-0547.patch
+      [Included in upstream release 2.5.6]
+    - d/p/openssl-3/0001-Add-insecure-tls-cert-profile-options.patch
+    - d/p/openssl-3/0002-Refactor-early-initialisation-and-uninitialisation-
+      into-methods.patch
+    - d/p/openssl-3/0003-Allow-loading-of-non-default-providers.patch
+    - d/p/openssl-3/0004-Fix-allowing-showing-unsupported-ciphers-digests.patch
+    - d/p/openssl-3/0005-Add-message-when-decoding-PKCS12-file-fails.patch
+    - d/p/openssl-3/0006-Translate-OpenSSL-3.0-digest-names-to-OpenSSL-1.1-
+      digest-names.patch
+     [Included in upstream release 2.5.7]
+    - d/p/openssl-3/0007-Allow-running-a-default-configuration-with-TLS-
+      libraries-without-BF-CBC.patch
+    - d/p/match-manpage-and-command-help.patch
+      [Included in upstream release 2.5.8]
