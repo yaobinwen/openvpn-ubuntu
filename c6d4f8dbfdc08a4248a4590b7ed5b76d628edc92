@@ -1,0 +1,6 @@
+  * New upstream version 2.6.2
+    - drop patches applied upstream
+    - needs new openvpn-dco-dkms version. Not adding a versioned dependency
+      to untangle testing migration, because it will just not use the
+      "wrong" version and run unaccelerated.
+  * New upstream version 2.6.3
