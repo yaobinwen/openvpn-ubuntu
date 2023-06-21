@@ -1,3 +1,12 @@
+openvpn (2.6.3-1+deb12u1) bookworm; urgency=medium
+
+  * Cherry-pick two bugfix commits from upstream
+    - Memory leak in dco_get_peer_stats_multi for Linux
+    - dangling pointer passed to pkcs11-helper
+  * d/gbp.conf: set branch to bookworm
+
+ -- Bernhard Schmidt <berni@debian.org>  Wed, 21 Jun 2023 21:41:33 +0200
+
 openvpn (2.6.3-1) unstable; urgency=medium
 
   * New upstream version 2.6.2
