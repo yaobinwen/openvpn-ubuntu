@@ -1,3 +1,13 @@
+openvpn (2.6.5-0ubuntu1) mantic; urgency=medium
+
+  * New Upstream release 2.6.5 (LP: #2018095)
+  * d/p/fix-dangling-pointer-in-pkcs11.patch:
+    Remove - fixed upstream in 2.6.4
+  * d/p/fix-memleak-in-dco_get_peer_stats_multi.patch:
+    Remove - fixed upstream in 2.6.5
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Tue, 11 Jul 2023 09:36:08 -0700
+
 openvpn (2.6.3-2ubuntu1) mantic; urgency=low
 
   * Merge from Debian unstable. Remaining changes:
