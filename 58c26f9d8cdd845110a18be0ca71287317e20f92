@@ -1,0 +1,5 @@
+  * New Upstream release 2.6.5 (LP: #2018095)
+  * d/p/fix-dangling-pointer-in-pkcs11.patch:
+    Remove - fixed upstream in 2.6.4
+  * d/p/fix-memleak-in-dco_get_peer_stats_multi.patch:
+    Remove - fixed upstream in 2.6.5
