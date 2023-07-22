@@ -1,0 +1,4 @@
+  * Cherry-pick two bugfix commits from upstream
+    - Memory leak in dco_get_peer_stats_multi for Linux
+    - dangling pointer passed to pkcs11-helper
+  * d/gbp.conf: set branch to bookworm
