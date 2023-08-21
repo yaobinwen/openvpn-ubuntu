@@ -1,3 +1,51 @@
+openvpn (2.4.12-0ubuntu0.20.04.1) focal; urgency=medium
+
+  * New upstream releases 2.4.8-2.4.12 (LP: #2004676)
+    - The version is being updated to the latest in 2.4.x rather than 2.6.x to
+      avoid feature releases and focus on bug fixes
+    - Updates:
+      + Support compiling with OpenSSL 1.1 without deprecated APIs
+      + Handle PSS padding in cryptoapicert (necessary for TLS >= 1.2)
+      + Client will now announce the acceptable ciphers to the server
+        (IV_CIPHER=...), so NCP cipher negotiation works better
+    - Bug Fixes Include:
+      + CVE-2020-11810
+      + CVE-2020-15078
+      + CVE-2022-0547
+      + Fix "--mtu-disc maybe|yes"
+      + Fix argv leaks in add_route() and add_route_ipv6()
+      + Ensure the current common_name is in the environment for scripts
+      + Apply connect-retry backoff only to one side of the connection for p2p
+      + Fix PIN querying in systemd environments
+      + Fix condition where a client's session could float to a new IP address
+        that is not authorized
+      + Fix combination of async push and NCP
+      + Fix OpenSSL error stack handling of tls_ctx_add_extra_certs
+      + Fix broken fragmentation logic when using NCP
+      + Fix handling of 'route remote_host' for IPv6 transport case
+      + Fix fatal error at switching remotes
+      + See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn24 for
+        additional bug fixes and information
+  * Remove patches fixed upstream:
+    - fix-pkcs11-helper-hang.patch
+    - increase-listen-backlog-queue-to-32.patch
+      [Included in upstream release 2.4.8]
+    - CVE-2020-11810.patch
+      [Included in upstream release 2.4.9]
+    - CVE-2020-15078.patch
+      [Included in upstream release 2.4.11]
+    - CVE-2022-0547.patch
+      [Included in upstream release 2.4.12]
+  * Add DEP-8 tests from later releases
+    - d/t/server-setup-with-static-key: test the OpenVPN server side setup
+      using a static key.
+    - d/t/server-setup-with-ca: test the OpenVPN server side setup using a
+      CA built with easy-rsa.
+    - The tests match those seen in Jammy and later with the exception of
+      checking for /sbin/ip commands instead of net_... commands
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Mon, 21 Aug 2023 11:08:59 -0700
+
 openvpn (2.4.7-1ubuntu2.20.04.4) focal-security; urgency=medium
 
   * SECURITY UPDATE: authentication bypass via multiple deferred

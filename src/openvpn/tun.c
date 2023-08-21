@@ -2069,6 +2069,11 @@ open_tun(const char *dev, const char *dev_type, const char *dev_node, struct tun
 
 #ifdef ENABLE_FEATURE_TUN_PERSIST
 
+/* TUNSETGROUP appeared in 2.6.23 */
+#ifndef TUNSETGROUP
+# define TUNSETGROUP   _IOW('T', 206, int)
+#endif
+
 void
 tuncfg(const char *dev, const char *dev_type, const char *dev_node, int persist_mode, const char *username, const char *groupname, const struct tuntap_options *options)
 {
@@ -2106,7 +2111,7 @@ tuncfg(const char *dev, const char *dev_type, const char *dev_node, int persist_
         }
         else if (ioctl(tt->fd, TUNSETGROUP, platform_state_group.gr->gr_gid) < 0)
         {
-            msg(M_ERR, "Cannot ioctl TUNSETOWNER(%s) %s", groupname, dev);
+            msg(M_ERR, "Cannot ioctl TUNSETGROUP(%s) %s", groupname, dev);
         }
     }
     close_tun(tt);
@@ -5044,7 +5049,6 @@ void
 ipconfig_register_dns(const struct env_set *es)
 {
     struct argv argv = argv_new();
-    bool status;
     const char err[] = "ERROR: Windows ipconfig command failed";
 
     msg(D_TUNTAP_INFO, "Start ipconfig commands for register-dns...");
@@ -5054,14 +5058,14 @@ ipconfig_register_dns(const struct env_set *es)
                 get_win_sys_path(),
                 WIN_IPCONFIG_PATH_SUFFIX);
     argv_msg(D_TUNTAP_INFO, &argv);
-    status = openvpn_execve_check(&argv, es, 0, err);
+    openvpn_execve_check(&argv, es, 0, err);
     argv_reset(&argv);
 
     argv_printf(&argv, "%s%sc /registerdns",
                 get_win_sys_path(),
                 WIN_IPCONFIG_PATH_SUFFIX);
     argv_msg(D_TUNTAP_INFO, &argv);
-    status = openvpn_execve_check(&argv, es, 0, err);
+    openvpn_execve_check(&argv, es, 0, err);
     argv_reset(&argv);
 
     netcmd_semaphore_release();
@@ -5355,8 +5359,7 @@ netsh_ifconfig(const struct tuntap_options *to,
 }
 
 static void
-netsh_enable_dhcp(const struct tuntap_options *to,
-                  const char *actual_name)
+netsh_enable_dhcp(const char *actual_name)
 {
     struct argv argv = argv_new();
 
@@ -5902,7 +5905,7 @@ open_tun(const char *dev, const char *dev_type, const char *dev_node, struct tun
                 }
                 else
                 {
-                    netsh_enable_dhcp(&tt->options, tt->actual_name);
+                    netsh_enable_dhcp(tt->actual_name);
                 }
             }
             dhcp_masq = true;
