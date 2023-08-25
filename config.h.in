@@ -223,6 +223,9 @@
 /* Define to 1 if you have the `EVP_aes_256_gcm' function. */
 #undef HAVE_EVP_AES_256_GCM
 
+/* Define to 1 if you have the `EVP_CIPHER_CTX_reset' function. */
+#undef HAVE_EVP_CIPHER_CTX_RESET
+
 /* Define to 1 if you have the `EVP_CIPHER_CTX_set_key_length' function. */
 #undef HAVE_EVP_CIPHER_CTX_SET_KEY_LENGTH
 
@@ -345,6 +348,9 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <linux/errqueue.h> header file. */
+#undef HAVE_LINUX_ERRQUEUE_H
 
 /* Define to 1 if you have the <linux/if_tun.h> header file. */
 #undef HAVE_LINUX_IF_TUN_H
@@ -535,9 +541,6 @@
 /* Define to 1 if you have the `socket' function. */
 #undef HAVE_SOCKET
 
-/* struct sock_extended_err needed for extended socket error support */
-#undef HAVE_SOCK_EXTENDED_ERR
-
 /* Define to 1 if you have the `SSL_CTX_get_default_passwd_cb' function. */
 #undef HAVE_SSL_CTX_GET_DEFAULT_PASSWD_CB
 
@@ -685,6 +688,12 @@
 
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
+
+/* Define to 1 if you have the `X509_get0_notAfter' function. */
+#undef HAVE_X509_GET0_NOTAFTER
+
+/* Define to 1 if you have the `X509_get0_notBefore' function. */
+#undef HAVE_X509_GET0_NOTBEFORE
 
 /* Define to 1 if you have the `X509_get0_pubkey' function. */
 #undef HAVE_X509_GET0_PUBKEY
