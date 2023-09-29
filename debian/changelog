@@ -1,3 +1,29 @@
+openvpn (2.5.9-0ubuntu0.22.04.2) jammy; urgency=medium
+
+  * d/rules: Use --with-openssl-engine=yes during configuration to maintain the
+    existing behavior of technically allowing openssl engine access in jammy.
+    For more information see
+    https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/2004676/comments/6
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Fri, 29 Sep 2023 16:14:48 -0700
+
+openvpn (2.5.9-0ubuntu0.22.04.1) jammy; urgency=medium
+
+  * New upstream release 2.5.9 (LP: #2004676):
+    - The version is being updated to the latest in 2.5.x rather than 2.6.x to
+      avoid feature releases and focus on bug fixes
+    - Updates:
+      + Allow optional ciphers in --data-ciphers
+    - Bug Fixes Include:
+      + Fix null pointer error when running openvpn --show-tls with mbedtls
+      + Fix corner case that could lead to leaked file descriptor
+      + Fix parsing issue in pull-filter when there are leading spaces
+      + Fix possible buffer overflow in parse_line argument
+      + See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn25 for
+        additional bug fixes and information
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Tue, 15 Aug 2023 10:48:49 -0700
+
 openvpn (2.5.8-0ubuntu0.22.04.1) jammy; urgency=medium
 
   * New upstream releases 2.5.6-2.5.8 (LP: #2004676):
