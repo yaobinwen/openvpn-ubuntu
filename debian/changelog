@@ -1,3 +1,12 @@
+openvpn (2.5.9-0ubuntu0.22.04.2) jammy; urgency=medium
+
+  * d/rules: Use --with-openssl-engine=yes during configuration to maintain the
+    existing behavior of technically allowing openssl engine access in jammy.
+    For more information see
+    https://bugs.launchpad.net/ubuntu/+source/openvpn/+bug/2004676/comments/6
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Fri, 29 Sep 2023 16:14:48 -0700
+
 openvpn (2.5.9-0ubuntu0.22.04.1) jammy; urgency=medium
 
   * New upstream release 2.5.9 (LP: #2004676):
