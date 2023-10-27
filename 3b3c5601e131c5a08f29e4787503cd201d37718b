@@ -1,0 +1,3 @@
+  * Non-maintainer upload.
+  [ Helmut Grohne ]
+  * Do not install systemd units twice (Closes: #1054083)
