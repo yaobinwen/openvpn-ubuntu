@@ -5,3 +5,5 @@ openvpn-pkcs11warn.patch
 systemd.patch
 fix-dangling-pointer-in-pkcs11.patch
 fix-memleak-in-dco_get_peer_stats_multi.patch
+CVE-2023-46849.patch
+CVE-2023-46850.patch
