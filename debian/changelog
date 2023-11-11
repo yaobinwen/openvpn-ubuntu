@@ -1,3 +1,13 @@
+openvpn (2.6.3-1+deb12u2) bookworm-security; urgency=medium
+
+  * Cherry-Pick upstream fixes for two CVEs
+    - CVE-2023-46849: Use of --fragment option can lead to a division by zero
+      error which can be fatal
+    - CVE-2023-46850: Incorrect use of send buffer can cause memory to be sent
+      to peer
+
+ -- Bernhard Schmidt <berni@debian.org>  Sat, 11 Nov 2023 23:21:37 +0100
+
 openvpn (2.6.3-1+deb12u1) bookworm; urgency=medium
 
   * Cherry-pick two bugfix commits from upstream
