@@ -920,7 +920,7 @@ pam_server(int fd, const char *service, int verb, const struct name_value_list *
     char ac_file_name[PATH_MAX];
     int command;
 #ifdef USE_PAM_DLOPEN
-    static const char pam_so[] = "libpam.so";
+    static const char pam_so[] = "libpam.so.0";
 #endif
 
     /*
