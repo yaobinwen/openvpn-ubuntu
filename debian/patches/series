@@ -6,3 +6,5 @@ systemd.patch
 Fix-ASSERT-in-tls-crypt.patch
 Fix-Memory-Leaks-in-HMAC-initial-packet-generation.patch
 Set-netlink-socket-to-be-non-blocking.patch
+CVE-2023-46849.patch
+CVE-2023-46850.patch
