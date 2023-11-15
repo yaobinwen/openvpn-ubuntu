@@ -1,3 +1,16 @@
+openvpn (2.6.5-0ubuntu1.1) mantic-security; urgency=medium
+
+  * SECURITY UPDATE: divide-by-zero via --fragment option
+    - debian/patches/CVE-2023-46849.patch: remove saving initial frame code
+      in src/openvpn/forward.c, src/openvpn/init.c, src/openvpn/openvpn.h.
+    - CVE-2023-46849
+  * SECURITY UPDATE: memory disclosure or code exec via use-after-free
+    - debian/patches/CVE-2023-46850.patch: fix using to_link buffer after
+      freed in src/openvpn/ssl.c.
+    - CVE-2023-46850
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 15 Nov 2023 13:12:32 -0500
+
 openvpn (2.6.5-0ubuntu1) mantic; urgency=medium
 
   * New Upstream release 2.6.5 (LP: #2018095)
