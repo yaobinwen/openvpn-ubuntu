@@ -3,3 +3,5 @@ auth-pam_libpam_so_filename.patch
 #debian_nogroup_for_sample_files.patch
 openvpn-pkcs11warn.patch
 systemd.patch
+CVE-2023-46849.patch
+CVE-2023-46850.patch
