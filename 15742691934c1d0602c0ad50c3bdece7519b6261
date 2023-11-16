@@ -1,0 +1,8 @@
+  * SECURITY UPDATE: divide-by-zero via --fragment option
+    - debian/patches/CVE-2023-46849.patch: remove saving initial frame code
+      in src/openvpn/forward.c, src/openvpn/init.c, src/openvpn/openvpn.h.
+    - CVE-2023-46849
+  * SECURITY UPDATE: memory disclosure or code exec via use-after-free
+    - debian/patches/CVE-2023-46850.patch: fix using to_link buffer after
+      freed in src/openvpn/ssl.c.
+    - CVE-2023-46850
