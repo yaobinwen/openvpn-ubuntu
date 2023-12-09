@@ -1,0 +1,5 @@
+  * Cherry-Pick upstream fixes for two CVEs
+    - CVE-2023-46849: Use of --fragment option can lead to a division by zero
+      error which can be fatal
+    - CVE-2023-46850: Incorrect use of send buffer can cause memory to be sent
+      to peer
