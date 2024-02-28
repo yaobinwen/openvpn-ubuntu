@@ -1,0 +1,3 @@
+  * New upstream version 2.6.9
+  * Switch to systemd-dev (Closes: #1060500)
+  * Install systemd generator and units into /usr. (Closes: #1064399)
