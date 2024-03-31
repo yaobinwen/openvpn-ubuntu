@@ -1,3 +1,9 @@
+openvpn (2.6.9-1ubuntu3) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 31 Mar 2024 09:23:46 +0000
+
 openvpn (2.6.9-1ubuntu2) noble; urgency=medium
 
   * No-change rebuild against libssl3t64
