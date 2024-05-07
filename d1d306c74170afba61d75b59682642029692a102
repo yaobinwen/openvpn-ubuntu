@@ -1,0 +1,15 @@
+  * New upstream version 2.6.10 (LP: #2064436)
+    - Updates:
+      + t_client.sh can now run pre-tests and skip a test block if needed.
+      + Remove license warnings about mbedTLS linking.
+      + Update documentation references in systemd unit files.
+      + Remove obsolete tls-*.conf sample files.
+      + document that auth-user-pass may be inlined.
+    - Bug fixes:
+      + Fix checking option consistency for compiled-in compression algorithm
+        support.
+      + Remove obsolete syslog.target in systemd unit files.
+      + Additional Windows bug fixes.
+    - See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn26 for
+      additional bug fixes and information.
+  * d/p/systemd.patch: Remove - Fixed upstream
