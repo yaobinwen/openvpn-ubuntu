@@ -297,7 +297,7 @@
 
 #endif /* TARGET_OPENBSD */
 
-#ifdef TARGET_FREEBSD
+#if defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
 
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>

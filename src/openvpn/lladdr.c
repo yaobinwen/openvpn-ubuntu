@@ -50,7 +50,7 @@ set_lladdr(const char *ifname, const char *lladdr,
                 "%s %s lladdr %s",
                 IFCONFIG_PATH,
                 ifname, lladdr);
-#elif defined(TARGET_FREEBSD)
+#elif defined(TARGET_FREEBSD) || defined(__FreeBSD_kernel__)
     argv_printf(&argv,
                 "%s %s ether %s",
                 IFCONFIG_PATH,
