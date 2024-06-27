@@ -5,3 +5,5 @@ openvpn-pkcs11warn.patch
 systemd.patch
 CVE-2023-46849.patch
 CVE-2023-46850.patch
+CVE-2024-28882.patch
+CVE-2024-5594.patch
