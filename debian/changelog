@@ -1,3 +1,13 @@
+openvpn (2.4.12-0ubuntu0.20.04.2) focal-security; urgency=medium
+
+  * SECURITY UPDATE: malicious peer can DoS or send garbage to logs
+    - debian/patches/CVE-2024-5594.patch: properly handle null bytes and
+      invalid characters in control messages in src/openvpn/buffer.*,
+      src/openvpn/forward.c, tests/unit_tests/openvpn/test_buffer.c.
+    - CVE-2024-5594
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 27 Jun 2024 15:09:17 -0400
+
 openvpn (2.4.12-0ubuntu0.20.04.1) focal; urgency=medium
 
   * New upstream releases 2.4.8-2.4.12 (LP: #2004676)
