@@ -448,7 +448,7 @@ static const char usage_message[] =
     "                  user/pass via environment, if method='via-file', pass\n"
     "                  user/pass via temporary file.\n"
     "--auth-gen-token  [lifetime] Generate a random authentication token which is pushed\n"
-    "                  to each client, replacing the password.  Usefull when\n"
+    "                  to each client, replacing the password.  Useful when\n"
     "                  OTP based two-factor auth mechanisms are in use and\n"
     "                  --reneg-* options are enabled. Optionally a lifetime in seconds\n"
     "                  for generated tokens can be set.\n"
