@@ -651,10 +651,11 @@ void hmac_ctx_free(hmac_ctx_t *ctx);
  * @param key           The key to use for the HMAC
  * @param key_len       The key length to use
  * @param kt            Static message digest parameters
+ * @param prf_use       Intended use for PRF in TLS protocol
  *
  */
 void hmac_ctx_init(hmac_ctx_t *ctx, const uint8_t *key, int key_length,
-                   const md_kt_t *kt);
+                   const md_kt_t *kt, bool prf_use);
 
 /*
  * Free the given HMAC context.

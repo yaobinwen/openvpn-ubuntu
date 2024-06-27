@@ -88,7 +88,7 @@ gen_hmac_md5(const uint8_t *data, int data_len, const uint8_t *key, int key_len,
     const md_kt_t *md5_kt = md_kt_get("MD5");
     hmac_ctx_t *hmac_ctx = hmac_ctx_new();
 
-    hmac_ctx_init(hmac_ctx, key, key_len, md5_kt);
+    hmac_ctx_init(hmac_ctx, key, key_len, md5_kt, 0);
     hmac_ctx_update(hmac_ctx, data, data_len);
     hmac_ctx_final(hmac_ctx, result);
     hmac_ctx_cleanup(hmac_ctx);
