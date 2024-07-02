@@ -1,0 +1,5 @@
+  * SECURITY UPDATE: malicious peer can DoS or send garbage to logs
+    - debian/patches/CVE-2024-5594.patch: properly handle null bytes and
+      invalid characters in control messages in src/openvpn/buffer.*,
+      src/openvpn/forward.c, tests/unit_tests/openvpn/test_buffer.c.
+    - CVE-2024-5594
