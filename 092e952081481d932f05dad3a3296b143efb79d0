@@ -1,0 +1,4 @@
+  * New upstream version 2.6.12
+    - Fix regression in CVE-2024-5594 patch breaking user configurations with
+      AUTH_FAIL messages having trailing CR/NL characters. This often happens
+      if the AUTH_FAIL reason is set by a script
