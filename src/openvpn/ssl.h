@@ -5,7 +5,7 @@
  *             packet encryption, packet authentication, and
  *             packet compression.
  *
- *  Copyright (C) 2002-2023 OpenVPN Inc <sales@openvpn.net>
+ *  Copyright (C) 2002-2024 OpenVPN Inc <sales@openvpn.net>
  *  Copyright (C) 2010-2021 Fox Crypto B.V. <openvpn@foxcrypto.com>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -395,6 +395,11 @@ void auth_user_pass_setup(const char *auth_file, bool is_inline,
  * Ensure that no caching is performed on authentication information
  */
 void ssl_set_auth_nocache(void);
+
+/*
+ * Getter method for retrieving the auth-nocache option.
+ */
+bool ssl_get_auth_nocache(void);
 
 /*
  * Purge any stored authentication information, both for key files and tunnel
