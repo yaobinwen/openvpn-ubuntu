@@ -1,3 +1,31 @@
+openvpn (2.6.12-0ubuntu0.24.04.1) noble; urgency=medium
+
+  * New upstream release 2.6.12 (LP: #2073318):
+    - CVE Fixes:
+      + CVE-2024-4877, CVE-2024-5594, CVE-2024-28882, CVE-2024-27459,
+        CVE-2024-24974, CVE-2024-27903
+    - Updates:
+      + Allow trailing \r and \n in control channel message
+      + Implement --server-poll-timeout on SOCKS proxies
+      + Implement Windows CA template match for Crypto-API selector
+      + Update sample configuration files
+      + Update systemd unit file documentation references
+    - Bug Fixes Include:
+      + Fix issue with proxy credentials caching
+      + Fix LibreSSL crashing when enumerating digests/cipher with workaround
+      + Use snprintf instead of sprintf for get_ssl_library_version
+      + Fix disabling DCO when proxy is set via management interface
+      + See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn26 for
+        additional bug fixes and information
+  * Remove patches fixed upstream:
+    - d/p/systemd.patch
+    [Fixed in 2.6.10]
+    - d/p/CVE-2024-28882.patch
+    - d/p/CVE-2024-5594.patch
+    [Fixed in 2.6.11]
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Tue, 17 Sep 2024 10:27:52 -0700
+
 openvpn (2.6.9-1ubuntu4.1) noble-security; urgency=medium
 
   * SECURITY UPDATE: client can circumvent management client-kill
