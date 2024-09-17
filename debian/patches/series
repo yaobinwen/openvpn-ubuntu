@@ -6,4 +6,3 @@ openvpn-pkcs11warn.patch
 systemd.patch
 openvpn-fips-2.4.patch
 OpenSSL3.patch
-CVE-2024-5594.patch

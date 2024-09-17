@@ -944,6 +944,20 @@ bool string_mod(char *str, const unsigned int inclusive, const unsigned int excl
 bool
 string_check_buf(struct buffer *buf, const unsigned int inclusive, const unsigned int exclusive);
 
+/**
+ * Returns a copy of a string with certain classes of characters of it replaced with a specified
+ * character.
+ *
+ * If replace is 0, characters are skipped instead of replaced.
+ *
+ * @param str       The input string to be modified.
+ * @param inclusive Character classes not to be replaced.
+ * @param exclusive Character classes to be replaced even if they are also in inclusive.
+ * @param replace   The character to replace the specified character classes with.
+ * @param gc        The garbage collector arena to allocate memory from.
+ *
+ * @return The modified string with characters replaced within the specified range.
+ */
 const char *string_mod_const(const char *str,
                              const unsigned int inclusive,
                              const unsigned int exclusive,

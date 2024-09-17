@@ -1,3 +1,18 @@
+openvpn (2.5.11-0ubuntu0.22.04.1) jammy; urgency=medium
+
+  * New upstream release 2.5.11 (LP: #2073318):
+    - CVE Fixes:
+      + CVE-2024-5594, CVE-2024-27459, CVE-2024-24974, CVE-2024-27903
+    - Updates:
+      + Allow trailing \r and \n in control channel message
+      + See https://community.openvpn.net/openvpn/wiki/ChangesInOpenvpn25 for
+        additional bug fixes and information
+  * Remove patches fixed upstream:
+    - d/p/CVE-2024-5594.patch
+    [Fixed in 2.5.11]
+
+ -- Lena Voytek <lena.voytek@canonical.com>  Tue, 17 Sep 2024 13:25:49 -0700
+
 openvpn (2.5.9-0ubuntu0.22.04.3) jammy-security; urgency=medium
 
   * SECURITY UPDATE: malicious peer can DoS or send garbage to logs
