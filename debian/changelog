@@ -1,3 +1,18 @@
+openvpn (2.6.13-1ubuntu1) plucky; urgency=medium
+
+  * Merge from Debian Unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Mon, 10 Feb 2025 22:24:50 -0600
+
+openvpn (2.6.13-1) unstable; urgency=medium
+
+  * New upstream version 2.6.13 (Closes: #1095675)
+
+ -- Bernhard Schmidt <berni@debian.org>  Mon, 10 Feb 2025 22:09:11 +0100
+
 openvpn (2.6.12-1ubuntu1) oracular; urgency=low
 
   * Merge from Debian unstable. Remaining changes:
@@ -2881,3 +2896,4 @@ openvpn (1.2.0-1) unstable; urgency=low
   * Initial Release. (Closes: #140463)
 
  -- Alberto Gonzalez Iniesta <agi@agi.as>  Thu, 23 May 2002 11:00:37 +0200
+
