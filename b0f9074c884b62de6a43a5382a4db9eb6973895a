@@ -1,0 +1,5 @@
+  * Merge from Debian Unstable. Remaining changes:
+    - d/control: Demote easy-rsa to Suggests (universe package).
+    - debian/openvpn@.service: Add '--script-security 2' similar to what
+      got added to debian/openvpn.init.d ages ago (LP #1454725)
+  * New upstream version 2.6.13 (Closes: #1095675)
